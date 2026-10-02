@@ -1,0 +1,8 @@
+node_modules/
+frontend/.svelte-kit/
+frontend/build/
+backend/uploads/*
+!backend/uploads/.gitkeep
+.env
+**/.env
+*.log

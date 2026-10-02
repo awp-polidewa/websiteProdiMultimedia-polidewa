@@ -1,0 +1,120 @@
+<svelte:head>
+	<title>Teknologi Rekayasa Multimedia — Politeknik Dewantara</title>
+	<meta name="description" content="Pusat informasi dan publikasi Program Studi Teknologi Rekayasa Multimedia Politeknik Dewantara." />
+</svelte:head>
+
+<script>
+	const heroLineOne = Array.from('Teknologi Rekayasa');
+	const heroLineTwo = Array.from('Multimedia');
+</script>
+
+<section class="hero" aria-labelledby="home-title">
+	<div class="hero-label"><p class="eyebrow">Politeknik Dewantara</p><span>Program Studi</span></div>
+	<h1 id="home-title">
+		<span class="visually-hidden">Teknologi Rekayasa Multimedia</span>
+		<span class="hero-line" aria-hidden="true">{#each heroLineOne as character}{#if character === ' '}{' '}{:else}<span class="hero-character">{character}</span>{/if}{/each}</span>
+		<span class="hero-line" aria-hidden="true">{#each heroLineTwo as character}<span class="hero-character">{character}</span>{/each}</span>
+	</h1>
+	<div class="hero-bottom">
+		<p class="intro">Pusat informasi program studi, aktivitas, dan karya mahasiswa TRM.</p>
+		<a class="text-link" href="/profil">Tentang program studi <span aria-hidden="true">↗</span></a>
+	</div>
+	<p class="hero-index" aria-hidden="true">TRM <span>01 / 06</span></p>
+</section>
+
+<section class="disciplines section-rule" aria-labelledby="disciplines-title">
+	<div class="section-top"><p class="eyebrow">Program studi</p><p class="section-index">01 — 03</p></div>
+	<div class="discipline-intro">
+		<h2 id="disciplines-title" class="section-heading">Bidang dalam struktur prodi</h2>
+		<p>Jelajahi informasi resmi mengenai struktur dosen dan konsentrasi yang tersedia.</p>
+	</div>
+	<div class="discipline-list">
+		<a href="/struktur"><span>01</span><strong>Web Design</strong><span aria-hidden="true">↗</span></a>
+		<a href="/struktur"><span>02</span><strong>Desain Grafis</strong><span aria-hidden="true">↗</span></a>
+		<a href="/struktur"><span>03</span><strong>Videografi</strong><span aria-hidden="true">↗</span></a>
+	</div>
+</section>
+
+<section class="latest section-rule" aria-label="Berita dan karya mahasiswa">
+	<div class="latest-panel">
+		<div class="section-top"><p class="eyebrow">Publikasi</p><span class="section-index">02</span></div>
+		<h2 class="section-heading">Berita prodi</h2>
+		<p class="latest-copy">Aktivitas dan kabar terbaru dari Program Studi TRM.</p>
+		<p class="empty-note">Belum ada berita yang dipublikasikan.</p>
+		<a class="text-link" href="/berita">Semua berita <span aria-hidden="true">↗</span></a>
+	</div>
+	<div class="latest-panel">
+		<div class="section-top"><p class="eyebrow">Showcase</p><span class="section-index">03</span></div>
+		<h2 class="section-heading">Karya mahasiswa</h2>
+		<p class="latest-copy">Project mahasiswa dalam bidang multimedia.</p>
+		<p class="empty-note">Belum ada karya yang dipublikasikan.</p>
+		<a class="text-link" href="/karya">Lihat showcase <span aria-hidden="true">↗</span></a>
+	</div>
+</section>
+
+<section class="accreditation-band">
+	<div><p class="eyebrow">Informasi resmi</p><h2 class="section-heading">Akreditasi</h2></div>
+	<p>Dokumen dan informasi akreditasi tersedia melalui halaman khusus.</p>
+	<a class="text-link" href="/akreditasi">Lihat informasi <span aria-hidden="true">↗</span></a>
+</section>
+
+<style>
+	.hero { position: relative; min-height: min(680px, 78vh); display: flex; flex-direction: column; justify-content: center; padding: clamp(4rem, 10vw, 8rem) 0; }
+	.hero-label { display: flex; align-items: baseline; gap: .75rem; }
+	.hero-label p { margin: 0; }
+	.hero-label span { font-size: .78rem; opacity: .7; }
+	h1 { max-width: 1120px; margin: 1.45rem 0 2.2rem; font: 500 clamp(3.2rem, 8.6vw, 7.7rem)/.98 'Poppins', sans-serif; letter-spacing: -.065em; text-wrap: balance; }
+	h1 > .hero-line { display: block; }
+	.hero-character { display: inline-block; transform-origin: 50% 70%; }
+	/* Character color remains unchanged until the controlled palette in 02-desain.md is approved. */
+	@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+		.hero-character:hover { animation: hero-wobble var(--motion-normal) var(--ease-out) both; }
+	}
+	@keyframes hero-wobble {
+		0%, 100% { transform: rotate(0); }
+		35% { transform: rotate(calc(var(--hero-wobble) * -1)); }
+		70% { transform: rotate(var(--hero-wobble)); }
+	}
+	.hero-bottom { display: flex; align-items: end; justify-content: space-between; gap: 2rem; max-width: 790px; }
+	.intro { max-width: 420px; margin: 0; font: 400 clamp(1rem, 1.5vw, 1.2rem)/1.7 'Inter', sans-serif; opacity: .86; }
+	.hero-index { position: absolute; right: 0; bottom: 2rem; margin: 0; font: 500 .72rem/1 'Inter', sans-serif; letter-spacing: .08em; }
+	.hero-index span { margin-left: .8rem; opacity: .6; }
+	.disciplines { padding: 1rem 0 var(--space-section); }
+	.section-top { display: flex; justify-content: space-between; gap: 1rem; margin: 0 0 2.5rem; }
+	.section-top .eyebrow { margin: 0; opacity: .65; }
+	.section-index { margin: 0; font: 400 .72rem/1.4 'Inter', sans-serif; opacity: .65; }
+	.discipline-intro { display: grid; grid-template-columns: 1.15fr .85fr; gap: 2rem; align-items: end; margin: 0 0 2.5rem; }
+	.discipline-intro p { max-width: 400px; margin: 0; font: 400 .95rem/1.7 'Inter', sans-serif; opacity: .82; }
+	.discipline-list { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--line); }
+	.discipline-list a { display: grid; grid-template-columns: 1fr auto; gap: 2.6rem .6rem; padding: 1rem 1.25rem 1.1rem 0; text-decoration: none; border-bottom: 1px solid var(--line); }
+	.discipline-list a + a { padding-left: 1.2rem; border-left: 1px solid var(--line); }
+	.discipline-list span:first-child { grid-column: 1 / -1; font: 400 .72rem/1 'Inter', sans-serif; opacity: .62; }
+	.discipline-list strong { font: 500 1.1rem/1.35 'Poppins', sans-serif; }
+	.discipline-list span:last-child { align-self: end; }
+	.latest { display: grid; grid-template-columns: 1fr 1fr; padding: var(--space-section) 0; }
+	.latest-panel { min-height: 315px; display: flex; align-items: flex-start; flex-direction: column; padding: 0 2.2rem 0 0; }
+	.latest-panel + .latest-panel { padding: 0 0 0 2.2rem; border-left: 1px solid var(--line); }
+	.latest-panel .section-top { width: 100%; margin-bottom: 2rem; }
+	.latest-panel .section-heading { margin-bottom: .7rem; }
+	.latest-copy { margin: 0; font: 400 .9rem/1.65 'Inter', sans-serif; opacity: .82; }
+	.empty-note { width: 100%; margin: auto 0 1.6rem; padding-top: 1rem; border-top: 1px solid var(--line); font: 400 .88rem/1.6 'Inter', sans-serif; opacity: .75; }
+	.latest-panel .text-link { margin-top: 0; }
+	.accreditation-band { display: grid; grid-template-columns: 1fr 1fr auto; align-items: end; gap: 2rem; padding: 2.25rem 0 var(--space-section); border-top: 1px solid var(--line); }
+	.accreditation-band .eyebrow { margin: 0 0 .8rem; opacity: .65; }
+	.accreditation-band p:not(.eyebrow) { max-width: 370px; margin: 0; font: 400 .9rem/1.7 'Inter', sans-serif; opacity: .82; }
+	@media (max-width: 700px) {
+		.hero { min-height: auto; padding: 6rem 0 5rem; }
+		h1 { font-size: clamp(2.8rem, 13vw, 5rem); }
+		.hero-bottom { align-items: start; flex-direction: column; }
+		.hero-index { bottom: 1.2rem; }
+		.section-top { margin-bottom: 1.6rem; }
+		.discipline-intro { grid-template-columns: 1fr; gap: .9rem; }
+		.discipline-list { grid-template-columns: 1fr; }
+		.discipline-list a, .discipline-list a + a { grid-template-columns: 2.4rem 1fr auto; align-items: center; gap: 1rem; padding: 1rem 0; border-left: 0; }
+		.discipline-list span:first-child { grid-column: auto; }
+		.latest { grid-template-columns: 1fr; }
+		.latest-panel { min-height: 290px; padding: 0 0 2.5rem; }
+		.latest-panel + .latest-panel { padding: 2.5rem 0; border-top: 1px solid var(--line); border-left: 0; }
+		.accreditation-band { grid-template-columns: 1fr; align-items: start; gap: 1rem; }
+	}
+</style>
