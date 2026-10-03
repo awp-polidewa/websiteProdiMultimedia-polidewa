@@ -228,14 +228,14 @@ Acceptance: dashboard usable; admin tidak memakai visual landing page public (`0
 
 | ID    | Task                                          | Output                                          | Dep          | P   | Catatan                                  |
 | ----- | --------------------------------------------- | ----------------------------------------------- | ------------ | --- | ---------------------------------------- |
-| T11.1 | Lecturer API (admin)                          | Endpoint tulis dan baca admin untuk `lecturers` | T9.5, T5.2   | P0  | **DONE 2026-10-03:** endpoint CRUD dosen terlindungi `requireAdmin` dan lolos uji integrasi MySQL; UI admin tetap task berikutnya |
-| T11.2 | Lecturer list                                 | Tabel admin                                     | T11.1, T10.1 | P0  |                                          |
-| T11.3 | Add lecturer                                  | Form tambah                                     | T11.1        | P0  |                                          |
-| T11.4 | Edit lecturer                                 | Form edit                                       | T11.1        | P0  |                                          |
-| T11.5 | Delete lecturer jika diperlukan               | Hapus + konfirmasi                              | T11.1        | P1  |                                          |
+| T11.1 | Lecturer API (admin)                          | Endpoint tulis dan baca admin untuk `lecturers` | T9.5, T5.2   | P0  | **DONE 2026-10-03:** endpoint CRUD dosen terlindungi `requireAdmin` dan lolos uji integrasi MySQL |
+| T11.2 | Lecturer list                                 | Tabel admin                                     | T11.1, T10.1 | P0  | **DONE 2026-10-03:** daftar berpaginasi menampilkan jabatan, konsentrasi, email, urutan, timestamp, serta kartu mobile dan state loading/error/empty |
+| T11.3 | Add lecturer                                  | Form tambah                                     | T11.1        | P0  | **DONE 2026-10-03:** form memakai field API yang tersedia, validasi dasar, dan pesan error backend |
+| T11.4 | Edit lecturer                                 | Form edit                                       | T11.1        | P0  | **DONE 2026-10-03:** detail dimuat dari API dan daftar disegarkan setelah perubahan |
+| T11.5 | Delete lecturer jika diperlukan               | Hapus + konfirmasi                              | T11.1        | P1  | **DONE 2026-10-03:** penghapusan memakai konfirmasi dan refresh daftar |
 | T11.6 | Photo upload                                  | Upload foto (path di database)                  | T11.3        | P0  | Storage dan aturan file TBD              |
-| T11.7 | Validation                                    | Frontend + backend                              | T11.3        | P0  | Validasi backend dosen selesai dan teruji; validasi form frontend masih menunggu UI admin |
-| T11.8 | created_at/updated_at display jika diperlukan | Tampil di admin                                 | T11.2        | P1  | Timezone kampus Asia/Makassar sesuai `04-database.md`                  |
+| T11.7 | Validation                                    | Frontend + backend                              | T11.3        | P0  | **DONE 2026-10-03:** backend dan form memvalidasi nama/jabatan, konsentrasi, path foto, bio, email, dan display order; schema/API lecturers tidak menyediakan field NIDN |
+| T11.8 | created_at/updated_at display jika diperlukan | Tampil di admin                                 | T11.2        | P1  | **DONE 2026-10-03:** waktu pembaruan tampil sesuai timezone Asia/Makassar |
 
 Acceptance: admin dapat mengelola data dosen; urutan lewat `display_order` (mekanisme TBD).
 
@@ -243,14 +243,14 @@ Acceptance: admin dapat mengelola data dosen; urutan lewat `display_order` (meka
 
 | ID    | Task             | Output                           | Dep        | P   |
 | ----- | ---------------- | -------------------------------- | ---------- | --- |
-| T12.1 | News API (admin) | Endpoint tulis dan baca admin    | T9.5, T6.3 | P0  | **DONE 2026-10-03:** endpoint admin CRUD berita (create/list/detail/update/delete) terlindungi `requireAdmin`, diuji dengan MySQL lokal; UI admin tetap task berikutnya |
-| T12.2 | News list        | Tabel admin                      | T12.1      | P0  |
-| T12.3 | Create news      | Form tambah                      | T12.1      | P0  |
-| T12.4 | Edit news        | Form edit                        | T12.1      | P0  |
-| T12.5 | Delete news      | Hapus + konfirmasi               | T12.1      | P0  |
+| T12.1 | News API (admin) | Endpoint tulis dan baca admin    | T9.5, T6.3 | P0  | **DONE 2026-10-03:** endpoint admin CRUD berita (create/list/detail/update/delete) terlindungi `requireAdmin` dan diuji dengan MySQL lokal |
+| T12.2 | News list        | Tabel admin                      | T12.1      | P0  | **DONE 2026-10-03:** daftar admin dengan pagination API, status, timestamp, loading/error/empty state, dan kartu responsif mobile |
+| T12.3 | Create news      | Form tambah                      | T12.1      | P0  | **DONE 2026-10-03:** form berita memakai field schema/API, validasi dasar, dan menampilkan error backend |
+| T12.4 | Edit news        | Form edit                        | T12.1      | P0  | **DONE 2026-10-03:** form memuat detail API dan menyegarkan daftar setelah perubahan |
+| T12.5 | Delete news      | Hapus + konfirmasi               | T12.1      | P0  | **DONE 2026-10-03:** hapus terautentikasi dengan konfirmasi dan refresh daftar |
 | T12.6 | Thumbnail upload | Upload gambar                    | T12.3      | P1  |
 | T12.7 | Validation       | Termasuk slug unik               | T12.3      | P0  | **DONE 2026-10-03:** validasi backend title, slug URL, content, excerpt, thumbnail path, status, pagination; duplicate slug mengembalikan 409 |
-| T12.8 | Timestamps       | `created_at`/`updated_at` tampil | T12.2      | P1  |
+| T12.8 | Timestamps       | `created_at`/`updated_at` tampil | T12.2      | P1  | **DONE 2026-10-03:** waktu pembaruan ditampilkan pada daftar berita desktop dan mobile |
 
 Acceptance: admin dapat CRUD berita; status draft/published bekerja.
 
@@ -258,14 +258,14 @@ Acceptance: admin dapat CRUD berita; status draft/published bekerja.
 
 | ID    | Task                | Output                             | Dep        | P   | Catatan |
 | ----- | ------------------- | ---------------------------------- | ---------- | --- | ------- |
-| T13.1 | Project API (admin) | Endpoint tulis dan baca admin      | T9.5, T7.4 | P0  | **DONE 2026-10-03:** endpoint admin CRUD project terlindungi `requireAdmin`, diuji dengan MySQL lokal; UI admin tetap task berikutnya |
-| T13.2 | Project list        | Tabel admin                        | T13.1      | P0  |         |
-| T13.3 | Create project      | Form tambah                        | T13.1      | P0  |         |
-| T13.4 | Edit project        | Form edit                          | T13.1      | P0  |         |
-| T13.5 | Delete project      | Hapus + konfirmasi                 | T13.1      | P0  |         |
+| T13.1 | Project API (admin) | Endpoint tulis dan baca admin      | T9.5, T7.4 | P0  | **DONE 2026-10-03:** endpoint admin CRUD project terlindungi `requireAdmin` dan diuji dengan MySQL lokal |
+| T13.2 | Project list        | Tabel admin                        | T13.1      | P0  | **DONE 2026-10-03:** daftar berpaginasi dengan kategori, tahun, mahasiswa, timestamp, serta loading/error/empty state dan kartu mobile |
+| T13.3 | Create project      | Form tambah                        | T13.1      | P0  | **DONE 2026-10-03:** form memakai field schema/API, validasi dasar, dan pesan error backend |
+| T13.4 | Edit project        | Form edit                          | T13.1      | P0  | **DONE 2026-10-03:** detail dimuat dari API; perubahan diikuti refresh daftar |
+| T13.5 | Delete project      | Hapus + konfirmasi                 | T13.1      | P0  | **DONE 2026-10-03:** penghapusan memakai konfirmasi dan refresh daftar |
 | T13.6 | Image upload        | Upload gambar                      | T13.3      | P1  |         |
-| T13.7 | Validation          | Termasuk slug unik, `external_url` | T13.3      | P0  | **DONE 2026-10-03:** validasi backend field wajib/opsional, slug, kategori, path relatif, tahun, URL HTTP/HTTPS; duplicate slug mengembalikan 409 |
-| T13.8 | Timestamps          | Tampil di admin                    | T13.2      | P1  |         |
+| T13.7 | Validation          | Termasuk slug unik, `external_url` | T13.3      | P0  | **DONE 2026-10-03:** validasi backend field wajib/opsional, slug, kategori, path relatif, tahun, URL HTTP/HTTPS; duplicate slug 409; form menerapkan validasi dasar dan menampilkan error backend |
+| T13.8 | Timestamps          | Tampil di admin                    | T13.2      | P1  | **DONE 2026-10-03:** waktu pembaruan tampil pada daftar desktop dan kartu mobile |
 
 Acceptance: admin dapat mengelola project; semua project langsung tayang tanpa status.
 
