@@ -227,13 +227,13 @@ Gunakan REST API.
 Contoh:
 
 GET /api/news
-GET /api/news/:id
+GET /api/news/:slug
 POST /api/news
 PUT /api/news/:id
 DELETE /api/news/:id
 
 GET /api/projects
-GET /api/projects/:id
+GET /api/projects/:slug
 POST /api/projects
 PUT /api/projects/:id
 DELETE /api/projects/:id
@@ -243,11 +243,11 @@ POST /api/lecturers
 PUT /api/lecturers/:id
 DELETE /api/lecturers/:id
 
-POST /api/auth/login
-POST /api/auth/logout
-GET /api/auth/me
+POST /api/admin/login
+POST /api/admin/logout
+GET /api/admin/session
 
-Endpoint final harus mengikuti `docs/09-data-api.md`, `docs/05-fitur.md`, dan `docs/04-database.md`.
+Contoh di atas bersifat konseptual; endpoint public detail final memakai slug. Halaman frontend final: `/berita/:slug` dan `/karya/:slug`. Kontrak endpoint public final harus mengikuti `docs/09-data-api.md`, `docs/05-fitur.md`, dan `docs/04-database.md`.
 
 Jangan membuat endpoint yang tidak diperlukan.
 
@@ -307,7 +307,7 @@ User public tidak membutuhkan login.
 
 Tidak ada sistem student account sebagai bagian dari scope utama.
 
-Authentication: login admin menerima NIDN atau username; gunakan signed HTTP-only cookie berumur 8 jam, `SameSite=Lax`, dan `Secure` pada production. Tidak menggunakan tabel session atau refresh token. Admin dapat mengganti NIDN dan username melalui pengaturan; password dikelola melalui prosedur admin terkontrol. Password di-hash dengan bcryptjs cost 12; jangan menyimpan plaintext.
+Authentication: login admin menerima NIDN atau username; gunakan signed HTTP-only cookie berumur 8 jam yang membawa ID admin dan expiry, `SameSite=Lax`, dan `Secure` pada production. Tidak menggunakan tabel session atau refresh token. Admin dapat mengganti NIDN dan username melalui pengaturan; password dikelola melalui prosedur admin terkontrol. Password di-hash dengan bcryptjs cost 12; jangan menyimpan plaintext.
 
 Jangan menyimpan password plaintext.
 
@@ -340,7 +340,7 @@ Jangan hanya mengandalkan frontend untuk security.
 K. DATABASE
 ==================================================
 
-Database menggunakan MySQL 8.4 LTS dengan `utf8mb4` / `utf8mb4_0900_ai_ci`. Backend menggunakan `mysql2/promise` melalui satu connection pool di `backend/src/config/database.js`; gunakan timezone `+08:00` (Asia/Makassar). Keputusan tabel dan tipe kolom berada di `docs/04-database.md`. Schema awal direncanakan di `backend/database/schema.sql` dan belum dibuat.
+Target database MySQL 8.4 LTS; development lokal project ini menggunakan MariaDB 10.4.32 dari XAMPP. Gunakan collation portabel `utf8mb4_unicode_ci` agar schema kompatibel dengan keduanya. Backend menggunakan `mysql2/promise` melalui satu connection pool di `backend/src/config/database.js`; gunakan timezone `+08:00` (Asia/Makassar). Keputusan tabel dan tipe kolom berada di `docs/04-database.md`; schema awal ada di `backend/database/schema.sql`.
 
 Dokumen arsitektur tidak perlu mendefinisikan seluruh struktur tabel secara detail karena itu berada di:
 

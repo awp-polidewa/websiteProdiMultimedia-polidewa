@@ -84,7 +84,7 @@ Instruksi user memuat dua tingkat fase: ringkasan 14 fase (0–13) dan rincian 4
 
 Penyesuaian dependensi yang harus diperhatikan agent (**[REVIEW]**, diputuskan di dokumen ini agar urutan tidak melanggar bagian 47):
 
-1. **Public read API.** Fase 5–7 (struktur, berita, project) membutuhkan endpoint baca (GET) publik, padahal "Implement API" muncul di fase admin 11–13. Keputusan: endpoint baca publik dibuat pada task connect di fase 5–7 (T5.2, T6.3, T7.4) memakai data seed development; fase 11–13 menambah endpoint admin (tulis dan baca admin) dan tidak menduplikasi endpoint baca.
+1. **Public read API.** Fase 5–7 (struktur, berita, project) membutuhkan endpoint baca (GET) publik, padahal "Implement API" muncul di fase admin 11–13. Keputusan: endpoint baca publik dibuat pada task connect di fase 5–7 (T5.2, T6.3, T7.4); fase 11–13 menambah endpoint admin (tulis dan baca admin) dan tidak menduplikasi endpoint baca. Jangan membuat seed konten resmi/fiktif; halaman mendukung empty state sebelum data resmi tersedia.
 2. **Interaksi structure.** T5.4–T5.6 mengimplementasikan perilaku fungsional (state aktif, preview di kanan, alternatif mobile) tanpa polish motion; transisi dan timing dikerjakan di T19.8 mengikuti `06-animation.md`.
 3. **Home.** T4.1 membuat kerangka Home; bagian highlight berita/project dihubungkan setelah fase 6–7.
 4. **FAQ.** T19.9 (FAQ accordion) menyebut FAQ, tetapi tidak ada task yang membuat halaman/fitur FAQ, dan keberadaan FAQ masih TBD (`05-fitur.md` bagian 3). Lihat catatan di T19.9.
@@ -116,11 +116,11 @@ Acceptance: dev server berjalan; satu request frontend → backend berhasil; sec
 
 | ID   | Task                                                | Output                                                                     | Dep  | P   | Catatan                                                                                                                   |
 | ---- | --------------------------------------------------- | -------------------------------------------------------------------------- | ---- | --- | ------------------------------------------------------------------------------------------------------------------------- |
-| T2.0 | Review desain data/API                              | `docs/09-data-api.md` disetujui; TBD blocker diselesaikan                   | T0.2 | P0  | DRAFT 2026-10-03: siap ditinjau user; putuskan visibility akreditasi dan nilai konsentrasi; jangan buat schema sebelum disetujui |
-| T2.1 | Setup koneksi MySQL                                 | Backend dapat connect (pool `mysql2/promise`)                              | T1.4 | P0  |                                                                                                                           |
-| T2.2 | Implement schema sesuai `04-database.md`            | Tabel `admins`, `lecturers`, `news`, `projects`, `accreditation_documents` | T2.0 approved, T2.1 | P0  | BLOCKED sampai desain data/API disetujui; belum membuat `schema.sql` |
-| T2.3 | Implement database access pattern sesuai arsitektur | `async/await`, try/catch, parameterized query                              | T2.2 | P0  |                                                                                                                           |
-| T2.4 | Implement basic error handling backend              | Error database tidak membocorkan informasi sensitif                        | T2.3 | P0  | Selaraskan 404/500 fallback `app.js` ke envelope `09-data-api.md` saat tahap implementasi |
+| T2.0 | Review desain data/API                              | `docs/09-data-api.md` disetujui; keputusan schema/public JSON ditetapkan   | T0.2 | P0  | **DONE 2026-10-03:** user menyetujui lima tabel/no FK, akreditasi draft/published, nilai konsentrasi kanonis, route detail slug; storage tetap TBD dan di luar tahap ini |
+| T2.1 | Setup koneksi MySQL                                 | Backend dapat connect (pool `mysql2/promise`)                              | T1.4 | P0  | **DONE 2026-10-03:** XAMPP MariaDB 10.4.32, database lokal `web_trm_dev`, health check HTTP 200 |
+| T2.2 | Implement schema sesuai `04-database.md`            | Tabel `admins`, `lecturers`, `news`, `projects`, `accreditation_documents` | T2.0 approved, T2.1 | P0  | **DONE 2026-10-03:** `backend/database/schema.sql`; lima tabel dibuat, tanpa seed |
+| T2.3 | Implement database access pattern sesuai arsitektur | `async/await`, try/catch, parameterized query                              | T2.2 | P0  | **DONE 2026-10-03:** public read controllers memakai pool dan parameterized query |
+| T2.4 | Implement basic error handling backend              | Error database tidak membocorkan informasi sensitif                        | T2.3 | P0  | **DONE 2026-10-03:** envelope error HTTP 400/404/500/503; error internal tidak dikirim ke client |
 
 Acceptance: backend terhubung ke database; schema sesuai dokumentasi; semua query parameterized; response error aman. Schema awal dibuat sebagai file reproducible `backend/database/schema.sql`; migrasi berikutnya dicatat sebagai SQL berurutan.
 
@@ -150,8 +150,8 @@ Acceptance: halaman terbuka dan konsisten dengan desain; tidak ada konten resmi 
 | ID   | Task                               | Output                                                            | Dep        | P   | Catatan                                                              |
 | ---- | ---------------------------------- | ----------------------------------------------------------------- | ---------- | --- | -------------------------------------------------------------------- |
 | T5.1 | Structure page                     | Halaman struktur                                                  | T3.1       | P0  | DONE 2026-10-03: chart publik; nama/profil dosen tetap placeholder resmi |
-| T5.2 | Connect lecturer data dari backend | Endpoint baca publik `lecturers` + pemakaian di halaman           | T2.3, T5.1 | P0  | Data seed development ditandai sebagai contoh; bukan data dosen asli |
-| T5.3 | Default organization structure     | Kaprodi di atas; Web Design, Graphic Design, Videography di bawah | T5.2       | P0  |                                                                      |
+| T5.2 | Connect lecturer data dari backend | Endpoint baca publik `lecturers` + pemakaian di halaman           | T2.3, T5.1 | P0  | Endpoint selesai; pemakaian halaman belum dilakukan. Tidak ada seed konten. |
+| T5.3 | Default organization structure     | Kaprodi di atas; Web Design, Desain Grafis, Videografi di bawah | T5.2       | P0  | Label mengikuti nilai konsentrasi kanonis yang disetujui user |
 | T5.4 | Desktop hover interaction          | Node aktif saat hover/fokus                                       | T5.3       | P1  | DONE 2026-10-03: node button merespons hover dan fokus keyboard     |
 | T5.5 | Profile preview di sisi kanan      | Preview foto, nama, role; bukan modal                             | T5.4       | P1  | DONE 2026-10-03: panel samping memakai placeholder yang jelas      |
 | T5.6 | Mobile interaction                 | Tap/selected state atau pola sederhana                            | T5.3       | P1  | DONE 2026-10-03: daftar vertikal; tap memilih node dan preview      |
@@ -164,7 +164,7 @@ Acceptance: struktur terbaca; preview tidak menjadi modal; hover desktop bekerja
 | ---- | ------------------------------------------ | --------------------------------- | ---- | --- |
 | T6.1 | News listing                               | Daftar berita (published saja)    | T3.1 | P0  |
 | T6.2 | News detail                                | Detail via slug                   | T6.1 | P0  |
-| T6.3 | Connect news API                           | Endpoint baca publik `news`       | T2.3 | P0  |
+| T6.3 | Connect news API                           | Endpoint baca publik `news`       | T2.3 | P0  | **DONE 2026-10-03:** list/detail API tersedia; diuji dengan DB lokal kosong |
 | T6.4 | Loading state                              | Indikator sederhana               | T6.3 | P1  |
 | T6.5 | Empty state                                | Pesan jelas bila belum ada berita | T6.3 | P1  |
 | T6.6 | Error state                                | Pesan gagal yang ramah            | T6.3 | P1  |
@@ -179,7 +179,7 @@ Acceptance: publik dapat membaca berita dari database/API; draft tidak tampil.
 | T7.1 | Project listing                       | Daftar image-first              | T3.1 | P0  |                          |
 | T7.2 | Project detail                        | Detail via slug                 | T7.1 | P0  |                          |
 | T7.3 | Category/filter jika sudah ditentukan | Filter kategori sederhana       | T7.4 | P1  | Gunakan kategori baku `desain`, `coding`, `3d`, `multimedia`, `lainnya` |
-| T7.4 | Connect project API                   | Endpoint baca publik `projects` | T2.3 | P0  |                          |
+| T7.4 | Connect project API                   | Endpoint baca publik `projects` | T2.3 | P0  | **DONE 2026-10-03:** list/detail/filter API tersedia; diuji dengan DB lokal kosong |
 | T7.5 | Loading state                         |                                 | T7.4 | P1  |                          |
 | T7.6 | Empty state                           |                                 | T7.4 | P1  |                          |
 | T7.7 | Error state                           |                                 | T7.4 | P1  |                          |
@@ -201,26 +201,26 @@ Acceptance: informasi mudah ditemukan; dokumen dapat diakses jika tersedia.
 
 | ID   | Task                   | Output                          | Dep  | P   | Catatan                              |
 | ---- | ---------------------- | ------------------------------- | ---- | --- | ------------------------------------ |
-| T9.1 | Admin login            | Form dan endpoint login         | T2.3 | P0  | Login memakai NIDN atau username |
-| T9.2 | Password hashing       | Password tersimpan sebagai hash | T9.1 | P0  | bcryptjs cost 12 sesuai `04-database.md`   |
-| T9.3 | Session                | Session admin                   | T9.1 | P0  |                                      |
-| T9.4 | HTTP-only cookie       | Cookie session aman             | T9.3 | P0  |                                      |
-| T9.5 | Protected admin routes | Halaman admin terlindungi       | T9.3 | P0  |                                      |
-| T9.6 | Logout                 | Session diakhiri                | T9.3 | P0  |                                      |
-| T9.7 | Unauthorized behavior  | 401/redirect login              | T9.5 | P0  |                                      |
+| T9.1 | Admin login            | Form dan endpoint login         | T2.3 | P0  | Form UI dan request login selesai diimplementasikan; HTTP integration test backend lulus. Verifikasi interaksi browser masih pending karena runtime browser tidak tersedia pada sesi ini |
+| T9.2 | Password hashing       | Password tersimpan sebagai hash | T9.1 | P0  | **DONE 2026-10-03:** bcryptjs cost 12; tidak menyimpan/mengirim plaintext |
+| T9.3 | Session                | Session admin                   | T9.1 | P0  | **DONE 2026-10-03:** signed cookie stateless berumur 8 jam, tanpa session table |
+| T9.4 | HTTP-only cookie       | Cookie session aman             | T9.3 | P0  | **DONE 2026-10-03:** HttpOnly, SameSite=Lax, Secure saat production |
+| T9.5 | Protected admin routes | Halaman admin terlindungi       | T9.3 | P0  | API session dan client-side route gate diimplementasikan; browser redirect QA masih pending |
+| T9.6 | Logout                 | Session diakhiri                | T9.3 | P0  | Backend logout dan tombol UI diimplementasikan; API menghapus cookie dan session test menjadi 401. Browser redirect QA masih pending |
+| T9.7 | Unauthorized behavior  | 401/redirect login              | T9.5 | P0  | **DONE 2026-10-03:** endpoint session memberi 401 tanpa cookie/akun valid |
 | T9.8 | Admin account settings | Ubah NIDN dan username sendiri | T9.5 | P0 | Username tetap unik; password di luar scope pengaturan MVP |
 
 Acceptance: pengguna tanpa autentikasi tidak dapat membuka area admin maupun endpoint admin. Login menerima NIDN atau username. Admin dapat mengubah NIDN dan username; validasi keunikan dilakukan backend. Seed admin development tidak memakai password production.
 
 ## 16. Phase 10 — Admin Foundation
 
-| ID    | Task                             | Output                                                           | Dep   | P   |
-| ----- | -------------------------------- | ---------------------------------------------------------------- | ----- | --- |
-| T10.1 | Admin layout                     | Layout admin                                                     | T9.5  | P0  |
-| T10.2 | Sidebar                          | Menu sesuai fitur nyata                                          | T10.1 | P0  |
-| T10.3 | Dashboard                        | Hanya informasi berguna (jumlah berita, project, dosen, dokumen) | T10.2 | P1  |
-| T10.4 | Responsive admin layout          | Drawer di mobile                                                 | T10.1 | P1  |
-| T10.5 | Basic loading/error/empty states | State dasar                                                      | T10.1 | P1  |
+| ID    | Task                             | Output                                                           | Dep   | P   | Catatan |
+| ----- | -------------------------------- | ---------------------------------------------------------------- | ----- | --- | ------- |
+| T10.1 | Admin layout                     | Layout admin                                                     | T9.5  | P0  | Layout admin diimplementasikan; route HTTP dan build lulus, browser QA pending |
+| T10.2 | Sidebar                          | Menu sesuai fitur nyata                                          | T10.1 | P0  | Menu dashboard/konten/logout dan placeholder diimplementasikan |
+| T10.3 | Dashboard                        | Hanya informasi berguna (jumlah berita, project, dosen, dokumen) | T10.2 | P1  | Overview mengambil total dari endpoint list admin terproteksi agar berita/dokumen draft ikut dihitung; endpoint count terverifikasi |
+| T10.4 | Responsive admin layout          | Drawer di mobile                                                 | T10.1 | P1  | Navigasi mobile collapsible diimplementasikan; visual browser QA pending |
+| T10.5 | Basic loading/error/empty states | State dasar                                                      | T10.1 | P1  | State pemeriksaan session, login, logout, dan statistik diimplementasikan |
 
 Acceptance: dashboard usable; admin tidak memakai visual landing page public (`02-desain.md` bagian 26).
 
@@ -228,13 +228,13 @@ Acceptance: dashboard usable; admin tidak memakai visual landing page public (`0
 
 | ID    | Task                                          | Output                                          | Dep          | P   | Catatan                                  |
 | ----- | --------------------------------------------- | ----------------------------------------------- | ------------ | --- | ---------------------------------------- |
-| T11.1 | Lecturer API (admin)                          | Endpoint tulis dan baca admin untuk `lecturers` | T9.5, T5.2   | P0  | Endpoint baca publik sudah ada dari T5.2 |
+| T11.1 | Lecturer API (admin)                          | Endpoint tulis dan baca admin untuk `lecturers` | T9.5, T5.2   | P0  | **DONE 2026-10-03:** endpoint CRUD dosen terlindungi `requireAdmin` dan lolos uji integrasi MySQL; UI admin tetap task berikutnya |
 | T11.2 | Lecturer list                                 | Tabel admin                                     | T11.1, T10.1 | P0  |                                          |
 | T11.3 | Add lecturer                                  | Form tambah                                     | T11.1        | P0  |                                          |
 | T11.4 | Edit lecturer                                 | Form edit                                       | T11.1        | P0  |                                          |
 | T11.5 | Delete lecturer jika diperlukan               | Hapus + konfirmasi                              | T11.1        | P1  |                                          |
 | T11.6 | Photo upload                                  | Upload foto (path di database)                  | T11.3        | P0  | Storage dan aturan file TBD              |
-| T11.7 | Validation                                    | Frontend + backend                              | T11.3        | P0  |                                          |
+| T11.7 | Validation                                    | Frontend + backend                              | T11.3        | P0  | Validasi backend dosen selesai dan teruji; validasi form frontend masih menunggu UI admin |
 | T11.8 | created_at/updated_at display jika diperlukan | Tampil di admin                                 | T11.2        | P1  | Timezone kampus Asia/Makassar sesuai `04-database.md`                  |
 
 Acceptance: admin dapat mengelola data dosen; urutan lewat `display_order` (mekanisme TBD).
@@ -243,13 +243,13 @@ Acceptance: admin dapat mengelola data dosen; urutan lewat `display_order` (meka
 
 | ID    | Task             | Output                           | Dep        | P   |
 | ----- | ---------------- | -------------------------------- | ---------- | --- |
-| T12.1 | News API (admin) | Endpoint tulis dan baca admin    | T9.5, T6.3 | P0  |
+| T12.1 | News API (admin) | Endpoint tulis dan baca admin    | T9.5, T6.3 | P0  | **DONE 2026-10-03:** endpoint admin CRUD berita (create/list/detail/update/delete) terlindungi `requireAdmin`, diuji dengan MySQL lokal; UI admin tetap task berikutnya |
 | T12.2 | News list        | Tabel admin                      | T12.1      | P0  |
 | T12.3 | Create news      | Form tambah                      | T12.1      | P0  |
 | T12.4 | Edit news        | Form edit                        | T12.1      | P0  |
 | T12.5 | Delete news      | Hapus + konfirmasi               | T12.1      | P0  |
 | T12.6 | Thumbnail upload | Upload gambar                    | T12.3      | P1  |
-| T12.7 | Validation       | Termasuk slug unik               | T12.3      | P0  |
+| T12.7 | Validation       | Termasuk slug unik               | T12.3      | P0  | **DONE 2026-10-03:** validasi backend title, slug URL, content, excerpt, thumbnail path, status, pagination; duplicate slug mengembalikan 409 |
 | T12.8 | Timestamps       | `created_at`/`updated_at` tampil | T12.2      | P1  |
 
 Acceptance: admin dapat CRUD berita; status draft/published bekerja.
@@ -258,13 +258,13 @@ Acceptance: admin dapat CRUD berita; status draft/published bekerja.
 
 | ID    | Task                | Output                             | Dep        | P   | Catatan |
 | ----- | ------------------- | ---------------------------------- | ---------- | --- | ------- |
-| T13.1 | Project API (admin) | Endpoint tulis dan baca admin      | T9.5, T7.4 | P0  |         |
+| T13.1 | Project API (admin) | Endpoint tulis dan baca admin      | T9.5, T7.4 | P0  | **DONE 2026-10-03:** endpoint admin CRUD project terlindungi `requireAdmin`, diuji dengan MySQL lokal; UI admin tetap task berikutnya |
 | T13.2 | Project list        | Tabel admin                        | T13.1      | P0  |         |
 | T13.3 | Create project      | Form tambah                        | T13.1      | P0  |         |
 | T13.4 | Edit project        | Form edit                          | T13.1      | P0  |         |
 | T13.5 | Delete project      | Hapus + konfirmasi                 | T13.1      | P0  |         |
 | T13.6 | Image upload        | Upload gambar                      | T13.3      | P1  |         |
-| T13.7 | Validation          | Termasuk slug unik, `external_url` | T13.3      | P0  |         |
+| T13.7 | Validation          | Termasuk slug unik, `external_url` | T13.3      | P0  | **DONE 2026-10-03:** validasi backend field wajib/opsional, slug, kategori, path relatif, tahun, URL HTTP/HTTPS; duplicate slug mengembalikan 409 |
 | T13.8 | Timestamps          | Tampil di admin                    | T13.2      | P1  |         |
 
 Acceptance: admin dapat mengelola project; semua project langsung tayang tanpa status.
@@ -288,7 +288,7 @@ Dikerjakan untuk mengelola PDF akreditasi resmi sesuai keputusan di `04-database
 
 | ID    | Task                | Dep         | P   |
 | ----- | ------------------- | ----------- | --- |
-| T15.1 | Document API        | T9.5        | P1  |
+| T15.1 | Document API        | T9.5        | P1  | **DONE 2026-10-03:** endpoint CRUD metadata/status dokumen akreditasi terlindungi `requireAdmin`, diuji dengan MySQL lokal; upload dan UI tetap task terpisah |
 | T15.2 | Document list       | T15.1       | P1  |
 | T15.3 | Upload              | T15.1       | P1  |
 | T15.4 | Metadata editing    | T15.1       | P1  |

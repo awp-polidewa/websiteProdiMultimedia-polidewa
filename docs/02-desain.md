@@ -240,7 +240,7 @@ Default:
 ```
 Kaprodi
    ↓
-Web Design | Graphic Design | Videography
+Web Design | Desain Grafis | Videografi
 ```
 
 Setiap node menampilkan nama dan role/title.

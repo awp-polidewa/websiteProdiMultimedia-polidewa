@@ -107,7 +107,7 @@ Tidak dibuat: tabel `program_profile`, CRUD profile, API profile, admin edit pro
 
 - Data berasal dari database (tabel `lecturers`).
 - Tampil: nama, jabatan/peran (`title`), konsentrasi, foto, serta informasi lain yang sudah disetujui. Email tidak ditampilkan publik.
-- Struktur utama: Kaprodi di atas; di bawahnya Web Design, Graphic Design, Videography.
+- Struktur utama: Kaprodi di atas; di bawahnya konsentrasi kanonis `Web Design`, `Desain Grafis`, `Videografi` (selaras dengan keputusan user dan `04-database.md`).
 - Urutan mengikuti `display_order`.
 - Jika foto belum ada: placeholder jelas. Tidak memakai foto generated.
 - Tidak ada data dosen fiktif. Seed development memakai data contoh yang ditandai jelas sebagai contoh.
@@ -131,6 +131,7 @@ Detail animation → `06-animation.md`.
 CRUD sederhana: list, tambah, lihat/edit, hapus.
 
 - Field mengikuti `04-database.md`: `name`, `title`, `concentration` (opsional), `photo_path` (opsional), `bio` (opsional), `email` (opsional dan privat), `display_order`.
+- Nilai `concentration` kanonis: `Web Design`, `Desain Grafis`, `Videografi`; NULL untuk Kaprodi. Gunakan ejaan/nilai yang sama pada database, API, dan frontend.
 - Admin dapat menambah, mengubah data, mengganti foto, mengatur urutan, dan menghapus.
 - Urutan diatur dengan nilai angka `display_order`; jika sama, urutkan berdasarkan `id`.
 - Validasi: `name` dan `title` wajib; panjang sesuai kolom; file foto divalidasi (bagian 28).
@@ -193,6 +194,7 @@ Fitur:
 - menampilkan informasi dan daftar dokumen;
 - tombol lihat dan tombol download jika file tersedia;
 - melihat/mengunduh PDF resmi surat keterangan akreditasi; website tidak merakit atau menghasilkan isi surat.
+- API public hanya menampilkan record dengan status `published`; status yang tersedia adalah `draft` dan `published`.
 
 Isi resmi (peringkat, nomor SK, masa berlaku): **TBD**, tidak dikarang. Tidak ada sistem verifikasi dokumen.
 
@@ -243,8 +245,8 @@ Hanya untuk data yang bisa banyak: berita dan project (juga tabel admin yang rel
 
 ## 27. Detail Page
 
-- Berita: `/news/{slug}` (pola URL final: **TBD**, mengikuti arsitektur).
-- Project: berdasarkan `slug`.
+- Berita: `/berita/{slug}`.
+- Karya mahasiswa: `/karya/{slug}`.
 - Dokumen akreditasi: tidak butuh halaman detail; cukup tombol lihat/download.
 - Slug tidak ditemukan → halaman not found (bagian 30). Berita berstatus draft tidak bisa diakses public; project langsung tampil setelah tersimpan.
 
@@ -311,7 +313,7 @@ Public hanya mendapat data yang dibutuhkan website, dan hanya yang aman untuk ta
 | Dosen                                         | Baca (field yang disetujui tampil)         |
 | Berita                                        | Baca, hanya published                      |
 | Project                                       | Baca seluruh project (langsung tayang)     |
-| Akreditasi                                    | Baca dokumen yang eligibility-nya disetujui; visibility masih TBD |
+| Akreditasi                                    | Baca hanya dokumen berstatus `published`                       |
 | Chatbot                                       | Kirim pertanyaan (fase RAG)                |
 | Admin, session, credential, metadata internal | Tidak pernah                               |
 

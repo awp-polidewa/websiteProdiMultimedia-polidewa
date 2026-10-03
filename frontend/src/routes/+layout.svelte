@@ -11,43 +11,48 @@
 	];
 
 	let { children } = $props();
+	let isAdminRoute = $derived(page.url.pathname.startsWith('/admin'));
 </script>
 
 <svelte:head>
 	<meta name="theme-color" content="Canvas" />
 </svelte:head>
 
-<div class="site-shell">
-	<a class="skip-link" href="#main-content">Lewati ke konten utama</a>
-	<header class="site-header">
-		<a class="wordmark" href="/" aria-label="TRM — Beranda">TRM<span> / POLITEKNIK DEWANTARA</span></a>
-		<nav aria-label="Navigasi utama">
-			<ul>
-				{#each publicLinks as link (link.href)}
-					<li><a href={link.href} aria-current={page.url.pathname === link.href ? 'page' : undefined}>{link.label}</a></li>
-				{/each}
-			</ul>
-		</nav>
-	</header>
-	<main id="main-content" tabindex="-1">
-		{@render children()}
-	</main>
-	<footer class="site-footer">
-		<div class="footer-brand">
-			<a class="wordmark" href="/">TRM<span> / POLITEKNIK DEWANTARA</span></a>
-			<p>Pusat informasi, publikasi, dan karya Program Studi Teknologi Rekayasa Multimedia.</p>
-		</div>
-		<nav class="footer-links" aria-label="Jelajahi">
-			<p class="eyebrow">Jelajahi</p>
-			<ul><li><a href="/profil">Profil</a></li><li><a href="/struktur">Struktur dosen</a></li><li><a href="/berita">Berita</a></li></ul>
-		</nav>
-		<nav class="footer-links" aria-label="Publikasi">
-			<p class="eyebrow">Publikasi</p>
-			<ul><li><a href="/karya">Karya mahasiswa</a></li><li><a href="/akreditasi">Akreditasi</a></li></ul>
-		</nav>
-	</footer>
-	<div class="footer-bottom"><span>© Politeknik Dewantara</span><span>Program Studi Teknologi Rekayasa Multimedia</span></div>
-</div>
+{#if isAdminRoute}
+	{@render children()}
+{:else}
+	<div class="site-shell">
+		<a class="skip-link" href="#main-content">Lewati ke konten utama</a>
+		<header class="site-header">
+			<a class="wordmark" href="/" aria-label="TRM — Beranda">TRM<span> / POLITEKNIK DEWANTARA</span></a>
+			<nav aria-label="Navigasi utama">
+				<ul>
+					{#each publicLinks as link (link.href)}
+						<li><a href={link.href} aria-current={page.url.pathname === link.href ? 'page' : undefined}>{link.label}</a></li>
+					{/each}
+				</ul>
+			</nav>
+		</header>
+		<main id="main-content" tabindex="-1">
+			{@render children()}
+		</main>
+		<footer class="site-footer">
+			<div class="footer-brand">
+				<a class="wordmark" href="/">TRM<span> / POLITEKNIK DEWANTARA</span></a>
+				<p>Pusat informasi, publikasi, dan karya Program Studi Teknologi Rekayasa Multimedia.</p>
+			</div>
+			<nav class="footer-links" aria-label="Jelajahi">
+				<p class="eyebrow">Jelajahi</p>
+				<ul><li><a href="/profil">Profil</a></li><li><a href="/struktur">Struktur dosen</a></li><li><a href="/berita">Berita</a></li></ul>
+			</nav>
+			<nav class="footer-links" aria-label="Publikasi">
+				<p class="eyebrow">Publikasi</p>
+				<ul><li><a href="/karya">Karya mahasiswa</a></li><li><a href="/akreditasi">Akreditasi</a></li></ul>
+			</nav>
+		</footer>
+		<div class="footer-bottom"><span>© Politeknik Dewantara</span><span>Program Studi Teknologi Rekayasa Multimedia</span></div>
+	</div>
+{/if}
 
 <style>
 	.site-shell { width: min(calc(100% - 2 * var(--page-gutter)), var(--page-max)); margin: 0 auto; }

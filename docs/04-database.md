@@ -143,7 +143,7 @@ Notes:
 - NIDN dan username unik; perubahan keduanya memeriksa keunikan sebelum disimpan. Email tidak dipakai untuk autentikasi.
 - NIDN dan username dapat diubah sendiri admin melalui pengaturan; keduanya tetap menjadi identitas login yang unik.
 - Password di-hash dengan bcryptjs, asynchronous, work factor 12. Panjang input dibatasi agar tidak melewati batas bcrypt 72 byte.
-- Session memakai signed HTTP-only cookie berisi hanya ID admin, berlaku 8 jam, tanpa refresh token dan tanpa tabel session. Cookie `SameSite=Lax`; `Secure` di production. Logout menghapus cookie; rotasi `SESSION_SECRET` membatalkan seluruh session.
+- Session memakai signed HTTP-only cookie berisi ID admin dan metadata expiry, berlaku 8 jam, tanpa refresh token dan tanpa tabel session. Cookie `SameSite=Lax`; `Secure` di production. Logout menghapus cookie; rotasi `SESSION_SECRET` membatalkan seluruh session.
 
 ## 12. Role Admin
 
@@ -178,8 +178,7 @@ CRUD: dikelola admin (create, read, update, delete). Public hanya membaca.
 
 Notes:
 
-- `concentration` memakai VARCHAR, bukan ENUM, karena daftar konsentrasi dapat berkembang.
-- **[TBD integration]:** string konsentrasi kanonis belum konsisten antar dokumen: `02-desain.md`/`05-fitur.md` memakai `Graphic Design` dan `Videography`, sementara frontend final serta bagian ini memakai `Desain Grafis` dan `Videografi`. Tabel tetap VARCHAR, tetapi nilai resmi/alias API perlu ditetapkan sebelum seed/admin form dan mapping struktur dihubungkan.
+- `concentration` memakai VARCHAR, bukan ENUM. Nilai kanonis yang disetujui: `Web Design`, `Desain Grafis`, dan `Videografi`; gunakan tepat sama di database, API, dan frontend. `NULL` untuk Kaprodi.
 - Foto dosen harus foto resmi; tidak boleh generated. Jika belum ada, kolom NULL dan UI menampilkan placeholder.
 - Hierarki chart tetap ditentukan oleh UI; kolom `parent_id` tidak dibuat.
 - Lebih dari satu dosen boleh berada di konsentrasi yang sama. Setiap dosen adalah satu row; satu Kaprodi aktif ditampilkan sesuai `title` dan urutan. Tidak ada constraint unik pada `concentration` atau `title`.
@@ -224,7 +223,7 @@ Notes:
 
 ## 16. News Slug
 
-- Dipakai untuk URL seperti `/news/judul-berita`.
+- Dipakai API untuk detail berita berdasarkan slug; halaman frontend final adalah `/berita/{slug}`.
 - Harus unik, URL-friendly, dan mudah dicari. Unique index pada `news.slug`.
 - Slug dibuat backend saat record dibuat. Bentrok diselesaikan dengan suffix angka (`-2`, `-3`, ...), dan unique constraint tetap menjadi pengaman akhir.
 - Perubahan judul tidak mengubah slug secara otomatis; slug yang sudah diterbitkan dipertahankan agar URL tidak putus. Tidak ada slug history atau redirect.
@@ -291,15 +290,16 @@ Columns:
 | description  | TEXT            | YES  |     | NULL                        | Keterangan                               |
 | file_path    | VARCHAR(255)    | NO   |     |                             | Path PDF resmi di storage                |
 | source_url   | VARCHAR(500)    | YES  |     | NULL                        | Link sumber resmi                        |
+| status       | ENUM('draft','published') | NO | INDEX | 'draft' | Status publikasi dokumen                 |
 | published_at | DATE            | YES  |     | NULL                        | Tanggal terbit dokumen (bila diperlukan) |
 | created_at   | TIMESTAMP       | NO   |     | CURRENT_TIMESTAMP           | Waktu dibuat                             |
 | updated_at   | TIMESTAMP       | NO   |     | CURRENT_TIMESTAMP ON UPDATE | Waktu terakhir diubah                    |
 
-Indexes: tidak ada selain primary key pada versi awal.
+Indexes: INDEX `status` untuk mengambil dokumen berstatus published.
 
 Relationships: tidak ada.
 
-CRUD: dokumen dikelola admin (tambah, baca, ubah metadata, hapus). Public hanya membaca dokumen yang disetujui untuk tayang. Satu atau lebih PDF dapat disimpan.
+CRUD: dokumen dikelola admin (tambah, baca, ubah metadata/status, hapus). Public hanya membaca dokumen `status = 'published'`. Satu atau lebih PDF dapat disimpan.
 
 Notes:
 
@@ -307,7 +307,8 @@ Notes:
 - `file_path` wajib. `source_url` opsional sebagai tautan ke sumber resmi terkait.
 - Tidak ada field terstruktur peringkat, nomor SK, atau masa berlaku karena informasi tersebut sudah berada dalam PDF resmi.
 - Keputusan MVP: tabel ini dipertahankan agar admin dapat mengelola daftar dokumen tanpa perubahan source code.
-- **[TBD blocker public API]:** tabel tidak mempunyai kolom status/approval, sehingga aturan "disetujui untuk tayang" belum dapat ditegakkan. Sebelum membuat schema/API, user perlu memutuskan apakah setiap row selalu public atau perlu penambahan status publikasi. Jangan menambah kolom approval tanpa keputusan.
+- **DECIDED (2026-10-03):** status publikasi memakai `draft` dan `published`; endpoint publik mengembalikan hanya `published`. Status ini bukan approval workflow terpisah.
+- Storage belum ditentukan. Simpan path dan metadata saja pada tahap database/API; upload dan provider storage ditunda.
 
 ## 21. Program Profile
 
@@ -337,6 +338,7 @@ Index hanya untuk search, filter, sorting, unique constraint, dan lookup:
 | lecturers | `display_order`                                   | Pengurutan structure                       |
 | news      | UNIQUE `slug`; `(status, published_at)`           | Detail URL; daftar publik                  |
 | projects  | UNIQUE `slug`; `category`; `(created_at, id)`     | Detail URL; filter kategori; daftar publik |
+| accreditation_documents | `status`                              | Filter dokumen published untuk public      |
 
 Tidak ada index di semua kolom.
 
@@ -381,7 +383,7 @@ Sumber lokasi institusi: [Politeknik Dewantara](https://polidewa.ac.id/). Zona w
 
 ## 31. Character Set
 
-`utf8mb4` dengan collation `utf8mb4_0900_ai_ci` untuk database dan tabel. Koneksi memakai `utf8mb4` dan menyelaraskan connection collation ke nilai yang sama. MySQL minimum 8.4 LTS dipilih agar collation tersebut tersedia. Collation case-insensitive sesuai untuk email dan slug yang dinormalisasi menjadi huruf kecil.
+`utf8mb4` dengan collation portabel `utf8mb4_unicode_ci` untuk database dan tabel. Collation ini dipakai karena development lokal menggunakan MariaDB 10.4.32 dari XAMPP dan target server adalah MySQL 8.4 LTS; `utf8mb4_0900_ai_ci` tidak tersedia pada versi MariaDB tersebut. Koneksi menyetel character set dan collation session ke nilai yang sama. Collation case-insensitive sesuai untuk email dan slug yang dinormalisasi menjadi huruf kecil.
 
 ## 32. Engine
 
@@ -419,7 +421,7 @@ Environment variables: `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`
 
 ## 37. Connection Pool
 
-Backend memakai `mysql2/promise` dengan satu pool di `backend/src/config/database.js`. `waitForConnections` aktif; `connectionLimit` mengikuti default driver 10 sampai ada pengukuran kebutuhan yang membenarkan perubahan. Kredensial dan host berasal dari environment. Pool memakai `utf8mb4` dan timezone `+08:00`; konfigurasi tidak disebar di controller.
+Backend memakai `mysql2/promise` dengan satu pool di `backend/src/config/database.js`. `waitForConnections` aktif; `connectionLimit` mengikuti default driver 10 sampai ada pengukuran kebutuhan yang membenarkan perubahan. Kredensial dan host berasal dari environment. Pool memakai `utf8mb4`, collation session `utf8mb4_unicode_ci`, dan timezone `+08:00`; konfigurasi tidak disebar di controller.
 
 ## 38. Transaction
 
@@ -628,6 +630,8 @@ erDiagram
         varchar title
         varchar file_path
         varchar source_url
+        enum status
+        date published_at
         timestamp created_at
         timestamp updated_at
     }
@@ -667,7 +671,7 @@ Tidak ditambahkan tanpa kebutuhan nyata: microservices, database per fitur, mult
 | 07-rules.md      | Development rules        |
 | 08-task.md       | Implementation task      |
 
-Review silang terhadap `03-arsitektur.md`, `05-fitur.md`, `07-rules.md`, dan `08-task.md` dilakukan pada 2026-10-03. Konflik visibility dokumen akreditasi dan nilai konsentrasi dicatat di bagian terkait serta `09-data-api.md`; keduanya harus diselesaikan sebelum schema/API implementasi terkait. `01-prd.md` tidak termasuk cakupan review milestone ini dan tetap perlu dicocokkan sebelum MVP final.
+Review silang terhadap `03-arsitektur.md`, `05-fitur.md`, `07-rules.md`, dan `08-task.md` dilakukan pada 2026-10-03. Visibilitas dokumen akreditasi dan nilai konsentrasi diputuskan pada 2026-10-03; lihat bagian terkait dan `09-data-api.md`. `01-prd.md` tidak termasuk cakupan review milestone ini dan tetap perlu dicocokkan sebelum MVP final.
 
 ## 60. AI Agent Database Rule
 
@@ -764,7 +768,7 @@ TBD yang tersisa dan tidak mengubah kolom inti:
 - Teknologi/model/vector store RAG; seluruh tabel dan indeks RAG ditunda sampai fase RAG (bagian 47).
 - Tipe/ukuran maksimum upload sesuai implementasi UI/backend (spesifikasi fitur, bukan bentuk schema inti).
 
-**Gate sebelum schema awal:** penyelesaian konflik visibilitas `accreditation_documents` pada bagian 20. Pilihan "semua row public" tidak mengubah schema; pilihan draft/published memerlukan persetujuan perubahan kolom sebelum `schema.sql` dibuat. Label konsentrasi perlu diputuskan sebelum lecturer seed/admin form, tetapi tidak memerlukan perubahan kolom VARCHAR.
+**Status schema awal:** keputusan desain data/API disetujui pada 2026-10-03; schema reproducible dibuat di `backend/database/schema.sql` dan diuji pada database lokal XAMPP MariaDB 10.4.32. Target MySQL 8.4 menggunakan collation portabel yang sama.
 
 ## Lampiran: Log Keputusan User (Selesai)
 
@@ -780,3 +784,4 @@ TBD yang tersisa dan tidak mengubah kolom inti:
    jawab: local
 6. Login admin memakai email atau username?
    jawab: NIDN dosen atau username; admin dapat mengubah identitas login tersebut di pengaturan.
+7. Keputusan desain data/API (2026-10-03): lima tabel dipertahankan tanpa FK; akreditasi memakai status draft/published dan public hanya menampilkan published; nilai concentration kanonis adalah Web Design, Desain Grafis, Videografi; route frontend detail memakai `/berita/:slug` dan `/karya/:slug`; storage belum dipilih dan pada tahap ini hanya path/metadata yang ditetapkan.
