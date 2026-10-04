@@ -4,7 +4,7 @@ Project: Website Program Studi Teknologi Rekayasa Multimedia (TRM), Politeknik D
 
 Status dokumen: DATABASE SOURCE OF TRUTH. Keputusan MVP ditetapkan di dokumen ini; keputusan untuk fase yang ditunda tetap diberi label TBD.
 
-Catatan konteks: schema lima tabel MVP sudah dibuat dan digunakan. Schema RAG, T37.1 ingestion, dan T37.2 embedding tersedia; retrieval dan chatbot masih tahap berikutnya.
+Catatan konteks: schema lima tabel MVP sudah dibuat dan digunakan. Schema RAG, T37.1 ingestion, T37.2 embedding, T37.3 retrieval, T37.4 answer generation, dan T37.6 UI publik tersedia. T37.4 dan T37.6 tidak mengubah schema.
 
 ---
 
@@ -794,12 +794,12 @@ FORM ADMIN → API → CONTROLLER → DATABASE QUERY → MYSQL → DATA → API 
 
 ## Lampiran: Status TBD
 
-Schema lima tabel MVP telah dibuat. Migration RAG menambahkan dua tabel; T37.1 PDF ingestion dan T37.2 Gemini embedding sudah diimplementasikan. Retrieval, API chatbot, dan UI chatbot belum diimplementasikan.
+Schema lima tabel MVP telah dibuat. Migration RAG menambahkan dua tabel; T37.1 PDF ingestion, T37.2 Gemini embedding, T37.3 retrieval, T37.4 answer generation, dan T37.6 UI publik sudah diimplementasikan tanpa perubahan schema baru.
 
 TBD yang tersisa dan tidak mengubah kolom inti:
 
 - Provider hosting/storage production dan konfigurasi volume persisten (bagian 48).
-- Provider/model LLM, retrieval threshold, serta batas biaya/penggunaan RAG.
+- Batas biaya/penggunaan RAG dan deployment production.
 
 **Status schema awal:** keputusan desain data/API disetujui pada 2026-10-03; schema reproducible MVP dan migration awal RAG ada di `backend/database/schema.sql` dan `backend/database/migrations/20261004_create_rag_tables.sql`, yang diuji pada database lokal XAMPP MariaDB 10.4.32. Migration lanjutan `20261004_make_rag_embeddings_nullable.sql` sudah diterapkan ke database development untuk T37.1. T37.2 tidak mengubah schema. Target MySQL 8.4 menggunakan collation portabel yang sama.
 

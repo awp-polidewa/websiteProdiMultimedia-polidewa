@@ -221,10 +221,10 @@ Chatbot tidak boleh menjadi tutor programming umum, chatbot general purpose, mes
 - Chatbot hanya menjawab dari PDF yang secara eksplisit dipilih/disetujui sebagai sumber knowledge Prodi TRM. Tidak ada pemindaian atau pemasukan otomatis semua file.
 - Dokumen akreditasi yang tampil public bukan sumber RAG secara otomatis; setiap dokumen akreditasi harus dipilih/disetujui secara eksplisit.
 - Tahap pertama mendukung PDF yang memiliki text layer. OCR untuk PDF scan/image-only tidak termasuk. Jika ekstraksi teks gagal, dokumen berstatus `failed` dan admin diberi tahu bahwa tidak ada teks yang dapat diproses.
-- Jika retrieval tidak memberikan bukti yang cukup, jawaban wajib persis: "Informasi tersebut tidak tersedia dalam sumber pengetahuan Program Studi Teknologi Rekayasa Multimedia."
+- Jika retrieval tidak memberikan bukti, jawaban wajib persis: "Maaf, saya belum menemukan informasi tersebut dalam dokumen yang tersedia."
 - Jawaban yang didukung bukti menyertakan sumber dokumen dan nomor halaman jika tersedia. Chatbot bukan general-purpose dan tidak menggunakan pengetahuan umum untuk menjawab di luar knowledge base.
 - Contoh: "Ajari saya Python." → tidak dijawab sebagai tutor Python.
-- Rate limit, panjang maksimum pertanyaan, panjang maksimum jawaban, dan spend limit harus ditentukan sebelum production: **TBD**.
+- Pertanyaan dibatasi 2.000 karakter dan jawaban model dibatasi 1.024 output tokens. Rate limit dan spend limit harus ditentukan sebelum production: **TBD**.
 
 ## 22. Knowledge Base RAG
 
@@ -232,7 +232,7 @@ Hanya PDF yang secara eksplisit dipilih/disetujui sebagai sumber knowledge Prodi
 
 Pipeline: PDF maksimal 15 MB → SHA-256 → ekstraksi teks → chunking per paragraf (target 1.600 karakter, overlap 200 karakter) → embedding Gemini `gemini-embedding-2` berdimensi 3.072 → simpan vector dan model pada chunk → status `ready` setelah semua chunk berhasil. Chunk yang sudah memiliki embedding dilewati. API key hanya berada di backend environment. SHA-256 duplikat ditolak dengan HTTP 409 dan dokumen lama tidak digunakan otomatis. PDF scan/image-only tanpa text layer tidak diproses dengan OCR; kegagalan ekstraksi atau embedding menghasilkan status `failed` dan pesan aman untuk admin.
 
-Retrieval (milestone berikutnya): pertanyaan pengguna → embedding pertanyaan → cosine similarity terhadap embedding chunk → pilih chunk relevan → periksa threshold kecukupan bukti → panggil LLM hanya jika bukti cukup → jawaban beserta dokumen sumber dan nomor halaman jika ada. Nilai threshold dan provider/model LLM masih TBD dan harus diuji sebelum rilis.
+Pipeline: pertanyaan pengguna → retrieval terhadap dokumen ready → jika tidak ada bukti, kembalikan refusal tetap tanpa memanggil LLM → jika ada bukti, susun context hanya dari hasil retrieval → panggil Gemini `generateContent` dengan model dari `LLM_MODEL` dan aturan RAG-only → jawaban beserta ID dokumen/chunk, halaman, dan similarity. Threshold retrieval diatur melalui `SIMILARITY_THRESHOLD`. Tidak ada pengetahuan umum sebagai fallback.
 
 ## 23. Admin RAG Document
 
@@ -245,7 +245,7 @@ API:
 - `POST /api/admin/rag/documents` untuk mengirim PDF sumber yang disetujui (tersedia).
 - `DELETE /api/admin/rag/documents/:id` untuk menghapus dokumen dan chunk terkait (tersedia).
 
-`GET`, `POST`, dan `DELETE` admin document endpoints di atas diimplementasikan pada T37.1. Upload memakai multipart field `file`, `title`, dan `description`; file disimpan private di `backend/storage/rag/`. Batas upload 15 MB. T37.2 membuat embedding Gemini selama ingest. T37.3 menyediakan retrieval bukti melalui `POST /api/chatbot/retrieve`; endpoint ini tidak menghasilkan jawaban. Hanya chunk dari dokumen `ready` yang dihitung dengan cosine similarity, top-K default 5, threshold default 0.30 (`SIMILARITY_THRESHOLD`). UI chatbot dan answer generation belum diimplementasikan.
+`GET`, `POST`, dan `DELETE` admin document endpoints di atas diimplementasikan pada T37.1. Upload memakai multipart field `file`, `title`, dan `description`; file disimpan private di `backend/storage/rag/`. Batas upload 15 MB. T37.2 membuat embedding Gemini selama ingest. T37.3 menyediakan `POST /api/chatbot/retrieve`; T37.4 menyediakan `POST /api/chatbot/ask` yang menjawab hanya dengan evidence retrieval, mengembalikan sources, dan memakai refusal tetap tanpa pemanggilan LLM jika evidence kosong. T37.6 memasang komponen Tanya TRM pada semua halaman publik. Credential Gemini tetap di backend.
 
 ## 24. Search
 

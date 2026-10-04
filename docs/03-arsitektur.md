@@ -706,7 +706,7 @@ Health check dapat digunakan saat deployment dan troubleshooting.
 Y. RAG ARCHITECTURE
 ==================================================
 
-RAG berjalan bertahap dengan schema, T37.1 PDF ingestion, T37.2 Gemini embedding generation, dan T37.3 retrieval. Retrieval menghitung cosine similarity 3072 dimensi di backend, hanya terhadap chunk dokumen `ready`, dengan top-K default 5 dan ambang default 0.30 yang dapat diatur melalui `SIMILARITY_THRESHOLD`. Tidak ada vector database. Answer generation dan UI chatbot belum diimplementasikan.
+RAG berjalan bertahap dengan schema, T37.1 PDF ingestion, T37.2 Gemini embedding generation, T37.3 retrieval, T37.4 grounded answer generation, dan T37.6 chatbot publik. Retrieval menghitung cosine similarity 3072 dimensi di backend, hanya terhadap chunk dokumen berstatus ready, dengan top-K default 5 dan ambang default 0.30 yang dapat diatur melalui SIMILARITY_THRESHOLD. Answer generation memakai model Gemini LLM_MODEL yang dipanggil melalui generateContent; context dibatasi pada hasil retrieval dan system instruction melarang penggunaan pengetahuan luar serta memperlakukan isi dokumen sebagai data. Komponen Tanya TRM terpasang pada layout publik dan memanggil POST /api/chatbot/ask. Tidak ada vector database atau riwayat percakapan.
 
 Urutan:
 
@@ -728,18 +728,18 @@ Hanya PDF yang secara eksplisit dipilih/disetujui boleh menjadi knowledge source
 
 Pipeline: PDF maksimal 15 MB → SHA-256 → text extraction → paragraph chunking dengan target 1600 karakter dan overlap 200 karakter → simpan chunks → buat embedding memakai Gemini `gemini-embedding-2` → simpan vector dan model pada chunk → status dokumen `ready` jika seluruh embedding berhasil, atau `failed` dengan pesan aman. Chunk dengan embedding yang sudah ada dilewati. SHA-256 yang sudah ada ditolak dengan HTTP 409 dan dokumen lama tidak digunakan otomatis.
 
-Retrieval embeds the question, scores stored vectors by cosine similarity, checks a relevance threshold, and calls the LLM only when the evidence is sufficient. Supported answers include source document and page where available. `GET /api/admin/rag/documents`, `POST /api/admin/rag/documents`, and `DELETE /api/admin/rag/documents/:id` are implemented and use `requireAdmin`. `POST /api/chatbot/ask` is planned and not implemented.
+Retrieval embeds the question, scores stored vectors by cosine similarity, checks a relevance threshold, and calls the LLM only when evidence is returned. `POST /api/chatbot/ask` is implemented and returns answer plus sources; it does not generate a conversational history. RAG document management endpoints use `requireAdmin`.
 
 Jika pertanyaan berada di luar knowledge base:
 
 - jangan mengarang;
 - jangan menggunakan pengetahuan umum secara bebas;
-- jawab persis: "Informasi tersebut tidak tersedia dalam sumber pengetahuan Program Studi Teknologi Rekayasa Multimedia.";
+- jawab persis: "Maaf, saya belum menemukan informasi tersebut dalam dokumen yang tersedia.";
 - jangan menggunakan pengetahuan umum untuk mengisi bukti yang tidak ditemukan.
 
 RAG bukan chatbot general-purpose.
 
-Embedding provider/model are fixed to Gemini API and `gemini-embedding-2`; backend environment names are `GEMINI_API_KEY` and `EMBEDDING_MODEL`. The API key must never reach frontend code, responses, or logs. LLM provider/model, rate limit, maximum question length, maximum answer length, and spend limit remain TBD and are required before production.
+Embedding provider/model are fixed to Gemini API and `gemini-embedding-2`; answer generation uses the verified `gemini-flash-lite-latest` model configured by backend environment `LLM_MODEL`. Both use backend-only `GEMINI_API_KEY`; the key must never reach frontend code, responses, or logs. Production rate limits and spend limits remain TBD.
 
 Contoh:
 

@@ -11,7 +11,7 @@ npm install
 npm run dev
 ```
 
-Buka `http://localhost:5173`. Route publik: `/`, `/profil`, `/struktur`, `/berita`, `/karya`, dan `/akreditasi`.
+Buka `http://localhost:5173`. Route publik: `/`, `/profil`, `/struktur`, `/berita`, `/karya`, dan `/akreditasi`. Komponen Tanya TRM tersedia di seluruh halaman publik dan menggunakan `POST /api/chatbot/ask`.
 
 ## Pemeriksaan
 

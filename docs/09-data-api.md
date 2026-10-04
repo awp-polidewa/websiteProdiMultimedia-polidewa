@@ -249,17 +249,20 @@ Endpoint media yang tersedia mengembalikan 400 untuk identifier/query tidak vali
 
 Tabel yang sudah diputuskan cukup untuk operasi konten dashboard sederhana: dosen (termasuk urutan), berita (draft/published), karya (langsung tayang), dan metadata PDF akreditasi. `admins` cukup merepresentasikan satu jenis admin. Profil memang statis dan tidak dapat diedit lewat dashboard sesuai keputusan user. Tidak perlu author relation, category table, media table, audit table, soft-delete column, atau role table untuk scope ini.
 
-Public read contract ini tidak mendefinisikan detail API RAG. Backend admin login/session, seluruh CRUD konten, public API, dan media upload telah diimplementasikan. Migration RAG dan endpoint manajemen dokumen T37.1 tersedia; chatbot API belum dibuat.
+Public read contract ini tidak mendefinisikan seluruh detail API RAG. Backend admin login/session, seluruh CRUD konten, public API, dan media upload telah diimplementasikan. Migration RAG, endpoint manajemen dokumen T37.1, retrieval T37.3, answer generation T37.4, dan UI chatbot publik T37.6 tersedia.
 
 API RAG:
 
-- `POST /api/chatbot/retrieve` menerima pertanyaan dan mengembalikan bukti retrieval saja; answer generation belum tersedia.
+- `POST /api/chatbot/retrieve` menerima pertanyaan dan mengembalikan bukti retrieval saja.
+- `POST /api/chatbot/ask` menjalankan retrieval lalu menghasilkan jawaban berbasis evidence saja; endpoint ini tidak memakai conversation history.
 - `GET /api/admin/rag/documents`, `POST /api/admin/rag/documents`, dan `DELETE /api/admin/rag/documents/:id`; semua route admin wajib memakai `requireAdmin`.
 - Dokumen RAG private di `backend/storage/rag/`, tidak dilayani melalui `/media/:type/:filename`.
 
 Admin document endpoints sudah aktif; upload multipart memakai field `file`, `title`, dan optional `description`. PDF maksimal 15 MB; SHA-256 duplikat ditolak dengan HTTP 409. Ingestion mengekstrak teks, menyimpan chunk target 1600 karakter dengan overlap 200 karakter, lalu membuat embedding Gemini `gemini-embedding-2`. Dokumen berstatus `ready` hanya jika seluruh chunk berhasil di-embed; kegagalan menyimpan status `failed` dengan pesan aman.
 
 `POST /api/chatbot/retrieve` menerima `{ "question": "...", "topK": 5, "similarityThreshold": 0.30 }`; `topK` dan `similarityThreshold` opsional. Pertanyaan wajib berupa string non-kosong maksimal 2.000 karakter; `topK` harus integer 1–20 dan threshold angka 0–1. Default threshold dapat diatur dengan backend environment `SIMILARITY_THRESHOLD` (default `0.30`). Endpoint membuat embedding pertanyaan lewat Gemini, membandingkan hanya chunk yang embedding-nya valid, modelnya sesuai konfigurasi, dan dokumennya berstatus `ready`. Cosine similarity memakai semua 3072 dimensi tanpa transformasi. Response `data` berisi `{ "hasEvidence": boolean, "results": [...] }`; tiap hasil memuat `chunkId`, `documentId`, `text`, `pageNumber`, `chunkOrder`, `similarity`, `documentTitle`, dan `originalFilename`. Hasil memenuhi threshold, berurutan similarity tertinggi, dibatasi top-K. Jika tidak ada hasil yang memenuhi threshold, response berisi `hasEvidence: false` dan `results: []`. Vector dan credential tidak pernah disertakan. Chunk belum ter-embed tetap valid dan dilewati. Endpoint ini tidak membuat jawaban, chatbot, atau UI.
+
+`POST /api/chatbot/ask` menerima `{ "question": "..." }`; pertanyaan wajib berupa string non-kosong maksimal 2.000 karakter. Endpoint memakai `retrieveRelevantChunks()` terlebih dahulu. Jika evidence kosong, response `200` persis berisi `{ "answer": "Maaf, saya belum menemukan informasi tersebut dalam dokumen yang tersedia.", "hasEvidence": false, "sources": [] }` dan Gemini untuk generasi jawaban tidak dipanggil. Jika evidence tersedia, hanya teks chunk hasil retrieval yang dimasukkan ke context `generateContent`; system instruction melarang pengetahuan luar/tebakan dan menetapkan isi PDF sebagai data yang tidak boleh menjadi instruksi. Model jawaban berasal dari backend environment `LLM_MODEL`; API key tetap `GEMINI_API_KEY` backend-only. Response sukses berisi `answer`, `hasEvidence: true`, serta `sources` yang masing-masing memuat `documentId`, `chunkId`, `pageNumber`, dan `similarity`. Vector, prompt internal, API key, dan raw provider response tidak dikirim. Kegagalan atau response model tidak valid menghasilkan HTTP 502 dengan pesan aman.
 
 ## 9. Gate implementasi
 

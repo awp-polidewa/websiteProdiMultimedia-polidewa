@@ -500,12 +500,12 @@ RAG **tidak boleh** dikerjakan sebelum MVP stabil. Prioritas P3 (fase akhir, buk
 | T37.1 | Implement document management sesuai arsitektur | **DONE & VERIFIED 2026-10-04:** migration applied to `web_trm_dev` (MariaDB 10.4.32); 10/10 integration checks passed for authenticated upload, validation, extraction/chunk fields, duplicate 409, list/delete/cascade, and private storage; PDF max 15 MB; no embeddings |
 | T37.2 | Implement document processing                   | **DONE & VERIFIED 2026-10-04:** Gemini API `gemini-embedding-2` via backend-only `GEMINI_API_KEY`; validates 3072-dimensional vectors; persists JSON + model name; skips existing embeddings; documents become `ready` only after all chunks succeed and `failed` with safe error otherwise; 17/17 backend tests passed including real Gemini integration |
 | T37.3 | Implement retrieval                             | **DONE & VERIFIED 2026-10-04:** `retrieveRelevantChunks` embeds validated questions with Gemini, compares 3072-dimensional vectors using cosine similarity, filters only `ready` documents, applies topK=5 and configurable threshold (default 0.30); retrieval endpoint returns evidence only, never vectors |
-| T37.4 | Implement answer generation                     |
-| T37.5 | Implement context restriction                   |
-| T37.6 | Implement refusal/out-of-scope behavior         |
-| T37.7 | Implement chatbot UI                            |
+| T37.4 | Implement answer generation                     | **DONE & VERIFIED 2026-10-04:** `LLM_MODEL=gemini-flash-lite-latest` was listed and successfully probed with `generateContent`; `/api/chatbot/ask` uses retrieval-only evidence, fixed refusal without LLM when empty, prompt-injection defense, safe errors, and sources; RAG suite 29/29 passed including live Gemini + temporary DB fixture |
+| T37.5 | Implement context restriction                   | **DONE:** Answer service membatasi context pada hasil retrieval, menetapkan isi PDF sebagai data, dan menginstruksikan model untuk tidak menggunakan pengetahuan luar |
+| T37.6 | Chatbot UI + frontend integration               | **DONE & VERIFIED 2026-10-04:** reusable Chatbot.svelte terpasang pada layout publik dan terhubung ke /api/chatbot/ask; browser smoke test memverifikasi jawaban + sumber, refusal, empty input, Enter, dan layout mobile tanpa horizontal overflow; npm run check dan npm run build lulus |
+| T37.7 | Implement refusal/out-of-scope behavior         | **DONE:** fixed refusal tanpa pemanggilan LLM ketika retrieval tidak memberi evidence (diimplementasikan dan diuji pada T37.4) |
 
-Dependency: Fase 36 and MVP deployed. T37.0 database schema, T37.1 PDF ingestion through extraction/chunking, T37.2 Gemini embeddings, and T37.3 retrieval are complete. Answer generation, chatbot UI, and production cost controls remain future work. No vector database for the initial version.
+Dependency: Fase 36 and MVP deployed. T37.0 database schema, T37.1 PDF ingestion through extraction/chunking, T37.2 Gemini embeddings, T37.3 retrieval, T37.4 evidence-grounded answer generation, T37.5 context restriction, T37.6 public chatbot UI integration, and T37.7 fixed refusal behavior are complete. Production cost controls remain future work. No vector database for the initial version.
 
 ## 44. Phase 38 — RAG Test
 

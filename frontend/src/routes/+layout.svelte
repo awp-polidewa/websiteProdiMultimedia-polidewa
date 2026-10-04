@@ -1,6 +1,7 @@
 <script>
 	import '../app.css';
 	import { page } from '$app/state';
+	import Chatbot from '../lib/Chatbot.svelte';
 
 	const publicLinks = [
 		{ href: '/profil', label: 'Profil' },
@@ -51,6 +52,7 @@
 			</nav>
 		</footer>
 		<div class="footer-bottom"><span>© Politeknik Dewantara</span><span>Program Studi Teknologi Rekayasa Multimedia</span></div>
+		<Chatbot />
 	</div>
 {/if}
 
