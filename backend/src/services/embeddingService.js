@@ -22,6 +22,10 @@ function getEmbeddingConfiguration() {
 	return { apiKey, model };
 }
 
+export function getConfiguredEmbeddingModel() {
+	return getEmbeddingConfiguration().model;
+}
+
 export function validateEmbeddingVector(vector) {
 	if (!Array.isArray(vector) || vector.length !== expectedEmbeddingDimensions || !vector.every(Number.isFinite)) {
 		throw new GeminiEmbeddingError('Gemini mengembalikan vector embedding dengan format atau dimensi tidak valid.', 'GEMINI_INVALID_VECTOR');

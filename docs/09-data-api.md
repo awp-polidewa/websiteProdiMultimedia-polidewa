@@ -253,13 +253,13 @@ Public read contract ini tidak mendefinisikan detail API RAG. Backend admin logi
 
 API RAG:
 
-- `POST /api/chatbot/ask` untuk pertanyaan publik; hanya menjawab dari PDF yang dipilih/disetujui secara eksplisit.
+- `POST /api/chatbot/retrieve` menerima pertanyaan dan mengembalikan bukti retrieval saja; answer generation belum tersedia.
 - `GET /api/admin/rag/documents`, `POST /api/admin/rag/documents`, dan `DELETE /api/admin/rag/documents/:id`; semua route admin wajib memakai `requireAdmin`.
 - Dokumen RAG private di `backend/storage/rag/`, tidak dilayani melalui `/media/:type/:filename`.
 
 Admin document endpoints sudah aktif; upload multipart memakai field `file`, `title`, dan optional `description`. PDF maksimal 15 MB; SHA-256 duplikat ditolak dengan HTTP 409. Ingestion mengekstrak teks, menyimpan chunk target 1600 karakter dengan overlap 200 karakter, lalu membuat embedding Gemini `gemini-embedding-2`. Dokumen berstatus `ready` hanya jika seluruh chunk berhasil di-embed; kegagalan menyimpan status `failed` dengan pesan aman.
 
-Chatbot endpoint belum tersedia. Chunk yang belum berhasil di-embed tetap memiliki kolom embedding bernilai NULL.
+`POST /api/chatbot/retrieve` menerima `{ "question": "...", "topK": 5, "similarityThreshold": 0.30 }`; `topK` dan `similarityThreshold` opsional. Pertanyaan wajib berupa string non-kosong maksimal 2.000 karakter; `topK` harus integer 1–20 dan threshold angka 0–1. Default threshold dapat diatur dengan backend environment `SIMILARITY_THRESHOLD` (default `0.30`). Endpoint membuat embedding pertanyaan lewat Gemini, membandingkan hanya chunk yang embedding-nya valid, modelnya sesuai konfigurasi, dan dokumennya berstatus `ready`. Cosine similarity memakai semua 3072 dimensi tanpa transformasi. Response `data` berisi `{ "hasEvidence": boolean, "results": [...] }`; tiap hasil memuat `chunkId`, `documentId`, `text`, `pageNumber`, `chunkOrder`, `similarity`, `documentTitle`, dan `originalFilename`. Hasil memenuhi threshold, berurutan similarity tertinggi, dibatasi top-K. Jika tidak ada hasil yang memenuhi threshold, response berisi `hasEvidence: false` dan `results: []`. Vector dan credential tidak pernah disertakan. Chunk belum ter-embed tetap valid dan dilewati. Endpoint ini tidak membuat jawaban, chatbot, atau UI.
 
 ## 9. Gate implementasi
 

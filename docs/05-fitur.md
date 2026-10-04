@@ -245,7 +245,7 @@ API:
 - `POST /api/admin/rag/documents` untuk mengirim PDF sumber yang disetujui (tersedia).
 - `DELETE /api/admin/rag/documents/:id` untuk menghapus dokumen dan chunk terkait (tersedia).
 
-`GET`, `POST`, dan `DELETE` admin document endpoints di atas diimplementasikan pada T37.1. Upload memakai multipart field `file`, `title`, dan `description`; file disimpan private di `backend/storage/rag/`. Batas upload 15 MB. T37.2 membuat embedding Gemini selama ingest. Retrieval, chatbot endpoint, dan UI chatbot belum diimplementasikan.
+`GET`, `POST`, dan `DELETE` admin document endpoints di atas diimplementasikan pada T37.1. Upload memakai multipart field `file`, `title`, dan `description`; file disimpan private di `backend/storage/rag/`. Batas upload 15 MB. T37.2 membuat embedding Gemini selama ingest. T37.3 menyediakan retrieval bukti melalui `POST /api/chatbot/retrieve`; endpoint ini tidak menghasilkan jawaban. Hanya chunk dari dokumen `ready` yang dihitung dengan cosine similarity, top-K default 5, threshold default 0.30 (`SIMILARITY_THRESHOLD`). UI chatbot dan answer generation belum diimplementasikan.
 
 ## 24. Search
 

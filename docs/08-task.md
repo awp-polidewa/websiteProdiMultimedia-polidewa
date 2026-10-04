@@ -498,14 +498,14 @@ RAG **tidak boleh** dikerjakan sebelum MVP stabil. Prioritas P3 (fase akhir, buk
 | ----- | ----------------------------------------------- |
 | T37.0 | RAG database schema and migration                | **DONE 2026-10-04:** created `rag_documents` and `rag_chunks`; tested against local MariaDB; existing five MVP tables unchanged |
 | T37.1 | Implement document management sesuai arsitektur | **DONE & VERIFIED 2026-10-04:** migration applied to `web_trm_dev` (MariaDB 10.4.32); 10/10 integration checks passed for authenticated upload, validation, extraction/chunk fields, duplicate 409, list/delete/cascade, and private storage; PDF max 15 MB; no embeddings |
-| T37.2 | Implement document processing                   |
-| T37.3 | Implement retrieval                             |
+| T37.2 | Implement document processing                   | **DONE & VERIFIED 2026-10-04:** Gemini API `gemini-embedding-2` via backend-only `GEMINI_API_KEY`; validates 3072-dimensional vectors; persists JSON + model name; skips existing embeddings; documents become `ready` only after all chunks succeed and `failed` with safe error otherwise; 17/17 backend tests passed including real Gemini integration |
+| T37.3 | Implement retrieval                             | **DONE & VERIFIED 2026-10-04:** `retrieveRelevantChunks` embeds validated questions with Gemini, compares 3072-dimensional vectors using cosine similarity, filters only `ready` documents, applies topK=5 and configurable threshold (default 0.30); retrieval endpoint returns evidence only, never vectors |
 | T37.4 | Implement answer generation                     |
 | T37.5 | Implement context restriction                   |
 | T37.6 | Implement refusal/out-of-scope behavior         |
 | T37.7 | Implement chatbot UI                            |
 
-Dependency: Fase 36 and MVP deployed. T37.0 database schema and T37.1 PDF ingestion through extraction/chunking are complete. T37.2 adds embeddings; retrieval, chatbot, provider/model selection, retrieval threshold, and production cost controls remain future work. No vector database for the initial version.
+Dependency: Fase 36 and MVP deployed. T37.0 database schema, T37.1 PDF ingestion through extraction/chunking, T37.2 Gemini embeddings, and T37.3 retrieval are complete. Answer generation, chatbot UI, and production cost controls remain future work. No vector database for the initial version.
 
 ## 44. Phase 38 — RAG Test
 

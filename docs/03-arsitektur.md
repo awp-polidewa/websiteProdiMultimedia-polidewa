@@ -706,7 +706,7 @@ Health check dapat digunakan saat deployment dan troubleshooting.
 Y. RAG ARCHITECTURE
 ==================================================
 
-RAG masih bertahap: schema, T37.1 PDF ingestion, dan T37.2 Gemini embedding generation telah dibuat. Retrieval dan chatbot belum diimplementasikan.
+RAG berjalan bertahap dengan schema, T37.1 PDF ingestion, T37.2 Gemini embedding generation, dan T37.3 retrieval. Retrieval menghitung cosine similarity 3072 dimensi di backend, hanya terhadap chunk dokumen `ready`, dengan top-K default 5 dan ambang default 0.30 yang dapat diatur melalui `SIMILARITY_THRESHOLD`. Tidak ada vector database. Answer generation dan UI chatbot belum diimplementasikan.
 
 Urutan:
 

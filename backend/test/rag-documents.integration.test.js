@@ -12,6 +12,7 @@ import { createAdminSessionCookie } from '../src/auth/adminSession.js';
 import { closeDatabasePool } from '../src/config/database.js';
 import { storageRoot } from '../src/media/storage.js';
 import { GeminiEmbeddingError, processDocumentEmbeddings } from '../src/services/embeddingService.js';
+import { retrieveRelevantChunks } from '../src/services/retrievalService.js';
 
 const apiPath = '/api/admin/rag/documents';
 const database = mysql.createPool({
@@ -31,6 +32,7 @@ let adminCookie;
 let adminId;
 let documentId;
 let failedDocumentId;
+const retrievalDocumentIds = [];
 let storedPath;
 let pdfFixture;
 let testNidn;
@@ -134,6 +136,7 @@ after(async () => {
 		if (rows[0]?.filePath) await unlink(resolve(storageRoot, rows[0].filePath)).catch(() => {});
 	}
 	if (failedDocumentId) await database.execute('DELETE FROM rag_documents WHERE id = ?', [failedDocumentId]);
+	for (const id of retrievalDocumentIds) await database.execute('DELETE FROM rag_documents WHERE id = ?', [id]);
 	if (adminId) await database.execute('DELETE FROM admins WHERE id = ?', [adminId]);
 	await closeDatabasePool();
 	await database.end();
@@ -148,9 +151,9 @@ test('valid PDF upload creates a ready document after Gemini embeddings', async 
 	const response = await upload({ buffer: pdfFixture });
 	const body = await json(response);
 	assert.equal(response.status, 201);
-	assert.equal(body.data.status, 'ready');
 	assert.ok(body.data.id);
 	documentId = body.data.id;
+	assert.equal(body.data.status, 'ready', body.data.errorMessage || 'Embedding did not complete.');
 	assert.equal(Number(body.data.embeddedCount), Number(body.data.chunkCount));
 	const [rows] = await database.execute(
 		'SELECT id, title, status, file_path AS filePath FROM rag_documents WHERE id = ?', [documentId]
@@ -279,4 +282,82 @@ test('delete document removes its chunks and private file', async () => {
 	assert.equal(Number(chunks[0].count), 0);
 	assert.equal(existsSync(absolutePath), false);
 	documentId = undefined;
+});
+
+test('retrieval ranks only ready chunks, applies topK and threshold, and omits stored vectors', async () => {
+	const fixtureVector = [1, 0, ...Array(3070).fill(0)];
+	const orthogonalVector = [0, 1, ...Array(3070).fill(0)];
+	async function makeDocument(status, label, chunks) {
+		const [document] = await database.execute(
+			`INSERT INTO rag_documents (title, original_filename, file_path, file_sha256, status)
+			 VALUES (?, ?, ?, ?, ?)`,
+			[`Retrieval ${label} ${randomUUID()}`, `${label}.pdf`, `rag/${label}.pdf`, randomUUID().replaceAll('-', '').padEnd(64, '0'), status]
+		);
+		const id = document.insertId;
+		retrievalDocumentIds.push(id);
+		for (const chunk of chunks) {
+			await database.execute(
+				`INSERT INTO rag_chunks (document_id, chunk_text, page_number, chunk_order, embedding, embedding_model)
+				 VALUES (?, ?, ?, ?, ?, 'gemini-embedding-2')`,
+				[id, chunk.text, chunk.page, chunk.order, JSON.stringify(chunk.vector)]
+			);
+		}
+		return id;
+	}
+	const readyId = await makeDocument('ready', 'ready', [
+		{ text: 'Exact fixture evidence.', page: 2, order: 0, vector: fixtureVector },
+		{ text: 'Orthogonal fixture evidence.', page: 3, order: 1, vector: orthogonalVector },
+		{ text: 'Second exact fixture evidence.', page: 4, order: 2, vector: fixtureVector }
+	]);
+	await makeDocument('pending', 'pending', [
+		{ text: 'Must not be visible.', page: 1, order: 0, vector: fixtureVector }
+	]);
+	await makeDocument('failed', 'failed', [
+		{ text: 'Must not be visible either.', page: 1, order: 0, vector: fixtureVector }
+	]);
+	const ranked = await retrieveRelevantChunks('fixture question', {
+		embed: async () => fixtureVector,
+		topK: 1,
+		similarityThreshold: 0.8
+	});
+	assert.equal(ranked.hasEvidence, true);
+	assert.equal(ranked.results.length, 1);
+	assert.equal(ranked.results[0].documentId, String(readyId));
+	assert.equal(ranked.results[0].text, 'Exact fixture evidence.');
+	assert.equal(ranked.results[0].pageNumber, 2);
+	assert.equal(ranked.results[0].chunkOrder, 0);
+	assert.ok(Math.abs(ranked.results[0].similarity - 1) < 1e-12);
+	assert.equal(Object.hasOwn(ranked.results[0], 'embedding'), false);
+	assert.equal(Object.hasOwn(ranked.results[0], 'vector'), false);
+
+	const noEvidence = await retrieveRelevantChunks('fixture question', {
+		embed: async () => [0, 0, ...Array(3070).fill(0)],
+		similarityThreshold: 0.3
+	});
+	assert.deepEqual(noEvidence, { hasEvidence: false, results: [] });
+	const response = await fetch(`${baseUrl}/api/chatbot/retrieve`, {
+		method: 'POST', headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ question: `integration retrieval ${randomUUID()}`, topK: 2 })
+	});
+	const responseText = await response.text();
+	assert.equal(response.status, 200, responseText);
+	const body = JSON.parse(responseText);
+	assert.equal(body.success, true);
+	assert.equal(typeof body.data.hasEvidence, 'boolean');
+	assert.ok(Array.isArray(body.data.results));
+	assert.doesNotMatch(responseText, /AIza[0-9A-Za-z_-]{20,}/);
+	assert.doesNotMatch(childOutput, /AIza[0-9A-Za-z_-]{20,}/);
+	for (const result of body.data.results) {
+		assert.equal(Object.hasOwn(result, 'embedding'), false);
+		assert.equal(Object.hasOwn(result, 'vector'), false);
+	}
+});
+
+test('retrieval endpoint rejects empty and invalid questions without calling Gemini', async () => {
+	for (const body of [{ question: '  ' }, { question: 'ok', topK: 0 }]) {
+		const response = await fetch(`${baseUrl}/api/chatbot/retrieve`, {
+			method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+		});
+		assert.equal(response.status, 400);
+	}
 });

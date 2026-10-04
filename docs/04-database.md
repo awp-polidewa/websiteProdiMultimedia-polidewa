@@ -801,7 +801,7 @@ TBD yang tersisa dan tidak mengubah kolom inti:
 - Provider hosting/storage production dan konfigurasi volume persisten (bagian 48).
 - Provider/model LLM, retrieval threshold, serta batas biaya/penggunaan RAG.
 
-**Status schema awal:** keputusan desain data/API disetujui pada 2026-10-03; schema reproducible MVP dan migration awal RAG ada di `backend/database/schema.sql` dan `backend/database/migrations/20261004_create_rag_tables.sql`, yang diuji pada database lokal XAMPP MariaDB 10.4.32. Migration lanjutan `20261004_make_rag_embeddings_nullable.sql` menyesuaikan schema untuk T37.1 dan belum diterapkan ke database lokal pada task ini. Target MySQL 8.4 menggunakan collation portabel yang sama.
+**Status schema awal:** keputusan desain data/API disetujui pada 2026-10-03; schema reproducible MVP dan migration awal RAG ada di `backend/database/schema.sql` dan `backend/database/migrations/20261004_create_rag_tables.sql`, yang diuji pada database lokal XAMPP MariaDB 10.4.32. Migration lanjutan `20261004_make_rag_embeddings_nullable.sql` sudah diterapkan ke database development untuk T37.1. T37.2 tidak mengubah schema. Target MySQL 8.4 menggunakan collation portabel yang sama.
 
 ## Lampiran: Log Keputusan User (Selesai)
 
