@@ -43,7 +43,7 @@ async function getPageMeta(pool, table, whereSql, params, page) {
 export async function getLecturers(_request, response, next) {
 	try {
 		const [data] = await getDatabasePool().execute(
-			`SELECT id, name, title, concentration, bio, display_order AS displayOrder
+			`SELECT id, name, title, concentration, photo_path AS photoPath, bio, display_order AS displayOrder
 			 FROM lecturers ORDER BY display_order ASC, id ASC`
 		);
 		return response.json({
@@ -66,7 +66,7 @@ export async function getNews(request, response, next) {
 		const meta = await getPageMeta(pool, 'news', whereSql, [], page);
 		const offset = (page - 1) * pageSize;
 		const [data] = await pool.execute(
-			`SELECT id, title, slug, excerpt, NULL AS thumbnailUrl,
+			`SELECT id, title, slug, excerpt, thumbnail_path AS thumbnailPath, NULL AS thumbnailUrl,
 				DATE_FORMAT(published_at, '%Y-%m-%dT%H:%i:%s+08:00') AS publishedAt
 			 FROM news ${whereSql}
 			 ORDER BY published_at DESC, id DESC LIMIT ? OFFSET ?`,
@@ -84,7 +84,7 @@ export async function getNewsBySlug(request, response, next) {
 
 	try {
 		const [rows] = await getDatabasePool().execute(
-			`SELECT id, title, slug, excerpt, content, NULL AS thumbnailUrl,
+			`SELECT id, title, slug, excerpt, content, thumbnail_path AS thumbnailPath, NULL AS thumbnailUrl,
 				DATE_FORMAT(published_at, '%Y-%m-%dT%H:%i:%s+08:00') AS publishedAt
 			 FROM news
 			 WHERE slug = ? AND status = 'published' AND published_at IS NOT NULL
@@ -119,7 +119,7 @@ export async function getProjects(request, response, next) {
 		const meta = await getPageMeta(pool, 'projects', whereSql, params, page);
 		const offset = (page - 1) * pageSize;
 		const [data] = await pool.execute(
-			`SELECT id, title, slug, description, NULL AS thumbnailUrl, category,
+			`SELECT id, title, slug, description, thumbnail_path AS thumbnailPath, NULL AS thumbnailUrl, category,
 				student_name AS studentName, project_year AS projectYear, external_url AS externalUrl
 			 FROM projects ${whereSql}
 			 ORDER BY created_at DESC, id DESC LIMIT ? OFFSET ?`,
@@ -137,7 +137,7 @@ export async function getProjectBySlug(request, response, next) {
 
 	try {
 		const [rows] = await getDatabasePool().execute(
-			`SELECT id, title, slug, description, NULL AS thumbnailUrl, category,
+			`SELECT id, title, slug, description, thumbnail_path AS thumbnailPath, NULL AS thumbnailUrl, category,
 				student_name AS studentName, project_year AS projectYear, external_url AS externalUrl
 			 FROM projects WHERE slug = ? LIMIT 1`,
 			[slug]
@@ -158,7 +158,7 @@ export async function getProjectBySlug(request, response, next) {
 export async function getAccreditationDocuments(_request, response, next) {
 	try {
 		const [data] = await getDatabasePool().execute(
-			`SELECT id, title, description, NULL AS fileUrl, source_url AS sourceUrl, published_at AS publishedAt
+			`SELECT id, title, description, file_path AS filePath, NULL AS fileUrl, source_url AS sourceUrl, published_at AS publishedAt
 			 FROM accreditation_documents
 			 WHERE status = 'published'
 			 ORDER BY published_at DESC, id DESC`

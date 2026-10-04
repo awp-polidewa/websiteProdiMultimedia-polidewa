@@ -33,12 +33,19 @@ import {
 	updateAccreditationDocument
 } from '../controllers/adminAccreditationDocumentController.js';
 import { requireAdmin } from '../middleware/requireAdmin.js';
+import {
+	handleMediaUploadError,
+	receiveMedia,
+	validateMediaType
+} from '../middleware/mediaUpload.js';
+import { uploadMedia } from '../controllers/adminMediaController.js';
 
 const router = Router();
 
 router.post('/login', loginAdmin);
 router.post('/logout', logoutAdmin);
 router.get('/session', requireAdmin, getAdminSession);
+router.post('/media/upload', requireAdmin, validateMediaType, receiveMedia, uploadMedia, handleMediaUploadError);
 router.route('/news').all(requireAdmin).get(getAdminNews).post(createNews);
 router
 	.route('/news/:id')

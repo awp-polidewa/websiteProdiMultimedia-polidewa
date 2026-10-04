@@ -59,6 +59,9 @@
 </section>
 
 <style>
+	/* .visually-hidden{
+		text-align: center;
+	} */
 	.hero { position: relative; min-height: min(680px, 78vh); display: flex; flex-direction: column; justify-content: center; padding: clamp(4rem, 10vw, 8rem) 0; }
 	.hero-label { display: flex; align-items: baseline; gap: .75rem; }
 	.hero-label p { margin: 0; }

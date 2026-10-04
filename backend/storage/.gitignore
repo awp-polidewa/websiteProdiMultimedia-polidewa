@@ -1,0 +1,14 @@
+*
+!.gitignore
+!lecturers/
+!news/
+!projects/
+!accreditation/
+lecturers/*
+!lecturers/.gitkeep
+news/*
+!news/.gitkeep
+projects/*
+!projects/.gitkeep
+accreditation/*
+!accreditation/.gitkeep

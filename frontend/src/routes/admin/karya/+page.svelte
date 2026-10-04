@@ -1,6 +1,7 @@
 <script>
 	import { onMount } from 'svelte';
 	import { ApiError, requestApi } from '../../../lib/admin/api.js';
+	import MediaUploadField from '../../../lib/admin/MediaUploadField.svelte';
 
 	/** @typedef {{ id: string, title: string, slug: string, description: string | null, thumbnailPath: string, category: string, studentName: string | null, projectYear: number | null, externalUrl: string | null, createdAt: string, updatedAt: string }} Project */
 	/** @typedef {{ title: string, slug: string, description: string, thumbnail_path: string, category: string, student_name: string, project_year: string, external_url: string }} ProjectForm */
@@ -27,6 +28,7 @@
 	let fieldErrors = $state(/** @type {Record<string, string>} */ ({}));
 	let formError = $state('');
 	let saving = $state(false);
+	let mediaUploading = $state(false);
 	let deletingId = $state(/** @type {string | null} */ (null));
 	let dialogElement = $state(/** @type {HTMLDialogElement | undefined} */ (undefined));
 	let requestVersion = 0;
@@ -99,6 +101,7 @@
 	/** @param {SubmitEvent} event */
 	async function submitForm(event) {
 		event.preventDefault();
+		if (mediaUploading) { formError = 'Tunggu sampai upload selesai sebelum menyimpan.'; return; }
 		fieldErrors = {};
 		formError = '';
 		const title = form.title.trim();
@@ -247,11 +250,12 @@
 			<label>Slug URL <span aria-hidden="true">*</span><input bind:value={form.slug} maxlength="220" autocomplete="off" required aria-invalid={Boolean(fieldErrors.slug)} aria-describedby={fieldErrors.slug ? 'slug-error' : undefined} /><small class="hint">Huruf kecil, angka, dan tanda hubung.</small>{#if fieldErrors.slug}<small id="slug-error" class="field-error">{fieldErrors.slug}</small>{/if}</label>
 			<label>Kategori <span aria-hidden="true">*</span><select bind:value={form.category} required aria-invalid={Boolean(fieldErrors.category)} aria-describedby={fieldErrors.category ? 'category-error' : undefined}><option value="">Pilih kategori</option>{#each categories as category (category.value)}<option value={category.value}>{category.label}</option>{/each}</select>{#if fieldErrors.category}<small id="category-error" class="field-error">{fieldErrors.category}</small>{/if}</label>
 			<label>Deskripsi<textarea bind:value={form.description} rows="5" aria-invalid={Boolean(fieldErrors.description)} aria-describedby={fieldErrors.description ? 'description-error' : undefined}></textarea><small class="hint">Opsional.</small>{#if fieldErrors.description}<small id="description-error" class="field-error">{fieldErrors.description}</small>{/if}</label>
-			<label>Path thumbnail <span aria-hidden="true">*</span><input bind:value={form.thumbnail_path} maxlength="255" placeholder="media/karya/nama-file.jpg" required aria-invalid={Boolean(fieldErrors.thumbnail_path)} aria-describedby={fieldErrors.thumbnail_path ? 'thumbnail-error' : 'thumbnail-hint'} /><small id="thumbnail-hint" class="hint">Path relatif yang sudah tersedia; upload gambar belum didukung.</small>{#if fieldErrors.thumbnail_path}<small id="thumbnail-error" class="field-error">{fieldErrors.thumbnail_path}</small>{/if}</label>
+			<MediaUploadField type="projects" label="Thumbnail karya" required bind:path={form.thumbnail_path} bind:busy={mediaUploading} />
+			{#if fieldErrors.thumbnail_path}<small id="thumbnail-error" class="field-error">{fieldErrors.thumbnail_path}</small>{/if}
 			<label>Nama mahasiswa<input bind:value={form.student_name} maxlength="150" aria-invalid={Boolean(fieldErrors.student_name)} aria-describedby={fieldErrors.student_name ? 'student-error' : undefined} />{#if fieldErrors.student_name}<small id="student-error" class="field-error">{fieldErrors.student_name}</small>{/if}</label>
 			<label>Tahun karya<input bind:value={form.project_year} type="number" min="0" max="65535" step="1" inputmode="numeric" aria-invalid={Boolean(fieldErrors.project_year)} aria-describedby={fieldErrors.project_year ? 'year-error' : 'year-hint'} /><small id="year-hint" class="hint">Opsional, bilangan bulat 0–65535.</small>{#if fieldErrors.project_year}<small id="year-error" class="field-error">{fieldErrors.project_year}</small>{/if}</label>
 			<label>URL eksternal<input bind:value={form.external_url} type="url" maxlength="500" placeholder="https://contoh.id/karya" aria-invalid={Boolean(fieldErrors.external_url)} aria-describedby={fieldErrors.external_url ? 'url-error' : 'url-hint'} /><small id="url-hint" class="hint">Opsional. Hanya URL HTTP atau HTTPS.</small>{#if fieldErrors.external_url}<small id="url-error" class="field-error">{fieldErrors.external_url}</small>{/if}</label>
-			<div class="form-actions"><button class="button" type="button" onclick={closeForm} disabled={saving}>Batal</button><button class="button primary" type="submit" disabled={saving}>{saving ? 'Menyimpan…' : editingId ? 'Simpan perubahan' : 'Simpan karya'}</button></div>
+			<div class="form-actions"><button class="button" type="button" onclick={closeForm} disabled={saving || mediaUploading}>Batal</button><button class="button primary" type="submit" disabled={saving || mediaUploading}>{mediaUploading ? 'Mengunggah…' : saving ? 'Menyimpan…' : editingId ? 'Simpan perubahan' : 'Simpan karya'}</button></div>
 		</form>
 	</dialog>
 {/if}

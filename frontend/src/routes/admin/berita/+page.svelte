@@ -1,6 +1,7 @@
 <script>
 	import { onMount } from 'svelte';
 	import { ApiError, requestApi } from '../../../lib/admin/api.js';
+	import MediaUploadField from '../../../lib/admin/MediaUploadField.svelte';
 
 	/** @typedef {{ id: string, title: string, slug: string, excerpt: string | null, content?: string, thumbnailPath: string | null, status: 'draft' | 'published', publishedAt: string | null, createdAt: string, updatedAt: string }} NewsItem */
 	/** @typedef {{ title: string, slug: string, excerpt: string, content: string, thumbnail_path: string, status: 'draft' | 'published' }} NewsForm */
@@ -20,6 +21,7 @@
 	let fieldErrors = $state(/** @type {Record<string, string>} */ ({}));
 	let formError = $state('');
 	let saving = $state(false);
+	let mediaUploading = $state(false);
 	let deletingId = $state(/** @type {string | null} */ (null));
 	let dialogElement = $state(/** @type {HTMLDialogElement | undefined} */ (undefined));
 	let requestVersion = 0;
@@ -90,6 +92,7 @@
 	/** @param {SubmitEvent} event */
 	async function submitForm(event) {
 		event.preventDefault();
+		if (mediaUploading) { formError = 'Tunggu sampai upload selesai sebelum menyimpan.'; return; }
 		fieldErrors = {};
 		formError = '';
 		const title = form.title.trim();
@@ -237,9 +240,10 @@
 				<label>Slug URL <span aria-hidden="true">*</span><input bind:value={form.slug} maxlength="220" autocomplete="off" required aria-invalid={Boolean(fieldErrors.slug)} aria-describedby={fieldErrors.slug ? 'slug-error' : undefined} /><small class="hint">Huruf kecil, angka, dan tanda hubung. Contoh: kegiatan-kampus</small>{#if fieldErrors.slug}<small id="slug-error" class="field-error">{fieldErrors.slug}</small>{/if}</label>
 				<label>Ringkasan<textarea bind:value={form.excerpt} maxlength="500" rows="3" aria-invalid={Boolean(fieldErrors.excerpt)} aria-describedby={fieldErrors.excerpt ? 'excerpt-error' : undefined}></textarea><small class="hint">Opsional, maksimal 500 karakter.</small>{#if fieldErrors.excerpt}<small id="excerpt-error" class="field-error">{fieldErrors.excerpt}</small>{/if}</label>
 				<label>Isi berita <span aria-hidden="true">*</span><textarea bind:value={form.content} rows="9" required aria-invalid={Boolean(fieldErrors.content)} aria-describedby={fieldErrors.content ? 'content-error' : undefined}></textarea>{#if fieldErrors.content}<small id="content-error" class="field-error">{fieldErrors.content}</small>{/if}</label>
-				<label>Path thumbnail<input bind:value={form.thumbnail_path} maxlength="255" placeholder="media/berita/nama-file.jpg" aria-invalid={Boolean(fieldErrors.thumbnail_path)} aria-describedby={fieldErrors.thumbnail_path ? 'thumbnail-error' : 'thumbnail-hint'} /><small id="thumbnail-hint" class="hint">Opsional. Isi path relatif yang sudah tersedia; unggah gambar belum didukung.</small>{#if fieldErrors.thumbnail_path}<small id="thumbnail-error" class="field-error">{fieldErrors.thumbnail_path}</small>{/if}</label>
+				<MediaUploadField type="news" label="Gambar berita" bind:path={form.thumbnail_path} bind:busy={mediaUploading} />
+				{#if fieldErrors.thumbnail_path}<small id="thumbnail-error" class="field-error">{fieldErrors.thumbnail_path}</small>{/if}
 				<label>Status<select bind:value={form.status} aria-invalid={Boolean(fieldErrors.status)} aria-describedby={fieldErrors.status ? 'status-error' : undefined}><option value="draft">Draft</option><option value="published">Published</option></select>{#if fieldErrors.status}<small id="status-error" class="field-error">{fieldErrors.status}</small>{/if}</label>
-				<div class="form-actions"><button class="button" type="button" onclick={closeForm} disabled={saving}>Batal</button><button class="button primary" type="submit" disabled={saving}>{saving ? 'Menyimpan…' : editingId ? 'Simpan perubahan' : 'Simpan berita'}</button></div>
+				<div class="form-actions"><button class="button" type="button" onclick={closeForm} disabled={saving || mediaUploading}>Batal</button><button class="button primary" type="submit" disabled={saving || mediaUploading}>{mediaUploading ? 'Mengunggah…' : saving ? 'Menyimpan…' : editingId ? 'Simpan perubahan' : 'Simpan berita'}</button></div>
 			</form>
 		</dialog>
 {/if}

@@ -38,3 +38,35 @@ export async function requestApi(path, options = {}, admin = false) {
 	}
 	return payload;
 }
+
+/** @param {string} type @param {File} file */
+export async function uploadMedia(type, file) {
+	const formData = new FormData();
+	formData.append('file', file);
+	const response = await fetch(`${apiBase}/api/admin/media/upload?type=${encodeURIComponent(type)}`, {
+		method: 'POST',
+		credentials: 'include',
+		body: formData
+	});
+	/** @type {ApiResponse | null} */
+	let payload = null;
+	try {
+		payload = await response.json();
+	} catch {
+		// Keep a consistent API error when the server does not return JSON.
+	}
+	if (!response.ok) {
+		throw new ApiError(
+			response.status,
+			typeof payload?.message === 'string' ? payload.message : 'File gagal diunggah.',
+			payload?.errors && typeof payload.errors === 'object' ? payload.errors : {}
+		);
+	}
+	return payload;
+}
+
+/** @param {string | null | undefined} path */
+export function mediaUrl(path) {
+	if (!path || path.startsWith('/') || path.includes('\\') || path.split('/').some((segment) => !segment || segment === '.' || segment === '..')) return '';
+	return `${apiBase}/media/${path.split('/').map(encodeURIComponent).join('/')}`;
+}

@@ -86,7 +86,7 @@ Penyesuaian dependensi yang harus diperhatikan agent (**[REVIEW]**, diputuskan d
 
 1. **Public read API.** Fase 5–7 (struktur, berita, project) membutuhkan endpoint baca (GET) publik, padahal "Implement API" muncul di fase admin 11–13. Keputusan: endpoint baca publik dibuat pada task connect di fase 5–7 (T5.2, T6.3, T7.4); fase 11–13 menambah endpoint admin (tulis dan baca admin) dan tidak menduplikasi endpoint baca. Jangan membuat seed konten resmi/fiktif; halaman mendukung empty state sebelum data resmi tersedia.
 2. **Interaksi structure.** T5.4–T5.6 mengimplementasikan perilaku fungsional (state aktif, preview di kanan, alternatif mobile) tanpa polish motion; transisi dan timing dikerjakan di T19.8 mengikuti `06-animation.md`.
-3. **Home.** T4.1 membuat kerangka Home; bagian highlight berita/project dihubungkan setelah fase 6–7.
+3. **Home.** T4.1 membuat kerangka Home; highlight berita/project kini terhubung ke API publik setelah fase 6–7.
 4. **FAQ.** T19.9 (FAQ accordion) menyebut FAQ, tetapi tidak ada task yang membuat halaman/fitur FAQ, dan keberadaan FAQ masih TBD (`05-fitur.md` bagian 3). Lihat catatan di T19.9.
 5. **Checkpoint.** Nomor checkpoint di bagian 56 tidak berurutan waktu (backend/DB dikerjakan sebelum public); pemetaan fasenya ditulis di bagian 56.
 6. **Final QA (fase 40)** muncul setelah RAG tetapi RAG bukan syarat MVP; lihat bagian 46.
@@ -139,7 +139,7 @@ Acceptance: layout konsisten, responsive, tidak menyimpang dari `02-desain.md`.
 
 | ID   | Task                   | Output                                 | Dep       | P   | Catatan                                               |
 | ---- | ---------------------- | -------------------------------------- | --------- | --- | ----------------------------------------------------- |
-| T4.1 | Home page              | Hero, pengenalan TRM, struktur halaman | T3.1–T3.4 | P0  | DONE 2026-10-03: halaman dasar; highlight data terhubung setelah fase 6–7 |
+| T4.1 | Home page              | Hero, pengenalan TRM, struktur halaman | T3.1–T3.4 | P0  | **DONE 2026-10-03:** highlight berita dan karya memakai tiga item terbaru dari API publik; link detail memakai slug |
 | T4.2 | Profile page           | Halaman profil prodi                   | T3.1      | P0  | DONE 2026-10-03: halaman statis; tanpa database/API/admin CRUD |
 | T4.3 | Static profile content | Isi profil di source code              | T4.2      | P0  | Isi mengikuti data resmi; jika belum ada: TBD         |
 
@@ -149,9 +149,9 @@ Acceptance: halaman terbuka dan konsisten dengan desain; tidak ada konten resmi 
 
 | ID   | Task                               | Output                                                            | Dep        | P   | Catatan                                                              |
 | ---- | ---------------------------------- | ----------------------------------------------------------------- | ---------- | --- | -------------------------------------------------------------------- |
-| T5.1 | Structure page                     | Halaman struktur                                                  | T3.1       | P0  | DONE 2026-10-03: chart publik; nama/profil dosen tetap placeholder resmi |
-| T5.2 | Connect lecturer data dari backend | Endpoint baca publik `lecturers` + pemakaian di halaman           | T2.3, T5.1 | P0  | Endpoint selesai; pemakaian halaman belum dilakukan. Tidak ada seed konten. |
-| T5.3 | Default organization structure     | Kaprodi di atas; Web Design, Desain Grafis, Videografi di bawah | T5.2       | P0  | Label mengikuti nilai konsentrasi kanonis yang disetujui user |
+| T5.1 | Structure page                     | Halaman struktur                                                  | T3.1       | P0  | DONE 2026-10-03: chart publik dengan fallback placeholder untuk data/foto yang belum tersedia |
+| T5.2 | Connect lecturer data dari backend | Endpoint baca publik `lecturers` + pemakaian di halaman           | T2.3, T5.1 | P0  | **DONE 2026-10-03:** `/struktur` memuat dosen dari API publik; data email/NIDN tidak ditampilkan karena endpoint publik mengecualikannya |
+| T5.3 | Default organization structure     | Kaprodi di atas; Web Design, Desain Grafis, Videografi di bawah | T5.2       | P0  | **DONE 2026-10-03:** struktur menggunakan konsentrasi dari API dan mempertahankan hierarki kanonis |
 | T5.4 | Desktop hover interaction          | Node aktif saat hover/fokus                                       | T5.3       | P1  | DONE 2026-10-03: node button merespons hover dan fokus keyboard     |
 | T5.5 | Profile preview di sisi kanan      | Preview foto, nama, role; bukan modal                             | T5.4       | P1  | DONE 2026-10-03: panel samping memakai placeholder yang jelas      |
 | T5.6 | Mobile interaction                 | Tap/selected state atau pola sederhana                            | T5.3       | P1  | DONE 2026-10-03: daftar vertikal; tap memilih node dan preview      |
@@ -162,13 +162,13 @@ Acceptance: struktur terbaca; preview tidak menjadi modal; hover desktop bekerja
 
 | ID   | Task                                       | Output                            | Dep  | P   |
 | ---- | ------------------------------------------ | --------------------------------- | ---- | --- |
-| T6.1 | News listing                               | Daftar berita (published saja)    | T3.1 | P0  |
-| T6.2 | News detail                                | Detail via slug                   | T6.1 | P0  |
-| T6.3 | Connect news API                           | Endpoint baca publik `news`       | T2.3 | P0  | **DONE 2026-10-03:** list/detail API tersedia; diuji dengan DB lokal kosong |
-| T6.4 | Loading state                              | Indikator sederhana               | T6.3 | P1  |
-| T6.5 | Empty state                                | Pesan jelas bila belum ada berita | T6.3 | P1  |
-| T6.6 | Error state                                | Pesan gagal yang ramah            | T6.3 | P1  |
-| T6.7 | Pagination jika diperlukan (`05-fitur.md`) | Pagination sederhana              | T6.3 | P1  |
+| T6.1 | News listing                               | Daftar berita (published saja)    | T3.1 | P0  | **DONE 2026-10-03:** daftar memakai data `GET /api/news` |
+| T6.2 | News detail                                | Detail via slug                   | T6.1 | P0  | **DONE 2026-10-03:** route `/berita/:slug` memuat detail API dan menangani 404/error |
+| T6.3 | Connect news API                           | Endpoint baca publik `news`       | T2.3 | P0  | **DONE 2026-10-03:** list/detail API tersedia dan terhubung ke halaman public |
+| T6.4 | Loading state                              | Indikator sederhana               | T6.3 | P1  | **DONE 2026-10-03:** state loading pada daftar dan detail berita |
+| T6.5 | Empty state                                | Pesan jelas bila belum ada berita | T6.3 | P1  | **DONE 2026-10-03:** empty state memakai komponen yang tersedia |
+| T6.6 | Error state                                | Pesan gagal yang ramah            | T6.3 | P1  | **DONE 2026-10-03:** error API dan aksi coba lagi pada daftar/detail |
+| T6.7 | Pagination jika diperlukan (`05-fitur.md`) | Pagination sederhana              | T6.3 | P1  | **DONE 2026-10-03:** navigasi memakai metadata pagination API |
 
 Acceptance: publik dapat membaca berita dari database/API; draft tidak tampil.
 
@@ -176,13 +176,13 @@ Acceptance: publik dapat membaca berita dari database/API; draft tidak tampil.
 
 | ID   | Task                                  | Output                          | Dep  | P   | Catatan                  |
 | ---- | ------------------------------------- | ------------------------------- | ---- | --- | ------------------------ |
-| T7.1 | Project listing                       | Daftar image-first              | T3.1 | P0  |                          |
-| T7.2 | Project detail                        | Detail via slug                 | T7.1 | P0  |                          |
-| T7.3 | Category/filter jika sudah ditentukan | Filter kategori sederhana       | T7.4 | P1  | Gunakan kategori baku `desain`, `coding`, `3d`, `multimedia`, `lainnya` |
-| T7.4 | Connect project API                   | Endpoint baca publik `projects` | T2.3 | P0  | **DONE 2026-10-03:** list/detail/filter API tersedia; diuji dengan DB lokal kosong |
-| T7.5 | Loading state                         |                                 | T7.4 | P1  |                          |
-| T7.6 | Empty state                           |                                 | T7.4 | P1  |                          |
-| T7.7 | Error state                           |                                 | T7.4 | P1  |                          |
+| T7.1 | Project listing                       | Daftar image-first              | T3.1 | P0  | **DONE 2026-10-03:** daftar karya dan placeholder media memakai data API |
+| T7.2 | Project detail                        | Detail via slug                 | T7.1 | P0  | **DONE 2026-10-03:** route `/karya/:slug` memuat detail API dan menangani 404/error |
+| T7.3 | Category/filter jika sudah ditentukan | Filter kategori sederhana       | T7.4 | P1  | **DONE 2026-10-03:** filter mengirim kategori kanonis ke API dan mereset pagination |
+| T7.4 | Connect project API                   | Endpoint baca publik `projects` | T2.3 | P0  | **DONE 2026-10-03:** list/detail/filter API tersedia dan terhubung ke halaman public |
+| T7.5 | Loading state                         |                                 | T7.4 | P1  | **DONE 2026-10-03:** loading state daftar karya |
+| T7.6 | Empty state                           |                                 | T7.4 | P1  | **DONE 2026-10-03:** empty state mengikuti hasil filter/list API |
+| T7.7 | Error state                           |                                 | T7.4 | P1  | **DONE 2026-10-03:** error API dan aksi coba lagi pada daftar karya |
 
 Acceptance: project mahasiswa tampil dari database.
 
@@ -190,7 +190,7 @@ Acceptance: project mahasiswa tampil dari database.
 
 | ID   | Task                                       | Output                | Dep  | P   | Catatan                                    |
 | ---- | ------------------------------------------ | --------------------- | ---- | --- | ------------------------------------------ |
-| T8.1 | Accreditation page                         | Halaman akreditasi    | T3.1 | P1  | DONE 2026-10-03: halaman dan empty state PDF; data/link resmi menunggu sumber |
+| T8.1 | Accreditation page                         | Halaman akreditasi    | T3.1 | P1  | **DONE 2026-10-03:** daftar dokumen memakai API publik; ringkasan status resmi tetap menunggu sumber terverifikasi |
 | T8.2 | Display official accreditation information | Informasi resmi       | T8.1 | P1  | Isi resmi TBD; tidak dikarang              |
 | T8.3 | Document viewing/download jika tersedia    | Tombol lihat/download | T8.1 | P1  | Fitur cetak: TBD (`05-fitur.md` bagian 18) |
 | T8.4 | Pastikan link/source resmi dipakai         | Sumber resmi          | T8.2 | P1  |                                            |
@@ -233,7 +233,7 @@ Acceptance: dashboard usable; admin tidak memakai visual landing page public (`0
 | T11.3 | Add lecturer                                  | Form tambah                                     | T11.1        | P0  | **DONE 2026-10-03:** form memakai field API yang tersedia, validasi dasar, dan pesan error backend |
 | T11.4 | Edit lecturer                                 | Form edit                                       | T11.1        | P0  | **DONE 2026-10-03:** detail dimuat dari API dan daftar disegarkan setelah perubahan |
 | T11.5 | Delete lecturer jika diperlukan               | Hapus + konfirmasi                              | T11.1        | P1  | **DONE 2026-10-03:** penghapusan memakai konfirmasi dan refresh daftar |
-| T11.6 | Photo upload                                  | Upload foto (path di database)                  | T11.3        | P0  | Storage dan aturan file TBD              |
+| T11.6 | Photo upload                                  | Upload foto (path di database)                  | T11.3        | P0  | **DONE 2026-10-04:** upload JPEG/PNG/WebP memakai endpoint admin terlindungi; path relatif tersimpan di CRUD dosen dan file disajikan dari storage terkontrol |
 | T11.7 | Validation                                    | Frontend + backend                              | T11.3        | P0  | **DONE 2026-10-03:** backend dan form memvalidasi nama/jabatan, konsentrasi, path foto, bio, email, dan display order; schema/API lecturers tidak menyediakan field NIDN |
 | T11.8 | created_at/updated_at display jika diperlukan | Tampil di admin                                 | T11.2        | P1  | **DONE 2026-10-03:** waktu pembaruan tampil sesuai timezone Asia/Makassar |
 
@@ -248,7 +248,7 @@ Acceptance: admin dapat mengelola data dosen; urutan lewat `display_order` (meka
 | T12.3 | Create news      | Form tambah                      | T12.1      | P0  | **DONE 2026-10-03:** form berita memakai field schema/API, validasi dasar, dan menampilkan error backend |
 | T12.4 | Edit news        | Form edit                        | T12.1      | P0  | **DONE 2026-10-03:** form memuat detail API dan menyegarkan daftar setelah perubahan |
 | T12.5 | Delete news      | Hapus + konfirmasi               | T12.1      | P0  | **DONE 2026-10-03:** hapus terautentikasi dengan konfirmasi dan refresh daftar |
-| T12.6 | Thumbnail upload | Upload gambar                    | T12.3      | P1  |
+| T12.6 | Thumbnail upload | Upload gambar                    | T12.3      | P1  | **DONE 2026-10-04:** endpoint media admin terhubung ke form berita; file dan signature divalidasi sebelum path disimpan |
 | T12.7 | Validation       | Termasuk slug unik               | T12.3      | P0  | **DONE 2026-10-03:** validasi backend title, slug URL, content, excerpt, thumbnail path, status, pagination; duplicate slug mengembalikan 409 |
 | T12.8 | Timestamps       | `created_at`/`updated_at` tampil | T12.2      | P1  | **DONE 2026-10-03:** waktu pembaruan ditampilkan pada daftar berita desktop dan mobile |
 
@@ -263,7 +263,7 @@ Acceptance: admin dapat CRUD berita; status draft/published bekerja.
 | T13.3 | Create project      | Form tambah                        | T13.1      | P0  | **DONE 2026-10-03:** form memakai field schema/API, validasi dasar, dan pesan error backend |
 | T13.4 | Edit project        | Form edit                          | T13.1      | P0  | **DONE 2026-10-03:** detail dimuat dari API; perubahan diikuti refresh daftar |
 | T13.5 | Delete project      | Hapus + konfirmasi                 | T13.1      | P0  | **DONE 2026-10-03:** penghapusan memakai konfirmasi dan refresh daftar |
-| T13.6 | Image upload        | Upload gambar                      | T13.3      | P1  |         |
+| T13.6 | Image upload        | Upload gambar                      | T13.3      | P1  | **DONE 2026-10-04:** endpoint media admin terhubung ke form project; path relatif teruji dengan CRUD |
 | T13.7 | Validation          | Termasuk slug unik, `external_url` | T13.3      | P0  | **DONE 2026-10-03:** validasi backend field wajib/opsional, slug, kategori, path relatif, tahun, URL HTTP/HTTPS; duplicate slug 409; form menerapkan validasi dasar dan menampilkan error backend |
 | T13.8 | Timestamps          | Tampil di admin                    | T13.2      | P1  | **DONE 2026-10-03:** waktu pembaruan tampil pada daftar desktop dan kartu mobile |
 
@@ -288,12 +288,12 @@ Dikerjakan untuk mengelola PDF akreditasi resmi sesuai keputusan di `04-database
 
 | ID    | Task                | Dep         | P   |
 | ----- | ------------------- | ----------- | --- |
-| T15.1 | Document API        | T9.5        | P1  | **DONE 2026-10-03:** endpoint CRUD metadata/status dokumen akreditasi terlindungi `requireAdmin`, diuji dengan MySQL lokal; upload dan UI tetap task terpisah |
-| T15.2 | Document list       | T15.1       | P1  |
-| T15.3 | Upload              | T15.1       | P1  |
-| T15.4 | Metadata editing    | T15.1       | P1  |
-| T15.5 | Delete              | T15.1       | P1  |
-| T15.6 | Connect public page | T15.1, T8.1 | P1  |
+| T15.1 | Document API        | T9.5        | P1  | **DONE 2026-10-03:** endpoint CRUD metadata/status dokumen akreditasi terlindungi `requireAdmin` dan diuji dengan MySQL lokal; upload tetap task terpisah |
+| T15.2 | Document list       | T15.1       | P1  | **DONE 2026-10-03:** daftar admin berpaginasi dengan status, tanggal, path, sumber, timestamp, state loading/error/empty, dan kartu mobile |
+| T15.3 | Upload              | T15.1       | P1  | **DONE 2026-10-04:** PDF diunggah ke folder terpisah, MIME/extension/signature dan batas ukuran diuji; form akreditasi mempertahankan source URL dan status |
+| T15.4 | Metadata editing    | T15.1       | P1  | **DONE 2026-10-03:** form tambah/edit metadata dan status memakai field schema/API dengan validasi dasar serta error backend |
+| T15.5 | Delete              | T15.1       | P1  | **DONE 2026-10-03:** penghapusan memakai konfirmasi dan refresh daftar |
+| T15.6 | Connect public page | T15.1, T8.1 | P1  | **DONE 2026-10-03:** `/akreditasi` menampilkan daftar dan tautan sesuai response API publik tanpa filter draft frontend |
 
 Tidak membuat document management system kompleks.
 

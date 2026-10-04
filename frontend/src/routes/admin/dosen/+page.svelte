@@ -1,6 +1,7 @@
 <script>
 	import { onMount } from 'svelte';
 	import { ApiError, requestApi } from '../../../lib/admin/api.js';
+	import MediaUploadField from '../../../lib/admin/MediaUploadField.svelte';
 
 	/** @typedef {{ id: string, name: string, title: string, concentration: string | null, photoPath: string | null, bio: string | null, email: string | null, displayOrder: number, createdAt: string, updatedAt: string }} Lecturer */
 	/** @typedef {{ name: string, title: string, concentration: string, photo_path: string, bio: string, email: string, display_order: string }} LecturerForm */
@@ -21,6 +22,7 @@
 	let fieldErrors = $state(/** @type {Record<string, string>} */ ({}));
 	let formError = $state('');
 	let saving = $state(false);
+	let mediaUploading = $state(false);
 	let deletingId = $state(/** @type {string | null} */ (null));
 	let dialogElement = $state(/** @type {HTMLDialogElement | undefined} */ (undefined));
 	let requestVersion = 0;
@@ -92,6 +94,7 @@
 	/** @param {SubmitEvent} event */
 	async function submitForm(event) {
 		event.preventDefault();
+		if (mediaUploading) { formError = 'Tunggu sampai upload selesai sebelum menyimpan.'; return; }
 		fieldErrors = {};
 		formError = '';
 		const name = form.name.trim();
@@ -223,9 +226,10 @@
 			<label>Konsentrasi<select bind:value={form.concentration} aria-invalid={Boolean(fieldErrors.concentration)} aria-describedby={fieldErrors.concentration ? 'concentration-error' : 'concentration-hint'}><option value="">Tidak ada / Kaprodi</option>{#each concentrations as concentration (concentration)}<option value={concentration}>{concentration}</option>{/each}</select><small id="concentration-hint" class="hint">Opsional. Nilai mengikuti daftar konsentrasi resmi.</small>{#if fieldErrors.concentration}<small id="concentration-error" class="field-error">{fieldErrors.concentration}</small>{/if}</label>
 			<label>Email<input bind:value={form.email} type="email" maxlength="150" autocomplete="email" aria-invalid={Boolean(fieldErrors.email)} aria-describedby={fieldErrors.email ? 'email-error' : 'email-hint'} /><small id="email-hint" class="hint">Opsional.</small>{#if fieldErrors.email}<small id="email-error" class="field-error">{fieldErrors.email}</small>{/if}</label>
 			<label>Urutan tampil <span aria-hidden="true">*</span><input bind:value={form.display_order} type="number" min="0" max="4294967295" step="1" inputmode="numeric" required aria-invalid={Boolean(fieldErrors.display_order)} aria-describedby={fieldErrors.display_order ? 'order-error' : 'order-hint'} /><small id="order-hint" class="hint">Bilangan bulat 0–4294967295. Angka lebih kecil tampil lebih dahulu.</small>{#if fieldErrors.display_order}<small id="order-error" class="field-error">{fieldErrors.display_order}</small>{/if}</label>
-			<label>Path foto<input bind:value={form.photo_path} maxlength="255" placeholder="media/dosen/nama-file.jpg" aria-invalid={Boolean(fieldErrors.photo_path)} aria-describedby={fieldErrors.photo_path ? 'photo-error' : 'photo-hint'} /><small id="photo-hint" class="hint">Opsional. Path relatif yang sudah tersedia; upload foto belum didukung.</small>{#if fieldErrors.photo_path}<small id="photo-error" class="field-error">{fieldErrors.photo_path}</small>{/if}</label>
+			<MediaUploadField type="lecturers" label="Foto dosen" bind:path={form.photo_path} bind:busy={mediaUploading} />
+			{#if fieldErrors.photo_path}<small id="photo-error" class="field-error">{fieldErrors.photo_path}</small>{/if}
 			<label>Bio<textarea bind:value={form.bio} rows="5" aria-invalid={Boolean(fieldErrors.bio)} aria-describedby={fieldErrors.bio ? 'bio-error' : 'bio-hint'}></textarea><small id="bio-hint" class="hint">Opsional.</small>{#if fieldErrors.bio}<small id="bio-error" class="field-error">{fieldErrors.bio}</small>{/if}</label>
-			<div class="form-actions"><button class="button" type="button" onclick={closeForm} disabled={saving}>Batal</button><button class="button primary" type="submit" disabled={saving}>{saving ? 'Menyimpan…' : editingId ? 'Simpan perubahan' : 'Simpan dosen'}</button></div>
+			<div class="form-actions"><button class="button" type="button" onclick={closeForm} disabled={saving || mediaUploading}>Batal</button><button class="button primary" type="submit" disabled={saving || mediaUploading}>{mediaUploading ? 'Mengunggah…' : saving ? 'Menyimpan…' : editingId ? 'Simpan perubahan' : 'Simpan dosen'}</button></div>
 		</form>
 	</dialog>
 {/if}
