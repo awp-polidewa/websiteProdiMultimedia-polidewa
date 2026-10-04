@@ -65,6 +65,36 @@ export async function uploadMedia(type, file) {
 	return payload;
 }
 
+/** Upload an approved RAG PDF through the protected admin API.
+ * @param {string} title
+ * @param {File} file
+ */
+export async function uploadRagDocument(title, file) {
+	const formData = new FormData();
+	formData.append('title', title);
+	formData.append('file', file);
+	const response = await fetch(`${apiBase}/api/admin/rag/documents`, {
+		method: 'POST',
+		credentials: 'include',
+		body: formData
+	});
+	/** @type {ApiResponse | null} */
+	let payload = null;
+	try {
+		payload = await response.json();
+	} catch {
+		// Keep the same user-facing error behavior as the other admin uploads.
+	}
+	if (!response.ok) {
+		throw new ApiError(
+			response.status,
+			typeof payload?.message === 'string' ? payload.message : 'Dokumen RAG gagal diunggah.',
+			payload?.errors && typeof payload.errors === 'object' ? payload.errors : {}
+		);
+	}
+	return payload;
+}
+
 /** @param {string | null | undefined} path */
 export function mediaUrl(path) {
 	if (!path || path.startsWith('/') || path.includes('\\') || path.split('/').some((segment) => !segment || segment === '.' || segment === '..')) return '';

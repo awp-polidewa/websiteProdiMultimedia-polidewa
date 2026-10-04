@@ -20,7 +20,8 @@
 		{ href: '/admin/berita', label: 'Berita', icon: 'M5 3h10l4 4v14H5z M15 3v5h4 M8 12h8 M8 16h8' },
 		{ href: '/admin/karya', label: 'Karya', icon: 'M4 7l8-4 8 4-8 4z M4 12l8 4 8-4 M4 17l8 4 8-4' },
 		{ href: '/admin/dosen', label: 'Dosen', icon: 'M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2 M9.5 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8 M21 21v-2a4 4 0 0 0-3-3.87 M16 3.13a4 4 0 0 1 0 7.75' },
-		{ href: '/admin/akreditasi', label: 'Akreditasi', icon: 'M6 3h9l4 4v14H6z M15 3v5h4 M9 12h7 M9 16h7' }
+		{ href: '/admin/akreditasi', label: 'Akreditasi', icon: 'M6 3h9l4 4v14H6z M15 3v5h4 M9 12h7 M9 16h7' },
+		{ href: '/admin/rag', label: 'Dokumen RAG', icon: 'M6 3h9l4 4v14H6z M15 3v5h4 M9 12h7 M9 16h7' }
 	];
 
 	$effect(() => {
