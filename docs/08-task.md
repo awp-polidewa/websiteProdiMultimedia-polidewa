@@ -486,17 +486,18 @@ RAG **tidak boleh** dikerjakan sebelum MVP stabil. Prioritas P3 (fase akhir, buk
 
 | ID    | Task                           |
 | ----- | ------------------------------ |
-| T36.1 | Collect approved documents     |
-| T36.2 | Identify knowledge sources     |
-| T36.3 | Clean documents                |
-| T36.4 | Define allowed knowledge scope |
-| T36.5 | Define out-of-scope behavior   |
+| T36.1 | Collect approved documents     | Pending: official PDFs must be provided/selected by the Prodi |
+| T36.2 | Identify knowledge sources     | **DONE 2026-10-04:** only individually selected/approved PDFs; no auto-ingestion; accreditation PDFs require explicit approval |
+| T36.3 | Clean documents                | Pending: inspect/clean the approved source corpus when provided |
+| T36.4 | Define allowed knowledge scope | **DONE 2026-10-04:** information about Prodi TRM from approved PDF sources only; first phase requires text-layer PDFs, no OCR |
+| T36.5 | Define out-of-scope behavior   | **DONE 2026-10-04:** insufficient evidence returns the fixed refusal documented in `05-fitur.md` |
 
 ## 43. Phase 37 — RAG Implementation
 
 | ID    | Task                                            |
 | ----- | ----------------------------------------------- |
-| T37.1 | Implement document management sesuai arsitektur |
+| T37.0 | RAG database schema and migration                | **DONE 2026-10-04:** created `rag_documents` and `rag_chunks`; tested against local MariaDB; existing five MVP tables unchanged |
+| T37.1 | Implement document management sesuai arsitektur | **DONE & VERIFIED 2026-10-04:** migration applied to `web_trm_dev` (MariaDB 10.4.32); 10/10 integration checks passed for authenticated upload, validation, extraction/chunk fields, duplicate 409, list/delete/cascade, and private storage; PDF max 15 MB; no embeddings |
 | T37.2 | Implement document processing                   |
 | T37.3 | Implement retrieval                             |
 | T37.4 | Implement answer generation                     |
@@ -504,7 +505,7 @@ RAG **tidak boleh** dikerjakan sebelum MVP stabil. Prioritas P3 (fase akhir, buk
 | T37.6 | Implement refusal/out-of-scope behavior         |
 | T37.7 | Implement chatbot UI                            |
 
-Dependency: Fase 36 dan MVP deployed. Teknologi RAG (provider model, penyimpanan embedding): **TBD** (`03-arsitektur.md`); tabel `rag_documents` ditambahkan lewat perubahan schema yang disetujui (`04-database.md` bagian 47). Tidak membuat chatbot general purpose; tidak ada vector database sebelum benar-benar perlu.
+Dependency: Fase 36 and MVP deployed. T37.0 database schema and T37.1 PDF ingestion through extraction/chunking are complete. T37.2 adds embeddings; retrieval, chatbot, provider/model selection, retrieval threshold, and production cost controls remain future work. No vector database for the initial version.
 
 ## 44. Phase 38 — RAG Test
 

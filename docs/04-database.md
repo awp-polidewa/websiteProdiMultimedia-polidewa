@@ -4,7 +4,7 @@ Project: Website Program Studi Teknologi Rekayasa Multimedia (TRM), Politeknik D
 
 Status dokumen: DATABASE SOURCE OF TRUTH. Keputusan MVP ditetapkan di dokumen ini; keputusan untuk fase yang ditunda tetap diberi label TBD.
 
-Catatan konteks: dokumen ini telah diverifikasi terhadap `01-prd.md`, `02-desain.md`, `03-arsitektur.md`, `05-fitur.md`, `07-rules.md`, dan `08-task.md`. Keputusan MVP dalam dokumen ini menjadi acuan sebelum pembuatan schema. RAG tetap ditunda sesuai prioritas produk.
+Catatan konteks: schema lima tabel MVP sudah dibuat dan digunakan. Schema RAG, T37.1 ingestion, dan T37.2 embedding tersedia; retrieval dan chatbot masih tahap berikutnya.
 
 ---
 
@@ -75,7 +75,8 @@ Berlaku untuk semua entity utama yang dikelola admin:
 | news                        | ya         | ya         |
 | projects                    | ya         | ya         |
 | accreditation_documents     | ya         | ya         |
-| rag_documents (tahap akhir) | ya         | ya         |
+| rag_documents                | ya        | ya         |
+| rag_chunks                   | tidak     | tidak      |
 
 Tabel `announcements` tidak dibuat pada versi awal sesuai keputusan user (bagian 19).
 
@@ -108,9 +109,10 @@ Hasil evaluasi (detail alasan di bagian 57):
 | accreditation_documents | DIBUAT (daftar PDF/sumber resmi yang dikelola admin) |
 | announcements           | TIDAK DIBUAT (user menetapkan berita mencukupi, bagian 19) |
 | program_profile         | TIDAK DIBUAT (profil statis sesuai keputusan user, bagian 21) |
-| rag_documents           | DITUNDA sampai tahap RAG (bagian 47)                   |
+| rag_documents           | DIBUAT melalui migration RAG (bagian 47)               |
+| rag_chunks              | DIBUAT melalui migration RAG (bagian 47)               |
 
-Tabel final versi awal: `admins`, `lecturers`, `news`, `projects`, `accreditation_documents`.
+Schema MVP yang sudah dibuat: `admins`, `lecturers`, `news`, `projects`, `accreditation_documents`. `rag_documents` dan `rag_chunks` ditambahkan melalui migration terpisah.
 
 ## 11. Admin / Users
 
@@ -494,30 +496,61 @@ Daftar berita dan project memakai pagination `LIMIT`/`OFFSET`, masing-masing 12 
 
 ## 47. RAG Database
 
-RAG adalah tahap akhir dan baru dikerjakan setelah fitur lain selesai. Chatbot hanya menjawab dari dokumen PDF.
+Implementasi RAG bertahap dan schema saat ini mencakup dua tabel berikut. Data dokumen akreditasi yang public tidak otomatis masuk knowledge base; pemilihan setiap PDF sebagai sumber harus eksplisit.
 
-### rag_documents (DITUNDA)
+### `rag_documents`
 
-Purpose: metadata dokumen PDF sumber chatbot.
+Purpose: metadata, private file reference, processing status, and extraction diagnostics for each explicitly approved PDF.
 
-Columns (rancangan awal, belum final):
+| Column | Type | Null | Key | Default | Description |
+|---|---|---|---|---|---|
+| id | BIGINT UNSIGNED | NO | PK | AUTO_INCREMENT | Document ID |
+| title | VARCHAR(200) | NO | | | Admin supplied document title |
+| description | TEXT | YES | | NULL | Optional admin description |
+| original_filename | VARCHAR(255) | NO | | | Display metadata only; never used as stored filename |
+| file_path | VARCHAR(255) | NO | | | Relative path under private `backend/storage/rag/` |
+| file_sha256 | CHAR(64) | NO | INDEX | | SHA-256 of uploaded PDF for integrity/change detection |
+| status | ENUM('pending','processing','ready','failed') | NO | INDEX | 'pending' | Processing state |
+| error_message | TEXT | YES | | NULL | Safe admin-facing reason for failure, including no extractable text |
+| created_at | TIMESTAMP | NO | | CURRENT_TIMESTAMP | Record creation/upload time |
+| updated_at | TIMESTAMP | NO | | CURRENT_TIMESTAMP ON UPDATE | Last metadata/status update |
 
-| Column      | Type            | Null | Key | Default                     | Description                                        |
-| ----------- | --------------- | ---- | --- | --------------------------- | -------------------------------------------------- |
-| id          | BIGINT UNSIGNED | NO   | PK  | AUTO_INCREMENT              | ID dokumen                                         |
-| title       | VARCHAR(200)    | NO   |     |                             | Judul dokumen                                      |
-| description | TEXT            | YES  |     | NULL                        | Keterangan                                         |
-| filename    | VARCHAR(255)    | NO   |     |                             | Nama file asli                                     |
-| file_path   | VARCHAR(255)    | NO   |     |                             | Lokasi file                                        |
-| status      | ENUM('pending','processing','ready','failed') | NO | | 'pending' | Status pemrosesan dokumen                         |
-| created_at  | TIMESTAMP       | NO   |     | CURRENT_TIMESTAMP           | Waktu dibuat (juga berfungsi sebagai waktu upload) |
-| updated_at  | TIMESTAMP       | NO   |     | CURRENT_TIMESTAMP ON UPDATE | Waktu terakhir diubah                              |
+Indexes: primary key `id`; index `status` for admin processing lists; unique index `file_sha256`. Upload dengan SHA-256 yang telah ada ditolak dengan HTTP 409; dokumen lama tidak dipakai otomatis.
 
-Notes: kolom `uploaded_at` sengaja tidak dibuat karena sama dengan `created_at`. Tabel ini tidak masuk schema versi awal. Teknologi RAG (penyimpanan embedding, vector store, dan sejenisnya): **TBD**, ditentukan berdasarkan implementasi nyata. Tidak ada vector database atau tabel embedding pada tahap awal.
+### `rag_chunks`
+
+Purpose: extracted passages and their embeddings, linked to their source PDF.
+
+| Column | Type | Null | Key | Default | Description |
+|---|---|---|---|---|---|
+| id | BIGINT UNSIGNED | NO | PK | AUTO_INCREMENT | Chunk ID |
+| document_id | BIGINT UNSIGNED | NO | FK, INDEX | | Parent document |
+| chunk_text | MEDIUMTEXT | NO | | | Extracted paragraph chunk |
+| page_number | INT UNSIGNED | YES | | NULL | Source PDF page when available |
+| chunk_order | INT UNSIGNED | NO | | | Stable order within the document |
+| embedding | JSON | YES | NULL | | Numeric embedding vector; NULL sampai tahap embedding T37.2 selesai |
+| embedding_model | VARCHAR(150) | YES | NULL | | Model identifier; NULL sampai tahap embedding T37.2 selesai |
+
+Relationship: one `rag_documents` row has many `rag_chunks`; `rag_chunks.document_id` references `rag_documents.id` with `ON DELETE CASCADE`. This FK is limited to the RAG document/chunk relationship; the five existing MVP tables remain unrelated. Add a composite index on `(document_id, chunk_order)` for ordered chunk retrieval. No vector database is planned for the initial corpus; cosine similarity is computed over stored vectors in the backend. Revisit storage only if measured corpus size or latency requires it.
+
+### Processing and lifecycle
+
+Supported input in the first phase is PDF up to 15 MB with a text layer. OCR is not included. T37.1 ends after extraction and chunking; T37.2 adds embeddings. Pipeline:
+
+```text
+PDF (≤ 15 MB) → SHA-256 → text extraction → paragraph chunking
+    → save chunks → Gemini `gemini-embedding-2` → save vector/model → `ready`
+```
+
+Chunk target is 1,600 characters with 200 characters of overlap. A PDF whose SHA-256 already exists is rejected with HTTP 409; the existing document is never selected or reused automatically. Extraction or embedding failures set the document status to `failed` with a safe error message. Embedding uses backend-only `GEMINI_API_KEY` and `EMBEDDING_MODEL=gemini-embedding-2`; vectors are validated at 3,072 finite numeric dimensions. Chunks already embedded are skipped.
+
+An image-only/scanned PDF or failed text extraction sets the document status to `failed`; the admin receives a clear message that the PDF has no processable text. Reprocessing after replacing a PDF must replace its old chunks so no stale text remains. Deleting a document removes its chunks through the FK cascade and its private file through the application. Exact transaction/file cleanup recovery behavior is an implementation detail to verify during the RAG milestone.
+
+The two-table schema and migrations are implemented. T37.1 provides private PDF upload/list/delete, SHA-256 duplicate rejection, text extraction, and chunk persistence. T37.2 generates and stores Gemini embeddings per chunk; `embedding` and `embedding_model` remain nullable for incomplete/failed work. No vector database is used. The status ENUM is additionally guarded by a CHECK constraint because local MariaDB may otherwise coerce invalid ENUM input when strict SQL mode is off.
 
 ## 48. File Storage
 
-Database tidak menyimpan binary file. Untuk gambar/PDF, database hanya menyimpan path relatif dan metadata; file berada pada filesystem persisten di `backend/uploads/` dengan nama opaque buatan server. File publik disajikan melalui route terkontrol; dokumen RAG kelak disimpan privat di luar route publik. Production harus memasang volume persisten dan memasukkan uploads ke backup. Provider hosting/storage production tetap ditentukan saat deployment.
+Database tidak menyimpan binary file. Media publik yang sudah diimplementasikan disimpan di `backend/storage/` pada folder jenis media dan disajikan melalui route terkontrol `/media/:type/:filename`. File RAG nantinya disimpan terpisah secara private di `backend/storage/rag/` dan tidak boleh disajikan melalui route media publik. Database hanya menyimpan path relatif dan metadata. Production harus menyediakan filesystem persisten dan backup; provider hosting/storage production tetap TBD.
 
 ## 49. Data Validation
 
@@ -580,7 +613,7 @@ Jangan menghapus database sebagai solusi.
 
 ## 55. Documentation Standard
 
-Setiap tabel di dokumen ini memakai format: Purpose, Columns (tabel), Indexes, Relationships, CRUD, Notes. Tabel yang terdokumentasi: `admins` (bagian 11), `lecturers` (13), `news` (15), `projects` (17), `accreditation_documents` (20), dan `rag_documents` (47, ditunda). Semua tabel baru wajib mengikuti format yang sama.
+Setiap tabel di dokumen ini memakai format: Purpose, Columns (tabel), Indexes, Relationships, CRUD, Notes. Tabel yang terdokumentasi: `admins` (bagian 11), `lecturers` (13), `news` (15), `projects` (17), `accreditation_documents` (20), `rag_documents`, dan `rag_chunks` (47). Semua tabel baru wajib mengikuti format yang sama.
 
 ## 56. Database Schema Diagram
 
@@ -652,7 +685,8 @@ Evaluasi tiap tabel (fitur, dikelola admin, dibutuhkan public, perlu di DB, bisa
 | accreditation_documents | Daftar PDF/sumber akreditasi            | ya    | ya             | Dibuat                         |
 | announcements           | Tidak ada fitur terpisah yang diketahui | -     | -              | Tidak dibuat; konfirmasi user |
 | program_profile         | Konten statis                           | -     | ya             | Tidak dibuat; konfirmasi user |
-| rag_documents           | Chatbot RAG (tahap akhir)               | ya    | tidak langsung | Ditunda                       |
+| rag_documents           | Metadata/status dokumen RAG             | ya    | tidak langsung | Dibuat melalui migration      |
+| rag_chunks              | Chunk teks dan embedding RAG            | ya    | tidak langsung | Dibuat melalui migration      |
 
 ## 58. Anti Over-Engineering Check
 
@@ -760,15 +794,14 @@ FORM ADMIN → API → CONTROLLER → DATABASE QUERY → MYSQL → DATA → API 
 
 ## Lampiran: Status TBD
 
-Keputusan yang memengaruhi schema MVP telah ditetapkan di dokumen ini. Schema MySQL belum dibuat.
+Schema lima tabel MVP telah dibuat. Migration RAG menambahkan dua tabel; T37.1 PDF ingestion dan T37.2 Gemini embedding sudah diimplementasikan. Retrieval, API chatbot, dan UI chatbot belum diimplementasikan.
 
 TBD yang tersisa dan tidak mengubah kolom inti:
 
 - Provider hosting/storage production dan konfigurasi volume persisten (bagian 48).
-- Teknologi/model/vector store RAG; seluruh tabel dan indeks RAG ditunda sampai fase RAG (bagian 47).
-- Tipe/ukuran maksimum upload sesuai implementasi UI/backend (spesifikasi fitur, bukan bentuk schema inti).
+- Provider/model LLM, retrieval threshold, serta batas biaya/penggunaan RAG.
 
-**Status schema awal:** keputusan desain data/API disetujui pada 2026-10-03; schema reproducible dibuat di `backend/database/schema.sql` dan diuji pada database lokal XAMPP MariaDB 10.4.32. Target MySQL 8.4 menggunakan collation portabel yang sama.
+**Status schema awal:** keputusan desain data/API disetujui pada 2026-10-03; schema reproducible MVP dan migration awal RAG ada di `backend/database/schema.sql` dan `backend/database/migrations/20261004_create_rag_tables.sql`, yang diuji pada database lokal XAMPP MariaDB 10.4.32. Migration lanjutan `20261004_make_rag_embeddings_nullable.sql` menyesuaikan schema untuk T37.1 dan belum diterapkan ke database lokal pada task ini. Target MySQL 8.4 menggunakan collation portabel yang sama.
 
 ## Lampiran: Log Keputusan User (Selesai)
 

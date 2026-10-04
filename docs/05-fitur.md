@@ -218,18 +218,34 @@ Chatbot tidak boleh menjadi tutor programming umum, chatbot general purpose, mes
 
 ## 21. Batasan RAG
 
-- Chatbot hanya menjawab dari knowledge base (dokumen yang disediakan).
-- Jika pertanyaan di luar knowledge base: menyatakan informasi tidak tersedia, tidak mengarang, dan mengarahkan pengguna ke informasi resmi prodi bila perlu.
+- Chatbot hanya menjawab dari PDF yang secara eksplisit dipilih/disetujui sebagai sumber knowledge Prodi TRM. Tidak ada pemindaian atau pemasukan otomatis semua file.
+- Dokumen akreditasi yang tampil public bukan sumber RAG secara otomatis; setiap dokumen akreditasi harus dipilih/disetujui secara eksplisit.
+- Tahap pertama mendukung PDF yang memiliki text layer. OCR untuk PDF scan/image-only tidak termasuk. Jika ekstraksi teks gagal, dokumen berstatus `failed` dan admin diberi tahu bahwa tidak ada teks yang dapat diproses.
+- Jika retrieval tidak memberikan bukti yang cukup, jawaban wajib persis: "Informasi tersebut tidak tersedia dalam sumber pengetahuan Program Studi Teknologi Rekayasa Multimedia."
+- Jawaban yang didukung bukti menyertakan sumber dokumen dan nomor halaman jika tersedia. Chatbot bukan general-purpose dan tidak menggunakan pengetahuan umum untuk menjawab di luar knowledge base.
 - Contoh: "Ajari saya Python." → tidak dijawab sebagai tutor Python.
-- Batas panjang pertanyaan/respons dan pembatasan penggunaan (untuk hemat biaya API): **TBD**.
+- Rate limit, panjang maksimum pertanyaan, panjang maksimum jawaban, dan spend limit harus ditentukan sebelum production: **TBD**.
 
 ## 22. Knowledge Base RAG
 
-Sumber yang dapat dipakai: dokumen resmi prodi, dokumen akademik yang disetujui, dokumen akreditasi, dokumen informasi prodi. Dokumen tidak dimasukkan otomatis tanpa proses yang ditentukan (admin mengunggah dokumen secara sengaja). Detail implementasi (penyedia model, penyimpanan embedding): **TBD**, mengikuti `03-arsitektur.md`.
+Hanya PDF yang secara eksplisit dipilih/disetujui sebagai sumber knowledge Prodi TRM yang boleh diproses. Dokumen dapat berupa dokumen resmi prodi atau dokumen akademik yang disetujui; dokumen akreditasi public tidak otomatis disertakan dan perlu persetujuan eksplisit satu per satu. Tidak ada auto-ingestion. File sumber disimpan private di `backend/storage/rag/`, di luar route `/media/:type/:filename`.
+
+Pipeline: PDF maksimal 15 MB → SHA-256 → ekstraksi teks → chunking per paragraf (target 1.600 karakter, overlap 200 karakter) → embedding Gemini `gemini-embedding-2` berdimensi 3.072 → simpan vector dan model pada chunk → status `ready` setelah semua chunk berhasil. Chunk yang sudah memiliki embedding dilewati. API key hanya berada di backend environment. SHA-256 duplikat ditolak dengan HTTP 409 dan dokumen lama tidak digunakan otomatis. PDF scan/image-only tanpa text layer tidak diproses dengan OCR; kegagalan ekstraksi atau embedding menghasilkan status `failed` dan pesan aman untuk admin.
+
+Retrieval (milestone berikutnya): pertanyaan pengguna → embedding pertanyaan → cosine similarity terhadap embedding chunk → pilih chunk relevan → periksa threshold kecukupan bukti → panggil LLM hanya jika bukti cukup → jawaban beserta dokumen sumber dan nomor halaman jika ada. Nilai threshold dan provider/model LLM masih TBD dan harus diuji sebelum rilis.
 
 ## 23. Admin RAG Document
 
-Pada fase RAG, admin dapat: upload dokumen (PDF), melihat daftar, dan menghapus. Tabel `rag_documents` (ditunda, `04-database.md` bagian 47). Tidak ada document management system kompleks.
+Admin dapat mengunggah PDF yang telah disetujui, melihat daftar/status/pesan gagal, dan menghapus dokumen. Semua endpoint admin dilindungi `requireAdmin`. Tabel `rag_documents` dan `rag_chunks` dengan relasi satu-ke-banyak tersedia lewat migration database.
+
+API:
+
+- `POST /api/chatbot/ask` untuk pertanyaan publik.
+- `GET /api/admin/rag/documents` untuk daftar dokumen/status (tersedia).
+- `POST /api/admin/rag/documents` untuk mengirim PDF sumber yang disetujui (tersedia).
+- `DELETE /api/admin/rag/documents/:id` untuk menghapus dokumen dan chunk terkait (tersedia).
+
+`GET`, `POST`, dan `DELETE` admin document endpoints di atas diimplementasikan pada T37.1. Upload memakai multipart field `file`, `title`, dan `description`; file disimpan private di `backend/storage/rag/`. Batas upload 15 MB. T37.2 membuat embedding Gemini selama ingest. Retrieval, chatbot endpoint, dan UI chatbot belum diimplementasikan.
 
 ## 24. Search
 

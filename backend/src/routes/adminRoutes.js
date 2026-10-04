@@ -39,6 +39,12 @@ import {
 	validateMediaType
 } from '../middleware/mediaUpload.js';
 import { uploadMedia } from '../controllers/adminMediaController.js';
+import {
+	deleteRagDocument,
+	listRagDocuments,
+	uploadRagDocument
+} from '../controllers/adminRagDocumentController.js';
+import { receiveRagDocument } from '../middleware/ragDocumentUpload.js';
 
 const router = Router();
 
@@ -46,6 +52,10 @@ router.post('/login', loginAdmin);
 router.post('/logout', logoutAdmin);
 router.get('/session', requireAdmin, getAdminSession);
 router.post('/media/upload', requireAdmin, validateMediaType, receiveMedia, uploadMedia, handleMediaUploadError);
+router.route('/rag/documents').all(requireAdmin)
+	.get(listRagDocuments)
+	.post(receiveRagDocument, uploadRagDocument);
+router.delete('/rag/documents/:id', requireAdmin, deleteRagDocument);
 router.route('/news').all(requireAdmin).get(getAdminNews).post(createNews);
 router
 	.route('/news/:id')

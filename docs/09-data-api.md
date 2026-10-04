@@ -21,7 +21,7 @@ Tipe dan definisi kolom lengkap tetap di tabel sumber kebenaran `04-database.md`
 
 | Entity/tabel | Field dan tipe kanonis (`04-database.md`) | Kunci/relasi | Status public |
 |---|---|---|---|
-| `admins` | `id BIGINT UNSIGNED`; `name VARCHAR(100)`; `email VARCHAR(150) NULL`; `nidn VARCHAR(20)`; `username VARCHAR(50)`; `password_hash VARCHAR(255)`; `created_at`, `updated_at TIMESTAMP` | PK `id`; UNIQUE `email`, `nidn`, `username`; tanpa FK | Tidak pernah public; tabel disiapkan untuk dashboard/login yang belum masuk tahap ini |
+| `admins` | `id BIGINT UNSIGNED`; `name VARCHAR(100)`; `email VARCHAR(150) NULL`; `nidn VARCHAR(20)`; `username VARCHAR(50)`; `password_hash VARCHAR(255)`; `created_at`, `updated_at TIMESTAMP` | PK `id`; UNIQUE `email`, `nidn`, `username`; tanpa FK | Tidak pernah public; dipakai oleh login/session admin |
 | `lecturers` | `id BIGINT UNSIGNED`; `name VARCHAR(150)`; `title VARCHAR(150)`; `concentration VARCHAR(50) NULL`; `photo_path VARCHAR(255) NULL`; `bio TEXT NULL`; `email VARCHAR(150) NULL`; `display_order INT UNSIGNED`; timestamps | PK `id`; INDEX `display_order`; tanpa FK | Semua row dosen yang dikelola dianggap dapat dibaca public. Nilai concentration: `Web Design`, `Desain Grafis`, `Videografi`, atau NULL untuk Kaprodi. `email` selalu dikecualikan dari response |
 | `news` | `id BIGINT UNSIGNED`; `title VARCHAR(200)`; `slug VARCHAR(220)`; `excerpt VARCHAR(500) NULL`; `content MEDIUMTEXT`; `thumbnail_path VARCHAR(255) NULL`; `status ENUM('draft','published')`; `published_at DATETIME NULL`; timestamps | PK `id`; UNIQUE `slug`; INDEX `(status, published_at)`; tanpa FK | Hanya `status='published'` dengan `published_at` terisi yang dikembalikan public |
 | `projects` | `id BIGINT UNSIGNED`; `title VARCHAR(200)`; `slug VARCHAR(220)`; `description TEXT NULL`; `thumbnail_path VARCHAR(255)`; `category VARCHAR(50)`; `student_name VARCHAR(150) NULL`; `project_year SMALLINT UNSIGNED NULL`; `external_url VARCHAR(500) NULL`; timestamps | PK `id`; UNIQUE `slug`; INDEX `category`; INDEX `(created_at, id)`; tanpa FK | Semua project langsung public setelah dibuat; tidak ada kolom status |
@@ -224,7 +224,7 @@ URL media pada response JSON menunjuk endpoint terkontrol (`photoUrl` → route 
 | `GET /api/projects/:slug/thumbnail` | slug valid; hanya project ada dan thumbnail tersedia | Binary thumbnail |
 | `GET /api/accreditation-documents/:id/file?download=0\|1` | id positif; `download` opsional boolean, default `0`; hanya dokumen berstatus published | PDF binary; `inline` untuk 0, `attachment` untuk 1 |
 
-Semua endpoint media mengembalikan 400 untuk identifier/query tidak valid, 404 bila resource tidak eligible/tidak punya file, atau 500 dengan pesan umum untuk kegagalan storage. Response error memakai bagian 4.2. MIME allowlist, ukuran maksimum, dan aturan nama file masih mengikuti keputusan upload/storage TBD pada `05-fitur.md` bagian 28 dan `03-arsitektur.md`; endpoint media tidak boleh dianggap implementable sebelum keputusan itu disetujui. Tidak ada upload method yang ditentukan/diimplementasikan di milestone ini.
+Endpoint media yang tersedia mengembalikan 400 untuk identifier/query tidak valid, 404 bila resource tidak eligible/tidak punya file, atau 500 dengan pesan umum untuk kegagalan storage. Response error memakai bagian 4.2. Berkas public berasal dari local media storage dengan route terkontrol; upload admin memakai autentikasi dan validasi server. RAG private storage tidak menggunakan route ini.
 
 ## 7. TBD dan blocker
 
@@ -237,20 +237,30 @@ Semua endpoint media mengembalikan 400 untuk identifier/query tidak valid, 404 b
 
 ### 7.2 TBD yang menunda implementasi terkait
 
-1. **Storage/provider dan aturan file:** keputusan user menetapkan path dan metadata saja pada tahap database/API. Provider, MIME, batas ukuran, dan filename tetap TBD; upload/storage provider tidak masuk scope sekarang. Binary media routes menunggu keputusan tersebut.
+1. **Production storage/hosting:** media saat ini memakai local filesystem; persistent production volume, backup, dan hosting/provider masih TBD. Kebijakan PDF RAG private ditetapkan pada dokumen fitur/arsitektur.
 
 ### 7.3 TBD yang tidak menghalangi desain API/schema awal
 
 - Palette/navigasi frontend, isi resmi profil, serta data resmi dosen, berita, karya, dan akreditasi: memengaruhi konten/presentasi, bukan bentuk field yang sudah ditetapkan.
-- FAQ, pencarian, RAG, deployment/provider, dan upload lanjutan berada di luar kontrak read API tahap ini.
-- Role admin tidak ada pada MVP; tabel admin yang sudah diputuskan cukup untuk satu jenis admin, tetapi auth tetap belum dikerjakan.
+- FAQ, pencarian, detail write API, dan deployment/provider berada di luar kontrak public-read ini. RAG direncanakan terpisah sebagaimana diringkas pada bagian 8.
+- Tidak ada role kompleks; semua akun `admins` menggunakan jenis akses admin yang sama.
 
 ## 8. Kecukupan dashboard admin berikutnya
 
 Tabel yang sudah diputuskan cukup untuk operasi konten dashboard sederhana: dosen (termasuk urutan), berita (draft/published), karya (langsung tayang), dan metadata PDF akreditasi. `admins` cukup merepresentasikan satu jenis admin. Profil memang statis dan tidak dapat diedit lewat dashboard sesuai keputusan user. Tidak perlu author relation, category table, media table, audit table, soft-delete column, atau role table untuk scope ini.
 
-Implementasi endpoint admin, login/session, upload, dan schema/migration bukan bagian dari desain public-read ini. Kontrak write harus mengikuti field/validasi yang sama di `04-database.md` dan `05-fitur.md` ketika milestone tersebut dimulai dan desain ini disetujui.
+Public read contract ini tidak mendefinisikan detail API RAG. Backend admin login/session, seluruh CRUD konten, public API, dan media upload telah diimplementasikan. Migration RAG dan endpoint manajemen dokumen T37.1 tersedia; chatbot API belum dibuat.
+
+API RAG:
+
+- `POST /api/chatbot/ask` untuk pertanyaan publik; hanya menjawab dari PDF yang dipilih/disetujui secara eksplisit.
+- `GET /api/admin/rag/documents`, `POST /api/admin/rag/documents`, dan `DELETE /api/admin/rag/documents/:id`; semua route admin wajib memakai `requireAdmin`.
+- Dokumen RAG private di `backend/storage/rag/`, tidak dilayani melalui `/media/:type/:filename`.
+
+Admin document endpoints sudah aktif; upload multipart memakai field `file`, `title`, dan optional `description`. PDF maksimal 15 MB; SHA-256 duplikat ditolak dengan HTTP 409. Ingestion mengekstrak teks, menyimpan chunk target 1600 karakter dengan overlap 200 karakter, lalu membuat embedding Gemini `gemini-embedding-2`. Dokumen berstatus `ready` hanya jika seluruh chunk berhasil di-embed; kegagalan menyimpan status `failed` dengan pesan aman.
+
+Chatbot endpoint belum tersedia. Chunk yang belum berhasil di-embed tetap memiliki kolom embedding bernilai NULL.
 
 ## 9. Gate implementasi
 
-Desain data/API disetujui user pada 2026-10-03. Schema awal dan public read API telah dijalankan serta diuji terhadap database lokal XAMPP MariaDB 10.4.32. Belum ada migration framework, CRUD admin, authentication, upload, atau RAG.
+Desain data/API disetujui user pada 2026-10-03. Schema lima tabel MVP dan public read API telah dijalankan serta diuji terhadap database lokal XAMPP MariaDB 10.4.32. Migration framework belum digunakan. Admin CRUD, authentication, media upload, serta endpoint ingestion T37.1 tersedia.

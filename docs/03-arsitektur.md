@@ -136,7 +136,12 @@ web-trm/
 │ │ ├── services/
 │ │ ├── utils/
 │ │ └── app.js
-│ ├── uploads/
+│ ├── storage/
+│ │ ├── lecturers/
+│ │ ├── news/
+│ │ ├── projects/
+│ │ ├── accreditation/
+│ │ └── rag/              # private; tidak disajikan melalui route media
 │ ├── package.json
 │ └── ...
 │
@@ -364,13 +369,14 @@ Database tidak boleh diakses langsung oleh frontend.
 L. FILE UPLOAD
 ==================================================
 
-Website membutuhkan kemungkinan upload:
+Website menggunakan upload media lokal yang sudah berjalan untuk:
 
 - gambar project;
 - foto dosen;
 - dokumen accreditation;
-- dokumen yang diperlukan untuk RAG;
 - media lain sesuai fitur.
+
+Dokumen RAG (saat fitur tersebut dibuat) disimpan terpisah secara private pada `backend/storage/rag/`; folder tersebut tidak boleh berada di bawah route `/media/:type/:filename`.
 
 Upload dilakukan melalui backend.
 
@@ -700,9 +706,7 @@ Health check dapat digunakan saat deployment dan troubleshooting.
 Y. RAG ARCHITECTURE
 ==================================================
 
-RAG adalah fitur tahap akhir.
-
-Jangan membangun RAG sebelum sistem dasar selesai.
+RAG masih bertahap: schema, T37.1 PDF ingestion, dan T37.2 Gemini embedding generation telah dibuat. Retrieval dan chatbot belum diimplementasikan.
 
 Urutan:
 
@@ -720,16 +724,22 @@ Testing
 ↓
 RAG
 
-RAG hanya boleh menjawab berdasarkan knowledge base/dokumen yang telah disetujui.
+Hanya PDF yang secara eksplisit dipilih/disetujui boleh menjadi knowledge source; tidak ada auto-ingestion. Public accreditation PDF tidak otomatis menjadi sumber knowledge. Tahap pertama menerima PDF dengan text layer saja, tanpa OCR; ekstraksi yang gagal menetapkan status `failed` dan memberi admin informasi bahwa teks yang dapat diproses tidak ditemukan. Dokumen berada di private `backend/storage/rag/`, tidak pada public media route.
+
+Pipeline: PDF maksimal 15 MB → SHA-256 → text extraction → paragraph chunking dengan target 1600 karakter dan overlap 200 karakter → simpan chunks → buat embedding memakai Gemini `gemini-embedding-2` → simpan vector dan model pada chunk → status dokumen `ready` jika seluruh embedding berhasil, atau `failed` dengan pesan aman. Chunk dengan embedding yang sudah ada dilewati. SHA-256 yang sudah ada ditolak dengan HTTP 409 dan dokumen lama tidak digunakan otomatis.
+
+Retrieval embeds the question, scores stored vectors by cosine similarity, checks a relevance threshold, and calls the LLM only when the evidence is sufficient. Supported answers include source document and page where available. `GET /api/admin/rag/documents`, `POST /api/admin/rag/documents`, and `DELETE /api/admin/rag/documents/:id` are implemented and use `requireAdmin`. `POST /api/chatbot/ask` is planned and not implemented.
 
 Jika pertanyaan berada di luar knowledge base:
 
 - jangan mengarang;
 - jangan menggunakan pengetahuan umum secara bebas;
-- berikan respons bahwa informasi tersebut tidak tersedia dalam sumber yang digunakan;
-- arahkan user ke sumber resmi jika memang tersedia.
+- jawab persis: "Informasi tersebut tidak tersedia dalam sumber pengetahuan Program Studi Teknologi Rekayasa Multimedia.";
+- jangan menggunakan pengetahuan umum untuk mengisi bukti yang tidak ditemukan.
 
 RAG bukan chatbot general-purpose.
+
+Embedding provider/model are fixed to Gemini API and `gemini-embedding-2`; backend environment names are `GEMINI_API_KEY` and `EMBEDDING_MODEL`. The API key must never reach frontend code, responses, or logs. LLM provider/model, rate limit, maximum question length, maximum answer length, and spend limit remain TBD and are required before production.
 
 Contoh:
 

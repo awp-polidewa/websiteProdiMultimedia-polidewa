@@ -41,7 +41,10 @@ export function receiveMedia(request, response, next) {
 			return callback(null, true);
 		}
 	}).single('file');
-	return middleware(request, response, next);
+	return middleware(request, response, (error) => {
+		if (error) return handleMediaUploadError(error, request, response, next);
+		return next();
+	});
 }
 
 export function handleMediaUploadError(error, _request, response, next) {
