@@ -1,4 +1,6 @@
-const apiBase = (import.meta.env.PUBLIC_API_URL || 'http://localhost:3000').replace(/\/+$/, '');
+// Keep local development pointed at the standalone Express server. In production,
+// route browser traffic through the same-origin SvelteKit proxy.
+const apiBase = (import.meta.env.DEV ? (import.meta.env.PUBLIC_API_URL || 'http://localhost:3000') : '').replace(/\/+$/, '');
 
 /** @typedef {{ success?: boolean, data?: any, meta?: Record<string, number | undefined>, message?: string, errors?: Record<string, string> }} ApiResponse */
 
