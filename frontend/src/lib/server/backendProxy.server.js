@@ -105,7 +105,12 @@ export async function proxyBackendRequest(request, backendPath) {
 		});
 	} catch (error) {
 		if (request.signal.aborted) throw error;
-		console.error('Backend proxy request failed:', error instanceof Error ? error.name : 'UnknownError');
+		const message = error instanceof Error ? error.message : '';
+		const cause = error instanceof Error && error.cause instanceof Error ? error.cause.message : '';
+		if (/BODY_SIZE_LIMIT|request body size exceeded|body exceeded|exceeds limit of/i.test(`${message} ${cause}`)) {
+			return Response.json({ success: false, status: 413, message: 'Ukuran request melebihi batas server.' }, { status: 413 });
+		}
+		console.error('Backend proxy request failed:', error instanceof Error ? error.name : 'UnknownError', cause || message || 'No error detail');
 		return Response.json({ success: false, status: 502, message: 'Backend API belum dapat dijangkau.' }, { status: 502 });
 	}
 }
