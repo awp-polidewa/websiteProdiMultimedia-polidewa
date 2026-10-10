@@ -36,7 +36,9 @@
 {#if isAdminRoute}
 	{@render children()}
 {:else}
-	<div class="site-shell">
+	<div class="home-background-page" class:active={isHomePage}>
+		<div class="site-shell" class:home-shell={isHomePage}>
+		<div class:home-content-shell={isHomePage}>
 		<a class="skip-link" href="#main-content">Lewati ke konten utama</a>
 		<header class="site-header" class:scrolled={isHomePage && hasScrolled}>
 			<a class="wordmark" href="/" aria-label="TRM — Beranda"><img src={politeknikDewantaraLogo} alt="" /> <span>POLITEKNIK DEWANTARA</span></a>
@@ -67,11 +69,16 @@
 		</footer>
 		<div class="footer-bottom"><span>© Politeknik Dewantara</span><span>Program Studi Teknologi Rekayasa Multimedia</span></div>
 		<Chatbot />
+		</div>
+	</div>
 	</div>
 {/if}
 
 <style>
 	.site-shell { width: min(calc(100% - 2 * var(--page-gutter)), var(--page-max)); margin: 0 auto; }
+	.home-background-page.active { position: relative; display: flow-root; isolation: isolate; min-height: 100vh; overflow: hidden; background: #fff; }
+	.site-shell.home-shell { position: relative; z-index: 1; }
+	.site-shell.home-shell > .home-content-shell { position: relative; z-index: 1; }
 	.skip-link { position: absolute; z-index: 10; top: .75rem; left: var(--page-gutter); padding: .7rem 1rem; background: Canvas; color: CanvasText; transform: translateY(-180%); transition: transform var(--motion-fast) var(--ease-out); }
 	.skip-link:focus { transform: translateY(0); }
 	.site-header { position: sticky; z-index: 20; top: 19px; width: min(100%, 1183px); min-height: 97px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; gap: 2rem; margin: 19px auto 0; padding: 9px 50px; border: 1px solid transparent; border-radius: 49px; background: transparent; box-shadow: none; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); transition: background-color 250ms ease, box-shadow 250ms ease, border-color 250ms ease; }

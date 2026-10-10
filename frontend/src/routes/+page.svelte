@@ -5,15 +5,14 @@
 
 <script>
 	import OvalDotsBackground from '../lib/OvalDotsBackground.svelte';
-
 	const heroLineOne = Array.from('Teknologi Rekayasa');
 	const heroLineTwo = Array.from('Multimedia');
 </script>
 
 <div class="home-page">
-<OvalDotsBackground />
 <div class="home-content">
 <section class="hero" aria-labelledby="home-title">
+	<OvalDotsBackground />
 	<div class="hero-label"><p>Politeknik Dewantara</p><span>Program Studi</span></div>
 	<h1 id="home-title">
 		<span class="visually-hidden">Teknologi Rekayasa Multimedia</span>
@@ -68,9 +67,10 @@
 </div>
 
 <style>
-	.home-page { position: relative; isolation: isolate; text-align: center; background: transparent; }
-	.home-content { position: relative; z-index: 1; }
+	.home-page { position: relative; min-height: 100vh; text-align: center; background: transparent; }
+	.home-content { position: relative; z-index: 1; width: min(calc(100% - 2 * var(--page-gutter)), var(--page-max)); margin: 0 auto; }
 	.hero { position: relative; min-height: min(680px, 78vh); display: flex; align-items: center; flex-direction: column; justify-content: center; padding: clamp(4rem, 8vw, 7rem) 0; }
+	.hero > :not(:global(.oval-dots-background)) { position: relative; z-index: 1; }
 	.hero-label { display: flex; align-items: baseline; justify-content: center; gap: 1rem; }
 	.hero-label p { margin: 0; font: 500 25px/1.35 'Inter', sans-serif; }
 	.hero-label span { font: 400 18px/1.4 'Inter', sans-serif; opacity: .72; }
