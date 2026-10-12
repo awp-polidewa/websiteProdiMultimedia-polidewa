@@ -4,7 +4,7 @@
 	import politeknikDewantaraLogo from '../../assets/politeknik-dewantara.png';
 
 	const publicLinks = [
-		{ href: '/profil', label: 'Profil' },
+		{ href: '/profil', label: 'profil' },
 		{ href: '/struktur', label: 'Struktur' },
 		{ href: '/berita', label: 'Berita' },
 		{ href: '/karya', label: 'Karya' },
@@ -20,7 +20,7 @@
 			hasScrolled = window.scrollY > 50;
 		};
 		const updateNavbarHeight = () => {
-			if (headerElement) navbarHeight = Math.ceil(headerElement.getBoundingClientRect().height);
+			if (headerElement) navbarHeight = Math.ceil(headerElement.getBoundingClientRect().height + 19);
 		};
 
 		updateScrollState();
@@ -54,29 +54,30 @@
 </header>
 
 <style>
-	.navbar-spacer { height: 75px; }
-	.site-header { position: fixed; z-index: 20; inset: 0 0 auto; width: 100%; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; gap: 2rem; padding: 15px 20px; border-bottom: 1px solid rgb(49 49 49 / 6%); background: rgb(255 255 255 / 84%); color: #313131; box-shadow: none; -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); transition: box-shadow 250ms ease; }
-	.site-header.scrolled { box-shadow: 0px 4px 6.4px rgba(0, 0, 0, 0.10); }
+	.navbar-spacer { height: 73px; }
+	.site-header { position: fixed; z-index: 20; top: 19px; left: 50%; width: min(calc(100% - 40px), 1079.38px); box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; border: 0; border-radius: 200px; background: rgb(255 255 255 / 72%); color: #313131; box-shadow: none; -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); transform: translateX(-50%); transition: box-shadow 250ms ease; }
+	.site-header.scrolled { box-shadow: 0px 4px 6.4px rgba(0, 0, 0, 0.25); }
 	@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-		.site-header { background: #fff; }
+		.site-header { background: rgb(255 255 255 / 96%); }
 	}
-	.wordmark { display: inline-flex; max-width: 100%; flex: 0 1 auto; align-items: center; gap: .6rem; color: #313131; text-decoration: none; }
+	.wordmark { display: inline-flex; max-width: 100%; flex: 0 1 auto; align-items: center; gap: 10.377px; color: #313131; text-decoration: none; }
 	.wordmark img { display: block; width: 34px; height: 34px; flex: 0 0 34px; object-fit: contain; }
-	.program-name { min-width: 0; font: 500 18px/1.2 'Inter', sans-serif; letter-spacing: -.025em; }
+	.program-name { min-width: 0; font: 500 18px/normal 'Inter', sans-serif; }
 	.site-header nav { flex: 0 1 auto; }
-	.site-header nav ul { display: flex; flex-wrap: wrap; justify-content: end; gap: .25rem clamp(1.25rem, 2.5vw, 2.25rem); margin: 0; padding: 0; list-style: none; }
-	.site-header nav a { display: inline-flex; align-items: center; min-height: 44px; color: #313131; font: 400 16px/1.4 'Inter', sans-serif; text-decoration: none; text-underline-offset: .4em; opacity: .82; transition: opacity var(--motion-fast) var(--ease-out); }
+	.site-header nav ul { display: flex; flex-wrap: wrap; justify-content: end; gap: .25rem 40px; margin: 0; padding: 0; list-style: none; }
+	.site-header nav a { display: inline-flex; align-items: center; min-height: 34px; color: #313131; font: 400 16px/normal 'Inter', sans-serif; text-decoration: none; text-underline-offset: .4em; opacity: .82; transition: opacity var(--motion-fast) var(--ease-out); }
 	.site-header nav a:hover, .site-header nav a:focus-visible, .site-header nav a[aria-current='page'] { opacity: 1; text-decoration: underline; }
 	.skip-link { position: absolute; z-index: 100; top: .75rem; left: var(--page-gutter); padding: .7rem 1rem; background: #fff; color: #313131; transform: translateY(-180%); transition: transform var(--motion-fast) var(--ease-out); }
 	.skip-link:focus { transform: translateY(0); }
 	@media (max-width: 900px) {
-		.navbar-spacer { height: 117px; }
+		.navbar-spacer { height: 136px; }
 		.site-header { align-items: flex-start; flex-direction: column; justify-content: center; gap: .5rem; }
 		.site-header nav { width: 100%; }
 		.site-header nav ul { justify-content: flex-start; gap: .1rem clamp(.75rem, 3vw, 1.25rem); }
+		.site-header nav a { min-height: 44px; }
 	}
 	@media (max-width: 420px) {
-		.navbar-spacer { height: 126px; }
+		.navbar-spacer { height: 145px; }
 		.site-header nav ul { gap: .1rem clamp(.5rem, 2.5vw, .75rem); }
 	}
 </style>
