@@ -17,10 +17,10 @@
 {#if isAdminRoute}
 	{@render children()}
 {:else}
+	<Navbar />
 	<div class="home-background-page" class:active={isHomePage}>
 		<div class="site-shell" class:home-shell={isHomePage}>
 		<div class:home-content-shell={isHomePage}>
-		<Navbar />
 		<main id="main-content" tabindex="-1">
 			{@render children()}
 		</main>
