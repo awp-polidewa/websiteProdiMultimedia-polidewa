@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="790" viewBox="0 0 1200 790" role="img" aria-labelledby="title desc">
+  <title id="title">ERD database web_trm_dev</title>
+  <desc id="desc">Diagram tujuh tabel. rag_chunks.document_id memiliki foreign key ke rag_documents.id. Tabel lainnya berdiri sendiri.</desc>
+  <defs>
+    <style>
+      text { font-family: "Segoe UI", Arial, sans-serif; fill: #172033; }
+      .title { font-size: 28px; font-weight: 700; }
+      .subtitle { font-size: 14px; fill: #536178; }
+      .table { fill: #fff; stroke: #8da0b8; stroke-width: 1.5; rx: 10; }
+      .head { fill: #eaf1fb; }
+      .name { font-size: 17px; font-weight: 700; }
+      .field { font-size: 13px; }
+      .muted { fill: #536178; }
+      .relation { stroke: #2563eb; stroke-width: 2.5; fill: none; }
+      .note { font-size: 13px; fill: #334155; }
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#2563eb"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="790" fill="#f7f9fc"/>
+  <text x="40" y="48" class="title">ERD · web_trm_dev</text>
+  <text x="40" y="73" class="subtitle">Berdasarkan backend/database/schema.sql · PK = primary key · FK = foreign key</text>
+
+  <!-- independent tables -->
+  <g transform="translate(40 115)">
+    <rect class="table" width="250" height="244"/>
+    <path class="head" d="M10 0 H240 Q250 0 250 10 V42 H0 V10 Q0 0 10 0Z"/>
+    <text x="16" y="28" class="name">admins</text>
+    <text x="16" y="68" class="field">🔑 id <tspan class="muted">BIGINT PK</tspan></text>
+    <text x="16" y="94" class="field">name <tspan class="muted">VARCHAR(100)</tspan></text>
+    <text x="16" y="120" class="field">email <tspan class="muted">VARCHAR(150), UNIQUE</tspan></text>
+    <text x="16" y="146" class="field">nidn <tspan class="muted">VARCHAR(20), UNIQUE</tspan></text>
+    <text x="16" y="172" class="field">username <tspan class="muted">VARCHAR(50), UNIQUE</tspan></text>
+    <text x="16" y="198" class="field">password_hash <tspan class="muted">VARCHAR(255)</tspan></text>
+    <text x="16" y="224" class="field muted">created_at · updated_at</text>
+  </g>
+
+  <g transform="translate(335 115)">
+    <rect class="table" width="250" height="244"/>
+    <path class="head" d="M10 0 H240 Q250 0 250 10 V42 H0 V10 Q0 0 10 0Z"/>
+    <text x="16" y="28" class="name">lecturers</text>
+    <text x="16" y="68" class="field">🔑 id <tspan class="muted">BIGINT PK</tspan></text>
+    <text x="16" y="94" class="field">name <tspan class="muted">VARCHAR(150)</tspan></text>
+    <text x="16" y="120" class="field">title <tspan class="muted">VARCHAR(150)</tspan></text>
+    <text x="16" y="146" class="field">concentration <tspan class="muted">VARCHAR(50)</tspan></text>
+    <text x="16" y="172" class="field">photo_path <tspan class="muted">VARCHAR(255)</tspan></text>
+    <text x="16" y="198" class="field">bio · email · display_order</text>
+    <text x="16" y="224" class="field muted">created_at · updated_at</text>
+  </g>
+
+  <g transform="translate(630 115)">
+    <rect class="table" width="250" height="244"/>
+    <path class="head" d="M10 0 H240 Q250 0 250 10 V42 H0 V10 Q0 0 10 0Z"/>
+    <text x="16" y="28" class="name">news</text>
+    <text x="16" y="68" class="field">🔑 id <tspan class="muted">BIGINT PK</tspan></text>
+    <text x="16" y="94" class="field">title <tspan class="muted">VARCHAR(200)</tspan></text>
+    <text x="16" y="120" class="field">slug <tspan class="muted">VARCHAR(220), UNIQUE</tspan></text>
+    <text x="16" y="146" class="field">excerpt · content</text>
+    <text x="16" y="172" class="field">thumbnail_path · status</text>
+    <text x="16" y="198" class="field">published_at</text>
+    <text x="16" y="224" class="field muted">created_at · updated_at</text>
+  </g>
+
+  <g transform="translate(925 115)">
+    <rect class="table" width="250" height="244"/>
+    <path class="head" d="M10 0 H240 Q250 0 250 10 V42 H0 V10 Q0 0 10 0Z"/>
+    <text x="16" y="28" class="name">projects</text>
+    <text x="16" y="68" class="field">🔑 id <tspan class="muted">BIGINT PK</tspan></text>
+    <text x="16" y="94" class="field">title <tspan class="muted">VARCHAR(200)</tspan></text>
+    <text x="16" y="120" class="field">slug <tspan class="muted">VARCHAR(220), UNIQUE</tspan></text>
+    <text x="16" y="146" class="field">description · category</text>
+    <text x="16" y="172" class="field">thumbnail_path</text>
+    <text x="16" y="198" class="field">student_name · project_year</text>
+    <text x="16" y="224" class="field muted">created_at · updated_at</text>
+  </g>
+
+  <g transform="translate(40 420)">
+    <rect class="table" width="350" height="225"/>
+    <path class="head" d="M10 0 H340 Q350 0 350 10 V42 H0 V10 Q0 0 10 0Z"/>
+    <text x="16" y="28" class="name">accreditation_documents</text>
+    <text x="16" y="68" class="field">🔑 id <tspan class="muted">BIGINT PK</tspan></text>
+    <text x="16" y="94" class="field">title <tspan class="muted">VARCHAR(200)</tspan></text>
+    <text x="16" y="120" class="field">description · file_path</text>
+    <text x="16" y="146" class="field">source_url · status · published_at</text>
+    <text x="16" y="172" class="field muted">created_at · updated_at</text>
+    <text x="16" y="201" class="field muted">Tidak memiliki foreign key</text>
+  </g>
+
+  <g transform="translate(510 420)">
+    <rect class="table" width="300" height="178"/>
+    <path class="head" d="M10 0 H290 Q300 0 300 10 V42 H0 V10 Q0 0 10 0Z"/>
+    <text x="16" y="28" class="name">rag_documents</text>
+    <text x="16" y="68" class="field">🔑 id <tspan class="muted">BIGINT PK</tspan></text>
+    <text x="16" y="94" class="field">title · description</text>
+    <text x="16" y="120" class="field">original_filename · file_path</text>
+    <text x="16" y="146" class="field">file_sha256 · status · timestamps</text>
+  </g>
+
+  <g transform="translate(875 420)">
+    <rect class="table" width="300" height="204"/>
+    <path class="head" d="M10 0 H290 Q300 0 300 10 V42 H0 V10 Q0 0 10 0Z"/>
+    <text x="16" y="28" class="name">rag_chunks</text>
+    <text x="16" y="68" class="field">🔑 id <tspan class="muted">BIGINT PK</tspan></text>
+    <text x="16" y="94" class="field">🔗 document_id <tspan class="muted">BIGINT FK</tspan></text>
+    <text x="16" y="120" class="field">chunk_text · page_number</text>
+    <text x="16" y="146" class="field">chunk_order · embedding JSON</text>
+    <text x="16" y="172" class="field muted">embedding_model · created_at</text>
+  </g>
+
+  <path class="relation" d="M810 505 H875" marker-end="url(#arrow)"/>
+  <text x="812" y="492" class="note">1 : N</text>
+  <text x="812" y="531" class="note">rag_documents.id</text>
+  <text x="812" y="548" class="note">→ document_id</text>
+
+  <text x="40" y="704" class="note">Catatan: relasi di diagram mengikuti foreign key yang didefinisikan pada schema.sql.</text>
+  <text x="40" y="728" class="note">Empat tabel utama lainnya berdiri sendiri; indeks/kolom teks tidak membentuk relasi foreign key.</text>
+</svg>

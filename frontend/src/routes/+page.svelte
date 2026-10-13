@@ -4,7 +4,6 @@
 </svelte:head>
 
 <script>
-	import OvalDotsBackground from '../lib/OvalDotsBackground.svelte';
 	const heroLineOne = Array.from('Teknologi Rekayasa');
 	const heroLineTwo = Array.from('Multimedia');
 </script>
@@ -12,7 +11,6 @@
 <div class="home-page">
 <div class="home-content">
 <section class="hero" aria-labelledby="home-title">
-	<OvalDotsBackground />
 	<div class="hero-label"><p>Politeknik Dewantara</p><span>Program Studi</span></div>
 	<h1 id="home-title">
 		<span class="visually-hidden">Teknologi Rekayasa Multimedia</span>
@@ -20,7 +18,7 @@
 		<span class="hero-line" aria-hidden="true">{#each heroLineTwo as character}<span class="hero-character">{character}</span>{/each}</span>
 	</h1>
 	<div class="hero-bottom">
-		<p class="intro">Pusat informasi program studi, aktivitas, dan karya mahasiswa TRM</p>
+		<!-- <p class="intro">Pusat informasi program studi, aktivitas, dan karya mahasiswa TRM</p> -->
 		<div class="hero-actions">
 			<a class="primary-action" href="https://wa.me/62887436943503" target="_blank" rel="noreferrer">Daftar Polidewa</a>
 			<a class="secondary-action" href="/profil">Tentang Program Studi</a>
@@ -69,13 +67,12 @@
 <style>
 	.home-page { position: relative; min-height: 100vh; text-align: center; background: transparent; }
 	.home-content { position: relative; z-index: 1; width: min(calc(100% - 2 * var(--page-gutter)), var(--page-max)); margin: 0 auto; }
-	.hero { position: relative; min-height: min(680px, 78vh); display: flex; align-items: center; flex-direction: column; justify-content: center; padding: clamp(4rem, 8vw, 7rem) 0; }
-	.hero > :not(:global(.oval-dots-background)) { position: relative; z-index: 1; }
+	.hero { position: relative; box-sizing: border-box; width: 100vw; height: 100vh; height: 100dvh; min-height: 100vh; min-height: 100dvh; display: flex; align-items: center; flex-direction: column; justify-content: center; margin-inline: calc(50% - 50vw); padding: clamp(4rem, 8vw, 7rem) clamp(1.25rem, 5vw, 4.5rem); }
 	.hero-label { display: flex; align-items: baseline; justify-content: center; gap: 1rem; }
 	.hero-label p { margin: 0; font: 500 25px/1.35 'Inter', sans-serif; }
 	.hero-label span { font: 400 18px/1.4 'Inter', sans-serif; opacity: .72; }
-	h1 { max-width: 1120px; margin: 1.5rem 0 1.2rem; font: 600 clamp(2.6rem, 4.45vw, 4rem)/1.08 'Inter', sans-serif; letter-spacing: -.045em; text-wrap: balance; }
-	h1 > .hero-line { display: block; white-space: nowrap; }
+	h1 { width: 100%; max-width: none; margin: 1.5rem 0 1.2rem; font: 600 clamp(2rem, 7.2vw, 6.5rem)/.98 'Inter', sans-serif; letter-spacing: -.055em; text-wrap: balance; }
+	h1 > .hero-line { display: block; width: 100%; white-space: normal; }
 	.hero-character { display: inline-block; transform-origin: 50% 70%; }
 	/* Character color remains unchanged until the controlled palette in 02-desain.md is approved. */
 	@media (hover: hover) and (prefers-reduced-motion: no-preference) {
@@ -87,7 +84,6 @@
 		70% { transform: rotate(var(--hero-wobble)); }
 	}
 	.hero-bottom { display: flex; align-items: center; flex-direction: column; gap: 1.6rem; max-width: 790px; padding: 0 1rem; }
-	.intro { max-width: 680px; margin: 0; font: 500 clamp(1rem, 1.4vw, 1.25rem)/1.65 'Inter', sans-serif; opacity: .86; }
 	.hero-actions { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: .85rem; }
 	.primary-action, .secondary-action { display: inline-flex; min-height: 48px; align-items: center; justify-content: center; padding: 12px 25px; border-radius: 34px; font: 500 16px/1.4 'Inter', sans-serif; text-decoration: none; transition: background-color var(--motion-fast) var(--ease-out), color var(--motion-fast) var(--ease-out), transform var(--motion-fast) var(--ease-out); }
 	.primary-action { color: #fff; background: #3A41FB; }
@@ -119,10 +115,10 @@
 	.accreditation-band .eyebrow { margin: 0 0 .8rem; opacity: .65; }
 	.accreditation-band p:not(.eyebrow) { max-width: 370px; margin: 0; font: 400 .9rem/1.7 'Inter', sans-serif; opacity: .82; }
 	@media (max-width: 700px) {
-		.hero { min-height: auto; padding: 6rem 0 5rem; }
+		.hero { padding-block: 6rem 5rem; }
 		.hero-label p { font-size: clamp(1.15rem, 5vw, 1.5rem); }
 		.hero-label span { font-size: .95rem; }
-		h1 { font-size: clamp(1.8rem, 8.4vw, 3.4rem); }
+		h1 { font-size: clamp(1.9rem, 8.4vw, 3.4rem); line-height: 1.02; }
 		.hero-bottom { align-items: center; }
 		.section-top { margin-bottom: 1.6rem; }
 		.discipline-intro { grid-template-columns: 1fr; gap: .9rem; }

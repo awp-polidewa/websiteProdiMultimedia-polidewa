@@ -48,7 +48,7 @@
 </script>
 
 <a class="skip-link" href="#main-content">Lewati ke konten utama</a>
-<div class="navbar-spacer" style:height={navbarHeight === null ? undefined : `${navbarHeight}px`} aria-hidden="true"></div>
+<div class="navbar-spacer" class:home-route={page.url.pathname === '/'} style:height={navbarHeight === null ? undefined : `${navbarHeight}px`} aria-hidden="true"></div>
 <header bind:this={headerElement} class="site-header" class:scrolled={hasScrolled} class:menu-open={menuOpen}>
 	<div class="header-top-row">
 		<a class="wordmark" href="/" aria-label="TRM — Beranda">
@@ -87,6 +87,7 @@
 
 <style>
 	.navbar-spacer { height: 73px; }
+	.navbar-spacer.home-route { display: none; }
 	.site-header { position: fixed; z-index: 40; isolation: isolate; top: 19px; left: 50%; width: min(calc(100% - 40px), 1079.38px); box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; border: 0; border-radius: 200px; background: rgb(255 255 255 / 72%); color: #313131; box-shadow: none; -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); transform: translateX(-50%); transition: border-radius .3s ease, box-shadow 250ms ease; }
 	.site-header.scrolled { box-shadow: 0px 4px 6.4px rgba(0, 0, 0, 0.25); }
 	@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
