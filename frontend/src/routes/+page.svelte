@@ -27,7 +27,8 @@
 </section>
 
 <section class="disciplines section-rule" aria-labelledby="disciplines-title">
-	<div class="section-top"><p class="eyebrow">Program studi</p><p class="section-index">01 — 03</p></div>
+	<div class="section-content">
+	<div class="section-top"><p class="eyebrow">Program studi</p></div>
 	<div class="discipline-intro">
 		<h2 id="disciplines-title" class="section-heading">Bidang dalam struktur prodi</h2>
 		<p>Jelajahi informasi resmi mengenai struktur dosen dan konsentrasi yang tersedia.</p>
@@ -37,9 +38,11 @@
 		<a href="/struktur"><span>02</span><strong>Desain Grafis</strong><span aria-hidden="true">↗</span></a>
 		<a href="/struktur"><span>03</span><strong>Videografi</strong><span aria-hidden="true">↗</span></a>
 	</div>
+	</div>
 </section>
 
 <section class="latest section-rule" aria-label="Berita dan karya mahasiswa">
+	<div class="section-content latest-content">
 	<div class="latest-panel">
 		<div class="section-top"><p class="eyebrow">Publikasi</p><span class="section-index">02</span></div>
 		<h2 class="section-heading">Berita prodi</h2>
@@ -54,6 +57,7 @@
 		<p class="empty-note">Belum ada karya yang dipublikasikan.</p>
 		<a class="text-link" href="/karya">Lihat showcase <span aria-hidden="true">↗</span></a>
 	</div>
+	</div>
 </section>
 
 <section class="accreditation-band">
@@ -67,6 +71,7 @@
 <style>
 	.home-page { position: relative; min-height: 100vh; text-align: center; background: transparent; }
 	.home-content { position: relative; z-index: 1; width: min(calc(100% - 2 * var(--page-gutter)), var(--page-max)); margin: 0 auto; }
+	.section-content { box-sizing: border-box; width: min(calc(100% - 2 * var(--page-gutter)), var(--page-max)); margin-inline: auto; }
 	.hero { position: relative; box-sizing: border-box; width: 100vw; height: 100vh; height: 100dvh; min-height: 100vh; min-height: 100dvh; display: flex; align-items: center; flex-direction: column; justify-content: center; margin-inline: calc(50% - 50vw); padding: clamp(4rem, 8vw, 7rem) clamp(1.25rem, 5vw, 4.5rem); }
 	.hero-label { display: flex; align-items: baseline; justify-content: center; gap: 1rem; }
 	.hero-label p { margin: 0; font: 500 25px/1.35 'Inter', sans-serif; }
@@ -91,7 +96,7 @@
 	.secondary-action { color: #000; background: transparent; border: 1px solid #000; }
 	.secondary-action:hover { color: #fff; background: #000; }
 	.primary-action:focus-visible, .secondary-action:focus-visible { outline: 2px solid #000; outline-offset: 3px; }
-	.disciplines { padding: 1rem 0 var(--space-section); }
+	.disciplines { box-sizing: border-box; width: 100vw; margin-inline: calc(50% - 50vw); padding: 1rem 0 var(--space-section); }
 	.section-top { display: flex; justify-content: center; gap: 1rem; margin: 0 0 2.5rem; }
 	.section-top .eyebrow { margin: 0; opacity: .65; }
 	.section-index { margin: 0; font: 400 .72rem/1.4 'Inter', sans-serif; opacity: .65; }
@@ -103,7 +108,8 @@
 	.discipline-list span:first-child { grid-column: 1 / -1; font: 400 .72rem/1 'Inter', sans-serif; opacity: .62; }
 	.discipline-list strong { font: 500 1.1rem/1.35 'Poppins', sans-serif; }
 	.discipline-list span:last-child { align-self: end; }
-	.latest { display: grid; grid-template-columns: 1fr 1fr; padding: var(--space-section) 0; }
+	.latest { box-sizing: border-box; width: 100vw; margin-inline: calc(50% - 50vw); padding: var(--space-section) 0; }
+	.latest-content { display: grid; grid-template-columns: 1fr 1fr; }
 	.latest-panel { min-height: 315px; display: flex; align-items: center; flex-direction: column; padding: 0 2.2rem 0 0; }
 	.latest-panel + .latest-panel { padding: 0 0 0 2.2rem; border-left: 1px solid var(--line); }
 	.latest-panel .section-top { width: 100%; margin-bottom: 2rem; }
@@ -125,7 +131,7 @@
 		.discipline-list { grid-template-columns: 1fr; }
 		.discipline-list a, .discipline-list a + a { grid-template-columns: 2.4rem 1fr auto; align-items: center; gap: 1rem; padding: 1rem 0; border-left: 0; }
 		.discipline-list span:first-child { grid-column: auto; }
-		.latest { grid-template-columns: 1fr; }
+		.latest-content { grid-template-columns: 1fr; }
 		.latest-panel { min-height: 290px; padding: 0 0 2.5rem; }
 		.latest-panel + .latest-panel { padding: 2.5rem 0; border-top: 1px solid var(--line); border-left: 0; }
 		.accreditation-band { grid-template-columns: 1fr; align-items: start; gap: 1rem; }
