@@ -8,6 +8,19 @@
 
 	const heroLineOne = Array.from('Teknologi Rekayasa');
 	const heroLineTwo = Array.from('Multimedia');
+	const toolItems = [
+		{ name: 'Blender', icon: '/icons/tools/icon-blender.svg', description: 'Pemodelan, animasi, dan produksi visual 3D.' },
+		{ name: 'Canva', icon: '/icons/tools/icon-canva.svg', description: 'Pembuatan desain grafis dan materi visual.' },
+		{ name: 'CSS', icon: '/icons/tools/icon-css.svg', description: 'Mengatur tampilan dan tata letak halaman web.' },
+		{ name: 'draw.io', icon: '/icons/tools/icon-drawio.svg', description: 'Menyusun diagram alur dan rancangan sistem.' },
+		{ name: 'Figma', icon: '/icons/tools/icon-figma.svg', description: 'Merancang antarmuka dan prototipe interaktif.' },
+		{ name: 'Google Classroom', icon: '/icons/tools/icon-google-classroom.svg', description: 'Mengelola materi, tugas, dan aktivitas pembelajaran.' },
+		{ name: 'Google Drive', icon: '/icons/tools/icon-google-drive.svg', description: 'Menyimpan dan berbagi berkas proyek.' },
+		{ name: 'HTML', icon: '/icons/tools/icon-html.svg', description: 'Menyusun struktur konten halaman web.' },
+		{ name: 'JavaScript', icon: '/icons/tools/icon-javascript.svg', description: 'Menambahkan perilaku interaktif pada aplikasi web.' },
+		{ name: 'PHP', icon: '/icons/tools/icon-php.svg', description: 'Membangun logika aplikasi web di sisi server.' },
+		{ name: 'XAMPP', icon: '/icons/tools/icon-xampp.svg', description: 'Menjalankan lingkungan pengembangan web lokal.' }
+	];
 	// Isi dengan path aset video lokal saat file tersedia, misalnya /videos/beranda.mp4.
 	const videoSource = '';
 	/** @type {HTMLElement | undefined} */
@@ -18,8 +31,16 @@
 	let videoStoryStage;
 	/** @type {HTMLElement | undefined} */
 	let videoFrame;
+	/** @type {HTMLElement | undefined} */
+	let toolsOrbit;
+	/** @type {HTMLButtonElement[]} */
+	let toolIconElements = $state([]);
 	let prefersReducedMotion = $state(false);
 	let videoUnavailable = $state(!videoSource);
+	let activeToolIndex = $state(10);
+	let orbitPhase = 10;
+	/** @type {number | null} */
+	let orbitTarget = null;
 
 	function markVideoUnavailable() {
 		videoUnavailable = true;
@@ -29,8 +50,24 @@
 		videoUnavailable = false;
 	}
 
+	/** @param {number} index */
+	function selectTool(index) {
+		if (prefersReducedMotion) {
+			activeToolIndex = index;
+			orbitPhase = index;
+			return;
+		}
+
+		const count = toolItems.length;
+		const currentIndex = ((Math.round(orbitPhase) % count) + count) % count;
+		const forwardDelta = (index - currentIndex + count) % count;
+		const shortestDelta = forwardDelta > count / 2 ? forwardDelta - count : forwardDelta;
+		orbitTarget = orbitPhase + shortestDelta;
+	}
+
 	onMount(() => {
 		let animationFrame = 0;
+		let orbitAnimationFrame = 0;
 		let trackStart = 0;
 		let transitionStart = 0;
 		let transitionDistance = 1;
@@ -40,7 +77,72 @@
 		let endTop = 0;
 		let startWidth = 0;
 		let endWidth = 0;
+		let previousOrbitTime = 0;
 		const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+		/** @param {number} value @param {number} divisor */
+		const positiveModulo = (value, divisor) => ((value % divisor) + divisor) % divisor;
+
+		function updateOrbit() {
+			if (!toolsOrbit) return;
+
+			const width = toolsOrbit.clientWidth;
+			const count = toolItems.length;
+			const spacing = width < 700 ? Math.max(72, width * 0.29) : Math.min(265, width * 0.184);
+			const maxVisibleOffset = Math.max(1, Math.min((count - 1) / 2, width / spacing));
+			const nextActiveIndex = positiveModulo(Math.round(orbitPhase), count);
+
+			if (activeToolIndex !== nextActiveIndex) activeToolIndex = nextActiveIndex;
+
+			toolItems.forEach((tool, index) => {
+				const element = toolIconElements[index];
+				if (!element) return;
+
+				let offset = positiveModulo(index - orbitPhase + count / 2, count) - count / 2;
+				if (offset < -count / 2) offset += count;
+				const distance = Math.abs(offset);
+				const centerDip = 28 * Math.exp(-(offset * offset) / 1.125);
+				const edgeDrop = 68 * (distance / maxVisibleOffset) ** 2;
+				const y = 8 + centerDip + edgeDrop;
+				const scale = Math.max(0.44, 1 - distance * 0.115);
+				const opacity = Math.max(0.3, 1 - distance * 0.14);
+				const rotation = Math.max(-24, Math.min(24, -offset * 5.5));
+
+				element.style.left = `${width / 2 + offset * spacing}px`;
+				element.style.top = `${y}px`;
+				element.style.transform = `translateX(-50%) scale(${scale}) rotate(${rotation}deg)`;
+				element.style.opacity = String(opacity);
+				element.style.zIndex = String(100 - Math.round(distance * 10));
+			});
+		}
+
+		/** @param {number} timestamp */
+		function renderOrbit(timestamp) {
+			orbitAnimationFrame = 0;
+			if (prefersReducedMotion) return;
+
+			const delta = previousOrbitTime ? Math.min(timestamp - previousOrbitTime, 48) : 0;
+			previousOrbitTime = timestamp;
+
+			if (orbitTarget !== null) {
+				const remaining = orbitTarget - orbitPhase;
+				orbitPhase += remaining * (1 - Math.exp(-delta / 260));
+				if (Math.abs(remaining) < 0.006) {
+					orbitPhase = orbitTarget;
+					orbitTarget = null;
+				}
+			} else {
+				orbitPhase += delta * 0.00016;
+			}
+
+			updateOrbit();
+			orbitAnimationFrame = requestAnimationFrame(renderOrbit);
+		}
+
+		function scheduleOrbit() {
+			if (!prefersReducedMotion && !orbitAnimationFrame) {
+				orbitAnimationFrame = requestAnimationFrame(renderOrbit);
+			}
+		}
 
 		function measureStory() {
 			if (!videoStoryTrack || !videoStory || !videoStoryStage || !videoFrame) return;
@@ -86,6 +188,7 @@
 		function handleResize() {
 			measureStory();
 			scheduleStoryUpdate();
+			updateOrbit();
 		}
 
 		async function handleMotionPreferenceChange() {
@@ -93,20 +196,33 @@
 			await tick();
 			measureStory();
 			scheduleStoryUpdate();
+			if (prefersReducedMotion) {
+				if (orbitAnimationFrame) cancelAnimationFrame(orbitAnimationFrame);
+				orbitAnimationFrame = 0;
+				previousOrbitTime = 0;
+				updateOrbit();
+			} else {
+				previousOrbitTime = 0;
+				updateOrbit();
+				scheduleOrbit();
+			}
 		}
 
 		prefersReducedMotion = reducedMotionQuery.matches;
 		measureStory();
+		updateOrbit();
 		window.addEventListener('scroll', scheduleStoryUpdate, { passive: true });
 		window.addEventListener('resize', handleResize);
 		reducedMotionQuery.addEventListener('change', handleMotionPreferenceChange);
 		scheduleStoryUpdate();
+		scheduleOrbit();
 
 		return () => {
 			window.removeEventListener('scroll', scheduleStoryUpdate);
 			window.removeEventListener('resize', handleResize);
 			reducedMotionQuery.removeEventListener('change', handleMotionPreferenceChange);
 			if (animationFrame) cancelAnimationFrame(animationFrame);
+			if (orbitAnimationFrame) cancelAnimationFrame(orbitAnimationFrame);
 		};
 	});
 </script>
@@ -158,11 +274,29 @@
 
 <section class="tools section-rule" aria-labelledby="tools-title">
 	<div class="tools-content">
-		<p class="eyebrow">Teknologi multimedia</p>
-		<h2 id="tools-title" class="section-heading">Tools used in practice Warga Multimedia</h2>
-		<div class="tool-feature">
-			<span class="tool-name">xampp</span>
-			<p>Database berbasis SQL</p>
+		<div class="tools-heading">
+			<p class="eyebrow">Teknologi multimedia</p>
+			<h2 id="tools-title" class="section-heading">Tools used in practice Warga Multimedia</h2>
+			<p class="tools-intro">Perangkat yang mendukung proses belajar dan produksi karya multimedia.</p>
+		</div>
+		<div class="tools-orbit" class:tools-orbit--static={prefersReducedMotion} aria-label="Pilih tools yang digunakan dalam pembelajaran dan produksi multimedia" bind:this={toolsOrbit}>
+			{#each toolItems as tool, index (tool.name)}
+				<button
+					class="tool-orbit-icon"
+					class:tool-orbit-icon--active={activeToolIndex === index}
+					type="button"
+					aria-label={`Pilih ${tool.name}`}
+					aria-pressed={activeToolIndex === index}
+					bind:this={toolIconElements[index]}
+					onclick={() => selectTool(index)}
+				>
+					<span class="tool-icon-tile"><img src={tool.icon} alt="" /></span>
+				</button>
+			{/each}
+		</div>
+		<div class="tool-feature" aria-atomic="true">
+			<h3 class="tool-name">{toolItems[activeToolIndex].name}</h3>
+			<p>{toolItems[activeToolIndex].description}</p>
 		</div>
 	</div>
 </section>
@@ -224,13 +358,25 @@
 	.video-story--reduced { position: relative; top: auto; height: auto; padding-inline: 30px; }
 	.video-story--reduced .video-story-stage { height: auto; }
 	.video-story--reduced .video-story-frame { position: relative; top: auto !important; left: auto; width: min(90%, 1352px) !important; margin-inline: auto; border-radius: 35px !important; transform: none !important; }
-	.tools { box-sizing: border-box; width: 100vw; margin-inline: calc(50% - 50vw); padding: var(--space-section) var(--page-gutter); background: #f1f2f2; }
-	.tools-content { box-sizing: border-box; width: min(100%, var(--page-max)); min-height: 430px; display: flex; align-items: center; flex-direction: column; justify-content: center; margin-inline: auto; padding: clamp(2rem, 6vw, 5rem) 1.5rem; border-radius: 2rem; background: #fff; text-align: center; }
-	.tools-content > .eyebrow { margin: 0 0 1rem; opacity: .65; }
-	.tools-content .section-heading { max-width: 760px; margin: 0; color: #625f5f; font-size: clamp(1.7rem, 4vw, 3rem); }
-	.tool-feature { margin-top: 4rem; }
-	.tool-name { font: 500 clamp(2rem, 4vw, 3rem)/1.1 'Inter', sans-serif; letter-spacing: -.04em; }
-	.tool-feature p { margin: .35rem 0 0; font: 400 1.1rem/1.5 'Inter', sans-serif; opacity: .75; }
+	.tools { box-sizing: border-box; width: 100vw; margin-inline: calc(50% - 50vw); padding: clamp(2rem, 4vw, 3rem) clamp(1rem, 2.7vw, 2.5rem); background-color: #f2f4f5; background-image: linear-gradient(to right, rgb(255 255 255 / 13%) 2px, transparent 2px), linear-gradient(to bottom, rgb(255 255 255 / 13%) 2px, transparent 2px); background-size: 114px 102.5px; }
+	.tools-content { box-sizing: border-box; width: min(100%, 1440px); min-height: 810px; display: flex; align-items: center; flex-direction: column; margin-inline: auto; padding: clamp(5rem, 9.5vw, 8.5rem) clamp(1rem, 4vw, 3.5rem) 3rem; border-radius: 38px; background: #fff; text-align: center; }
+	.tools-heading { width: 100%; }
+	.tools-heading .eyebrow { margin: 0 0 1rem; opacity: .65; }
+	.tools-heading .section-heading { max-width: 900px; margin: 0 auto; color: #676363; font-size: clamp(2rem, 4.45vw, 4rem); line-height: 1.2; }
+	.tools-intro { margin: 1rem 0 0; color: #625f5f; font: 400 clamp(.95rem, 1.4vw, 1.2rem)/1.6 'Inter', sans-serif; }
+	.tools-orbit { position: relative; width: 100%; height: clamp(17rem, 25vw, 21rem); flex: 0 0 auto; margin-top: clamp(3rem, 7vw, 5.5rem); overflow: hidden; }
+	.tool-orbit-icon { position: absolute; top: 0; left: 50%; width: clamp(100px, 13.9vw, 190px); height: clamp(82px, 11.3vw, 154px); display: grid; place-items: center; padding: 0; border: 0; border-radius: 15px; background: transparent; cursor: pointer; transform-origin: center; transition: filter 180ms ease, outline-color 180ms ease; }
+	.tool-icon-tile { width: 100%; height: 100%; display: grid; place-items: center; border-radius: 15px; background: #e5e5e5; }
+	.tool-icon-tile img { display: block; width: 64%; height: 64%; object-fit: contain; }
+	.tool-orbit-icon--active .tool-icon-tile { background: #e5e5e5; }
+	.tool-orbit-icon:hover { filter: brightness(.96); }
+	.tool-orbit-icon:focus-visible { z-index: 120 !important; outline: 3px solid #313131; outline-offset: 4px; }
+	.tool-feature { box-sizing: border-box; width: min(100%, 620px); min-height: 98px; margin-top: .5rem; }
+	.tool-name { margin: 0; color: #525151; font: 400 clamp(2rem, 3.7vw, 3.4rem)/1.1 'Poppins', sans-serif; letter-spacing: -.04em; }
+	.tool-feature p { margin: .45rem 0 0; color: #525151; font: 400 clamp(1rem, 2vw, 1.65rem)/1.4 'Inter', sans-serif; }
+	.tools-orbit--static { height: auto; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 1rem; overflow: visible; margin-block: 3rem 2rem; }
+	.tools-orbit--static .tool-orbit-icon { position: relative; top: auto !important; left: auto !important; width: 100%; height: auto; aspect-ratio: 1.23; opacity: 1 !important; transform: none !important; }
+	.tools-orbit--static .tool-orbit-icon--active .tool-icon-tile { outline: 2px solid #636161; outline-offset: 3px; }
 	.hero { position: relative; box-sizing: border-box; width: 100vw; height: 100vh; height: 100dvh; min-height: 100vh; min-height: 100dvh; display: flex; align-items: center; flex-direction: column; justify-content: center; margin-inline: calc(50% - 50vw); padding: clamp(4rem, 8vw, 7rem) 30px; }
 	.hero-label { display: flex; align-items: baseline; justify-content: center; gap: 1rem; }
 	.hero-label p { margin: 0; font: 500 25px/1.35 'Inter', sans-serif; }
@@ -289,8 +435,14 @@
 		.video-story--reduced { padding-inline: 20px; }
 		.video-story--reduced .video-story-frame { border-radius: 1.25rem !important; }
 		.section-top { margin-bottom: 1.6rem; }
-		.tools { padding-block: var(--space-section); }
-		.tools-content { min-height: 350px; border-radius: 1.25rem; }
+		.tools { padding: 1.5rem 1rem; }
+		.tools-content { min-height: 700px; padding: 4rem 1rem 2.5rem; border-radius: 1.25rem; }
+		.tools-heading .section-heading { font-size: clamp(1.85rem, 8vw, 2.7rem); }
+		.tools-orbit { height: 15rem; margin-top: 3.5rem; }
+		.tool-orbit-icon { width: clamp(78px, 24vw, 102px); height: clamp(68px, 20vw, 90px); border-radius: 12px; }
+		.tool-icon-tile { border-radius: 12px; }
+		.tool-feature { min-height: 90px; margin-top: 0; }
+		.tools-orbit--static { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .65rem; margin-block: 2.5rem 1.5rem; }
 		.discipline-intro { grid-template-columns: 1fr; gap: .9rem; }
 		.discipline-list { grid-template-columns: 1fr; }
 		.discipline-list a, .discipline-list a + a { grid-template-columns: 2.4rem 1fr auto; align-items: center; gap: 1rem; padding: 1rem 0; border-left: 0; }
@@ -299,6 +451,9 @@
 		.latest-panel { min-height: 290px; padding: 0 0 2.5rem; }
 		.latest-panel + .latest-panel { padding: 2.5rem 0; border-top: 1px solid var(--line); border-left: 0; }
 		.accreditation-band { grid-template-columns: 1fr; align-items: start; gap: 1rem; }
+	}
+	@media (max-width: 480px) {
+		.tools-orbit--static { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 	}
 	@media (max-width: 420px) {
 		.hero-label { align-items: center; flex-direction: column; gap: .15rem; }
