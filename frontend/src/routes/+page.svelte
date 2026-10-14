@@ -33,12 +33,20 @@
 	let videoFrame;
 	/** @type {HTMLElement | undefined} */
 	let toolsOrbit;
+	/** @type {HTMLElement | undefined} */
+	let toolsTooltip;
 	/** @type {HTMLButtonElement[]} */
 	let toolIconElements = $state([]);
 	let prefersReducedMotion = $state(false);
+	let toolsTooltipVisible = $state(false);
 	let videoUnavailable = $state(!videoSource);
 	let activeToolIndex = $state(10);
 	let orbitPhase = 10;
+	let toolsTooltipFrame = 0;
+	let toolsTooltipX = 0;
+	let toolsTooltipY = 0;
+	let toolsTooltipTargetX = 0;
+	let toolsTooltipTargetY = 0;
 	/** @type {number | null} */
 	let orbitTarget = null;
 
@@ -48,6 +56,63 @@
 
 	function markVideoReady() {
 		videoUnavailable = false;
+	}
+
+	/** @param {PointerEvent} event */
+	function setToolsTooltipTarget(event) {
+		if (!toolsTooltip) return;
+
+		const gap = 14;
+		const width = toolsTooltip.offsetWidth;
+		const height = toolsTooltip.offsetHeight;
+		let x = event.clientX + gap;
+		let y = event.clientY + gap;
+
+		if (x + width > window.innerWidth - 8) x = event.clientX - width - gap;
+		if (y + height > window.innerHeight - 8) y = event.clientY - height - gap;
+
+		toolsTooltipTargetX = Math.max(8, Math.min(x, window.innerWidth - width - 8));
+		toolsTooltipTargetY = Math.max(8, Math.min(y, window.innerHeight - height - 8));
+	}
+
+	function animateToolsTooltip() {
+		toolsTooltipFrame = 0;
+		if (!toolsTooltip || !toolsTooltipVisible) return;
+
+		toolsTooltipX += (toolsTooltipTargetX - toolsTooltipX) * 0.5;
+		toolsTooltipY += (toolsTooltipTargetY - toolsTooltipY) * 0.5;
+		toolsTooltip.style.setProperty('--cursor-x', `${toolsTooltipX}px`);
+		toolsTooltip.style.setProperty('--cursor-y', `${toolsTooltipY}px`);
+
+		if (Math.abs(toolsTooltipTargetX - toolsTooltipX) > 0.4 || Math.abs(toolsTooltipTargetY - toolsTooltipY) > 0.4) {
+			toolsTooltipFrame = requestAnimationFrame(animateToolsTooltip);
+		}
+	}
+
+	/** @param {PointerEvent} event */
+	function handleToolsPointerEnter(event) {
+		if (event.pointerType === 'touch' || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+
+		setToolsTooltipTarget(event);
+		toolsTooltipX = toolsTooltipTargetX;
+		toolsTooltipY = toolsTooltipTargetY;
+		toolsTooltip?.style.setProperty('--cursor-x', `${toolsTooltipX}px`);
+		toolsTooltip?.style.setProperty('--cursor-y', `${toolsTooltipY}px`);
+		toolsTooltipVisible = true;
+	}
+
+	/** @param {PointerEvent} event */
+	function handleToolsPointerMove(event) {
+		if (!toolsTooltipVisible || event.pointerType === 'touch') return;
+
+		setToolsTooltipTarget(event);
+		if (!toolsTooltipFrame) toolsTooltipFrame = requestAnimationFrame(animateToolsTooltip);
+	}
+
+	function handleToolsPointerLeave() {
+		toolsTooltipVisible = false;
+		if (toolsTooltipFrame) cancelAnimationFrame(toolsTooltipFrame);
+		toolsTooltipFrame = 0;
 	}
 
 	/** @param {number} index */
@@ -221,6 +286,7 @@
 			reducedMotionQuery.removeEventListener('change', handleMotionPreferenceChange);
 			if (animationFrame) cancelAnimationFrame(animationFrame);
 			if (orbitAnimationFrame) cancelAnimationFrame(orbitAnimationFrame);
+			if (toolsTooltipFrame) cancelAnimationFrame(toolsTooltipFrame);
 		};
 	});
 </script>
@@ -270,7 +336,13 @@
 	</section>
 </div>
 
-<section class="tools section-rule" aria-labelledby="tools-title">
+<section
+	class="tools section-rule"
+	aria-labelledby="tools-title"
+	onpointerenter={handleToolsPointerEnter}
+	onpointermove={handleToolsPointerMove}
+	onpointerleave={handleToolsPointerLeave}
+>
 	<div class="tools-content">
 		<div class="tools-heading">
 			<p class="eyebrow">Teknologi multimedia</p>
@@ -297,6 +369,7 @@
 			<p>{toolItems[activeToolIndex].description}</p>
 		</div>
 	</div>
+	<div class="tool-cursor-tooltip" class:tool-cursor-tooltip--visible={toolsTooltipVisible} aria-hidden="true" bind:this={toolsTooltip}>klik icons</div>
 </section>
 
 <section class="disciplines section-rule" aria-labelledby="disciplines-title">
@@ -356,24 +429,31 @@
 	.video-story--reduced { position: relative; top: auto; height: auto; padding-inline: 30px; }
 	.video-story--reduced .video-story-stage { height: auto; }
 	.video-story--reduced .video-story-frame { position: relative; top: auto !important; left: auto; width: min(90%, 1352px) !important; margin-inline: auto; border-radius: 35px !important; transform: none !important; }
-	.tools { box-sizing: border-box; width: 100vw; margin-inline: calc(50% - 50vw); padding: clamp(2rem, 4vw, 3rem) clamp(1rem, 2.7vw, 2.5rem); background-color: #f2f4f5; background-image: linear-gradient(to right, rgb(255 255 255 / 13%) 2px, transparent 2px), linear-gradient(to bottom, rgb(255 255 255 / 13%) 2px, transparent 2px); background-size: 114px 102.5px; }
-	.tools-content { box-sizing: border-box; width: min(100%, 1440px); min-height: 810px; display: flex; align-items: center; flex-direction: column; margin-inline: auto; padding: clamp(5rem, 9.5vw, 8.5rem) clamp(1rem, 4vw, 3.5rem) 3rem; border-radius: 38px; background: #fff; text-align: center; }
+	.tools { box-sizing: border-box; width: 100vw; min-height: 100svh; display: flex; flex-direction: column; margin-inline: calc(50% - 50vw); padding: clamp(1rem, 2vh, 1.5rem) clamp(1rem, 2.7vw, 2.5rem); background-color: #f2f4f5; background-image: linear-gradient(to right, rgb(255 255 255 / 13%) 2px, transparent 2px), linear-gradient(to bottom, rgb(255 255 255 / 13%) 2px, transparent 2px); background-size: 114px 102.5px; }
+	.tools-content { box-sizing: border-box; width: min(100%, 1440px); flex: 1 0 auto; min-height: 0; display: flex; align-items: center; flex-direction: column; justify-content: center; margin-inline: auto; padding: clamp(3rem, 7.5vh, 3.5rem) clamp(1rem, 4vw, 3.5rem) 0; border-radius: 38px; background: #fff; text-align: center; }
 	.tools-heading { width: 100%; }
 	.tools-heading .eyebrow { margin: 0 0 1rem; opacity: .65; }
-	.tools-heading .section-heading { max-width: 900px; margin: 0 auto; color: #676363; font-size: clamp(2rem, 4.45vw, 4rem); line-height: 1.2; }
-	.tools-intro { margin: 1rem 0 0; color: #625f5f; font: 400 clamp(.95rem, 1.4vw, 1.2rem)/1.6 'Inter', sans-serif; }
-	.tools-orbit { position: relative; width: 100%; height: clamp(17rem, 25vw, 21rem); flex: 0 0 auto; margin-top: clamp(3rem, 7vw, 5.5rem); overflow: hidden; }
-	.tool-orbit-icon { position: absolute; top: 0; left: 50%; width: clamp(100px, 13.9vw, 190px); height: clamp(82px, 11.3vw, 154px); display: grid; place-items: center; padding: 0; border: 0; border-radius: 15px; background: transparent; cursor: pointer; transform-origin: center; transition: filter 180ms ease, outline-color 180ms ease; }
-	.tool-icon-tile { width: 100%; height: 100%; display: grid; place-items: center; border-radius: 15px; background: #e5e5e5; }
+	.tools-heading .section-heading { max-width: 820px; margin: 0 auto; color: #676363; font-size: clamp(1.5rem, 3.3vw, 3rem); line-height: 1.16; }
+	.tools-intro { margin: 1rem 0 0; color: #625f5f; font: 400 clamp(.9rem, 1.2vw, 1.05rem)/1.6 'Inter', sans-serif; }
+	.tools-orbit { position: relative; width: 100%; height: clamp(16rem, 37vh, 21rem); flex: 0 0 auto; margin-top: clamp(1rem, 2vh, 1.5rem); overflow: hidden; }
+	.tool-orbit-icon { position: absolute; top: 0; left: 50%; width: clamp(75px, 10.4vw, 142px); height: clamp(61px, 8.5vw, 116px); display: grid; place-items: center; padding: 0; border: 0; border-radius: 12px; background: transparent; cursor: pointer; transform-origin: center; transition: filter 180ms ease, outline-color 180ms ease; }
+	.tool-icon-tile { width: 100%; height: 100%; display: grid; place-items: center; border-radius: 12px; background: #e5e5e5; }
 	.tool-icon-tile img { display: block; width: 64%; height: 64%; object-fit: contain; }
 	.tool-orbit-icon--active .tool-icon-tile { background: #e5e5e5; }
 	.tool-orbit-icon:hover { filter: brightness(.96); }
 	.tool-orbit-icon:focus-visible { z-index: 120 !important; outline: 3px solid #313131; outline-offset: 4px; }
-	.tool-feature { box-sizing: border-box; width: min(100%, 620px); min-height: 98px; margin-top: .5rem; }
-	.tool-name { margin: 0; color: #525151; font: 400 clamp(2rem, 3.7vw, 3.4rem)/1.1 'Poppins', sans-serif; letter-spacing: -.04em; }
-	.tool-feature p { margin: .45rem 0 0; color: #525151; font: 400 clamp(1rem, 2vw, 1.65rem)/1.4 'Inter', sans-serif; }
-	.tools-orbit--static { height: auto; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 1rem; overflow: visible; margin-block: 3rem 2rem; }
-	.tools-orbit--static .tool-orbit-icon { position: relative; top: auto !important; left: auto !important; width: 100%; height: auto; aspect-ratio: 1.23; opacity: 1 !important; transform: none !important; }
+	.tool-feature { box-sizing: border-box; width: min(100%, 560px); min-height: 90px; margin-top: .85rem; }
+	.tool-name { margin: 0; color: #525151; font: 400 clamp(1.5rem, 2.8vw, 2.55rem)/1.12 'Poppins', sans-serif; letter-spacing: -.04em; }
+	.tool-feature p { margin: .5rem 0 0; color: #525151; font: 400 clamp(.85rem, 1.5vw, 1.25rem)/1.5 'Inter', sans-serif; }
+	.tool-cursor-tooltip { position: fixed; top: 0; left: 0; z-index: 110; padding: .4rem .65rem; border: 1px solid rgb(255 255 255 / 68%); border-radius: 999px; background: rgb(174 221 255 / 96%); color: #14354f; box-shadow: 0 4px 12px rgb(30 86 125 / 12%); font: 500 .75rem/1.2 'Inter', sans-serif; letter-spacing: .01em; white-space: nowrap; opacity: 0; pointer-events: none; transform: translate3d(var(--cursor-x, -1000px), var(--cursor-y, -1000px), 0); scale: .94; transform-origin: top left; transition: opacity 160ms ease, scale 160ms ease; will-change: transform, opacity, scale; }
+	@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+		.tool-cursor-tooltip { background: rgb(139 205 250 / 78%); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+	}
+	.tool-cursor-tooltip--visible { opacity: 1; scale: 1; }
+	@media (hover: none), (pointer: coarse) { .tool-cursor-tooltip { display: none; } }
+	@media (prefers-reduced-motion: reduce) { .tool-cursor-tooltip { transition: none; } }
+	.tools-orbit--static { height: auto; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: .5rem; overflow: visible; margin-block: .75rem .5rem; }
+	.tools-orbit--static .tool-orbit-icon { position: relative; top: auto !important; left: auto !important; width: min(75%, 142px); height: auto; justify-self: center; aspect-ratio: 1.23; opacity: 1 !important; transform: none !important; }
 	.tools-orbit--static .tool-orbit-icon--active .tool-icon-tile { outline: 2px solid #636161; outline-offset: 3px; }
 	.hero { position: relative; box-sizing: border-box; width: 100vw; height: 100vh; height: 100dvh; min-height: 100vh; min-height: 100dvh; display: flex; align-items: center; flex-direction: column; justify-content: center; margin-inline: calc(50% - 50vw); padding: clamp(4rem, 8vw, 7rem) 30px; }
 	.hero-label { display: flex; align-items: baseline; justify-content: center; gap: 1rem; }
@@ -433,13 +513,13 @@
 		.video-story--reduced { padding-inline: 20px; }
 		.video-story--reduced .video-story-frame { border-radius: 1.25rem !important; }
 		.section-top { margin-bottom: 1.6rem; }
-		.tools { padding: 1.5rem 1rem; }
-		.tools-content { min-height: 700px; padding: 4rem 1rem 2.5rem; border-radius: 1.25rem; }
-		.tools-heading .section-heading { font-size: clamp(1.85rem, 8vw, 2.7rem); }
-		.tools-orbit { height: 15rem; margin-top: 3.5rem; }
-		.tool-orbit-icon { width: clamp(78px, 24vw, 102px); height: clamp(68px, 20vw, 90px); border-radius: 12px; }
-		.tool-icon-tile { border-radius: 12px; }
-		.tool-feature { min-height: 90px; margin-top: 0; }
+		.tools { padding: 1rem .75rem; }
+		.tools-content { padding: 2.5rem 1rem; border-radius: 1.25rem; }
+		.tools-heading .section-heading { font-size: clamp(1.5rem, 6vw, 2rem); line-height: 1.15; }
+		.tools-orbit { height: 15rem; margin-top: 1.5rem; }
+		.tool-orbit-icon { width: clamp(58px, 18vw, 77px); height: clamp(51px, 15vw, 68px); border-radius: 10px; }
+		.tool-icon-tile { border-radius: 10px; }
+		.tool-feature { min-height: 82px; margin-top: .75rem; }
 		.tools-orbit--static { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .65rem; margin-block: 2.5rem 1.5rem; }
 		.discipline-intro { grid-template-columns: 1fr; gap: .9rem; }
 		.discipline-list { grid-template-columns: 1fr; }
