@@ -4,8 +4,111 @@
 </svelte:head>
 
 <script>
+	import { onMount, tick } from 'svelte';
+
 	const heroLineOne = Array.from('Teknologi Rekayasa');
 	const heroLineTwo = Array.from('Multimedia');
+	// Isi dengan path aset video lokal saat file tersedia, misalnya /videos/beranda.mp4.
+	const videoSource = '';
+	/** @type {HTMLElement | undefined} */
+	let videoStoryTrack;
+	/** @type {HTMLElement | undefined} */
+	let videoStory;
+	/** @type {HTMLElement | undefined} */
+	let videoStoryStage;
+	/** @type {HTMLElement | undefined} */
+	let videoFrame;
+	let prefersReducedMotion = $state(false);
+	let videoUnavailable = $state(!videoSource);
+
+	function markVideoUnavailable() {
+		videoUnavailable = true;
+	}
+
+	function markVideoReady() {
+		videoUnavailable = false;
+	}
+
+	onMount(() => {
+		let animationFrame = 0;
+		let trackStart = 0;
+		let transitionStart = 0;
+		let transitionDistance = 1;
+		let viewportHeight = window.innerHeight;
+		let stageHeight = 0;
+		let startTop = 0;
+		let endTop = 0;
+		let startWidth = 0;
+		let endWidth = 0;
+		const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+		function measureStory() {
+			if (!videoStoryTrack || !videoStory || !videoStoryStage || !videoFrame) return;
+
+			viewportHeight = window.innerHeight;
+			stageHeight = videoStoryStage.clientHeight;
+			const availableWidth = videoStory.clientWidth * 0.9;
+			const maxFrameHeight = Math.min(viewportHeight * 0.85, stageHeight * 0.85);
+			endWidth = Math.min(availableWidth, maxFrameHeight * (1352 / 834), 1352);
+			const endHeight = endWidth * (834 / 1352);
+			endTop = Math.max(0, stageHeight * 0.925 - endHeight);
+			startWidth = Math.min(endWidth * 0.528, 713);
+			startTop = stageHeight * 0.96;
+			trackStart = window.scrollY + videoStoryTrack.getBoundingClientRect().top;
+			transitionStart = trackStart;
+			transitionDistance = Math.max(1, videoStoryTrack.clientHeight - videoStory.clientHeight);
+			videoFrame.style.width = `${endWidth}px`;
+			videoFrame.style.top = `${endTop}px`;
+		}
+
+		function renderStory() {
+			animationFrame = 0;
+			if (!videoFrame || prefersReducedMotion) return;
+
+			const linearProgress = Math.min(1, Math.max(0, (window.scrollY - transitionStart) / transitionDistance));
+			const progress = linearProgress * linearProgress * (3 - 2 * linearProgress);
+			const scale = (startWidth + (endWidth - startWidth) * progress) / endWidth;
+			const yOffset = (startTop - endTop) * (1 - progress);
+			const radius = 35 / scale + (35 - 35 / scale) * progress;
+			const startColor = [31, 27, 27];
+			const endColor = [34, 32, 32];
+			const color = startColor.map((channel, index) => Math.round(channel + (endColor[index] - channel) * progress));
+
+			videoFrame.style.transform = `translate3d(-50%, ${yOffset}px, 0) scale(${scale})`;
+			videoFrame.style.borderRadius = `${radius}px`;
+			videoFrame.style.backgroundColor = `rgb(${color.join(' ')})`;
+		}
+
+		function scheduleStoryUpdate() {
+			if (!animationFrame) animationFrame = requestAnimationFrame(renderStory);
+		}
+
+		function handleResize() {
+			measureStory();
+			scheduleStoryUpdate();
+		}
+
+		async function handleMotionPreferenceChange() {
+			prefersReducedMotion = reducedMotionQuery.matches;
+			await tick();
+			measureStory();
+			scheduleStoryUpdate();
+		}
+
+		prefersReducedMotion = reducedMotionQuery.matches;
+		measureStory();
+		window.addEventListener('scroll', scheduleStoryUpdate, { passive: true });
+		window.addEventListener('resize', handleResize);
+		reducedMotionQuery.addEventListener('change', handleMotionPreferenceChange);
+		scheduleStoryUpdate();
+
+		return () => {
+			window.removeEventListener('scroll', scheduleStoryUpdate);
+			window.removeEventListener('resize', handleResize);
+			reducedMotionQuery.removeEventListener('change', handleMotionPreferenceChange);
+			if (animationFrame) cancelAnimationFrame(animationFrame);
+		};
+	});
 </script>
 
 <div class="home-page">
@@ -26,6 +129,44 @@
 	</div>
 </section>
 
+<div class="video-story-track" class:video-story-track--reduced={prefersReducedMotion} bind:this={videoStoryTrack}>
+	<section
+		class="video-story"
+		class:video-story--reduced={prefersReducedMotion}
+		aria-label="Video pengantar program studi"
+		bind:this={videoStory}
+	>
+		<div class="video-story-stage" bind:this={videoStoryStage}>
+			<div class="video-story-frame" bind:this={videoFrame}>
+				<video
+					class="prototype-video"
+					src={videoSource || undefined}
+					autoplay
+					muted
+					loop
+					playsinline
+					preload="metadata"
+					aria-hidden="true"
+					onerror={markVideoUnavailable}
+					onloadeddata={markVideoReady}
+				></video>
+				{#if videoUnavailable}<p class="video-status" role="status">Video belum tersedia</p>{/if}
+			</div>
+		</div>
+	</section>
+</div>
+
+<section class="tools section-rule" aria-labelledby="tools-title">
+	<div class="tools-content">
+		<p class="eyebrow">Teknologi multimedia</p>
+		<h2 id="tools-title" class="section-heading">Tools used in practice Warga Multimedia</h2>
+		<div class="tool-feature">
+			<span class="tool-name">xampp</span>
+			<p>Database berbasis SQL</p>
+		</div>
+	</div>
+</section>
+
 <section class="disciplines section-rule" aria-labelledby="disciplines-title">
 	<div class="section-content">
 	<div class="section-top"><p class="eyebrow">Program studi</p></div>
@@ -37,6 +178,7 @@
 		<a href="/struktur"><span>01</span><strong>Web Design</strong><span aria-hidden="true">↗</span></a>
 		<a href="/struktur"><span>02</span><strong>Desain Grafis</strong><span aria-hidden="true">↗</span></a>
 		<a href="/struktur"><span>03</span><strong>Videografi</strong><span aria-hidden="true">↗</span></a>
+		<a href="/struktur"><span>04</span><strong>Animasi</strong><span aria-hidden="true">↗</span></a>
 	</div>
 	</div>
 </section>
@@ -44,18 +186,18 @@
 <section class="latest section-rule" aria-label="Berita dan karya mahasiswa">
 	<div class="section-content latest-content">
 	<div class="latest-panel">
-		<div class="section-top"><p class="eyebrow">Publikasi</p><span class="section-index">02</span></div>
-		<h2 class="section-heading">Berita prodi</h2>
-		<p class="latest-copy">Aktivitas dan kabar terbaru dari Program Studi TRM.</p>
-		<p class="empty-note">Belum ada berita yang dipublikasikan.</p>
-		<a class="text-link" href="/berita">Semua berita <span aria-hidden="true">↗</span></a>
-	</div>
-	<div class="latest-panel">
-		<div class="section-top"><p class="eyebrow">Showcase</p><span class="section-index">03</span></div>
+		<div class="section-top"><p class="eyebrow">Showcase</p><span class="section-index">02</span></div>
 		<h2 class="section-heading">Karya mahasiswa</h2>
 		<p class="latest-copy">Project mahasiswa dalam bidang multimedia.</p>
 		<p class="empty-note">Belum ada karya yang dipublikasikan.</p>
 		<a class="text-link" href="/karya">Lihat showcase <span aria-hidden="true">↗</span></a>
+	</div>
+	<div class="latest-panel">
+		<div class="section-top"><p class="eyebrow">Publikasi</p><span class="section-index">03</span></div>
+		<h2 class="section-heading">Berita prodi</h2>
+		<p class="latest-copy">Aktivitas dan kabar terbaru dari Program Studi TRM.</p>
+		<p class="empty-note">Belum ada berita yang dipublikasikan.</p>
+		<a class="text-link" href="/berita">Semua berita <span aria-hidden="true">↗</span></a>
 	</div>
 	</div>
 </section>
@@ -72,7 +214,24 @@
 	.home-page { position: relative; min-height: 100vh; text-align: center; background: transparent; }
 	.home-content { position: relative; z-index: 1; width: min(calc(100% - 2 * var(--page-gutter)), var(--page-max)); margin: 0 auto; }
 	.section-content { box-sizing: border-box; width: min(calc(100% - 2 * var(--page-gutter)), var(--page-max)); margin-inline: auto; }
-	.hero { position: relative; box-sizing: border-box; width: 100vw; height: 100vh; height: 100dvh; min-height: 100vh; min-height: 100dvh; display: flex; align-items: center; flex-direction: column; justify-content: center; margin-inline: calc(50% - 50vw); padding: clamp(4rem, 8vw, 7rem) clamp(1.25rem, 5vw, 4.5rem); }
+	.video-story-track { position: relative; box-sizing: border-box; width: 100vw; height: 135vh; height: 135svh; margin-top: -40vh; margin-top: -40svh; margin-inline: calc(50% - 50vw); }
+	.video-story { position: sticky; top: 0; box-sizing: border-box; width: 100%; height: 100vh; height: 100svh; padding-inline: 30px; }
+	.video-story-stage { position: relative; width: 100%; height: 100%; overflow: visible; }
+	.video-story-frame { position: absolute; top: 0; left: 50%; overflow: hidden; aspect-ratio: 1352 / 834; border-radius: 35px; background: #1f1b1b; transform-origin: 50% 0; will-change: transform, border-radius, background-color; }
+	.prototype-video { display: block; width: 100%; height: 100%; object-fit: cover; }
+	.video-status { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; color: rgb(255 255 255 / 72%); font: 500 clamp(1rem, 2.2vw, 1.5rem)/1.4 'Inter', sans-serif; }
+	.video-story-track--reduced { height: auto; margin-top: 0; padding-block: var(--space-section); }
+	.video-story--reduced { position: relative; top: auto; height: auto; padding-inline: 30px; }
+	.video-story--reduced .video-story-stage { height: auto; }
+	.video-story--reduced .video-story-frame { position: relative; top: auto !important; left: auto; width: min(90%, 1352px) !important; margin-inline: auto; border-radius: 35px !important; transform: none !important; }
+	.tools { box-sizing: border-box; width: 100vw; margin-inline: calc(50% - 50vw); padding: var(--space-section) var(--page-gutter); background: #f1f2f2; }
+	.tools-content { box-sizing: border-box; width: min(100%, var(--page-max)); min-height: 430px; display: flex; align-items: center; flex-direction: column; justify-content: center; margin-inline: auto; padding: clamp(2rem, 6vw, 5rem) 1.5rem; border-radius: 2rem; background: #fff; text-align: center; }
+	.tools-content > .eyebrow { margin: 0 0 1rem; opacity: .65; }
+	.tools-content .section-heading { max-width: 760px; margin: 0; color: #625f5f; font-size: clamp(1.7rem, 4vw, 3rem); }
+	.tool-feature { margin-top: 4rem; }
+	.tool-name { font: 500 clamp(2rem, 4vw, 3rem)/1.1 'Inter', sans-serif; letter-spacing: -.04em; }
+	.tool-feature p { margin: .35rem 0 0; font: 400 1.1rem/1.5 'Inter', sans-serif; opacity: .75; }
+	.hero { position: relative; box-sizing: border-box; width: 100vw; height: 100vh; height: 100dvh; min-height: 100vh; min-height: 100dvh; display: flex; align-items: center; flex-direction: column; justify-content: center; margin-inline: calc(50% - 50vw); padding: clamp(4rem, 8vw, 7rem) 30px; }
 	.hero-label { display: flex; align-items: baseline; justify-content: center; gap: 1rem; }
 	.hero-label p { margin: 0; font: 500 25px/1.35 'Inter', sans-serif; }
 	.hero-label span { font: 400 18px/1.4 'Inter', sans-serif; opacity: .72; }
@@ -102,7 +261,7 @@
 	.section-index { margin: 0; font: 400 .72rem/1.4 'Inter', sans-serif; opacity: .65; }
 	.discipline-intro { display: grid; grid-template-columns: 1fr; justify-items: center; gap: .9rem; margin: 0 0 2.5rem; }
 	.discipline-intro p { max-width: 600px; margin: 0; font: 400 .95rem/1.7 'Inter', sans-serif; opacity: .82; }
-	.discipline-list { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--line); }
+	.discipline-list { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--line); }
 	.discipline-list a { display: grid; grid-template-columns: 1fr auto; justify-items: center; gap: 2.6rem .6rem; padding: 1rem 1.25rem 1.1rem 0; text-decoration: none; border-bottom: 1px solid var(--line); }
 	.discipline-list a + a { padding-left: 1.2rem; border-left: 1px solid var(--line); }
 	.discipline-list span:first-child { grid-column: 1 / -1; font: 400 .72rem/1 'Inter', sans-serif; opacity: .62; }
@@ -121,12 +280,17 @@
 	.accreditation-band .eyebrow { margin: 0 0 .8rem; opacity: .65; }
 	.accreditation-band p:not(.eyebrow) { max-width: 370px; margin: 0; font: 400 .9rem/1.7 'Inter', sans-serif; opacity: .82; }
 	@media (max-width: 700px) {
-		.hero { padding-block: 6rem 5rem; }
+		.hero { padding: 6rem 20px 5rem; }
+		.video-story { padding-inline: 20px; }
 		.hero-label p { font-size: clamp(1.15rem, 5vw, 1.5rem); }
 		.hero-label span { font-size: .95rem; }
 		h1 { font-size: clamp(1.9rem, 8.4vw, 3.4rem); line-height: 1.02; }
 		.hero-bottom { align-items: center; }
+		.video-story--reduced { padding-inline: 20px; }
+		.video-story--reduced .video-story-frame { border-radius: 1.25rem !important; }
 		.section-top { margin-bottom: 1.6rem; }
+		.tools { padding-block: var(--space-section); }
+		.tools-content { min-height: 350px; border-radius: 1.25rem; }
 		.discipline-intro { grid-template-columns: 1fr; gap: .9rem; }
 		.discipline-list { grid-template-columns: 1fr; }
 		.discipline-list a, .discipline-list a + a { grid-template-columns: 2.4rem 1fr auto; align-items: center; gap: 1rem; padding: 1rem 0; border-left: 0; }

@@ -33,7 +33,7 @@
 
 <style>
 	.site-shell { width: min(calc(100% - 2 * var(--page-gutter)), var(--page-max)); margin: 0 auto; }
-	.home-background-page.active { position: relative; display: flow-root; isolation: isolate; min-height: 100vh; overflow: hidden; background: #fff; }
+	.home-background-page.active { position: relative; display: flow-root; isolation: isolate; min-height: 100vh; overflow: clip; background: #fff; }
 	.site-shell.home-shell { position: relative; z-index: 1; }
 	.site-shell.home-shell > .home-content-shell { position: relative; z-index: 1; }
 	main:focus { outline: none; }
