@@ -88,7 +88,7 @@
 			const width = toolsOrbit.clientWidth;
 			const count = toolItems.length;
 			const spacing = width < 700 ? Math.max(72, width * 0.29) : Math.min(265, width * 0.184);
-			const maxVisibleOffset = Math.max(1, Math.min((count - 1) / 2, width / spacing));
+			const curveDepth = width < 700 ? 18 : 23.5;
 			const nextActiveIndex = positiveModulo(Math.round(orbitPhase), count);
 
 			if (activeToolIndex !== nextActiveIndex) activeToolIndex = nextActiveIndex;
@@ -100,12 +100,10 @@
 				let offset = positiveModulo(index - orbitPhase + count / 2, count) - count / 2;
 				if (offset < -count / 2) offset += count;
 				const distance = Math.abs(offset);
-				const centerDip = 28 * Math.exp(-(offset * offset) / 1.125);
-				const edgeDrop = 68 * (distance / maxVisibleOffset) ** 2;
-				const y = 8 + centerDip + edgeDrop;
+				const y = 8 + curveDepth * offset ** 2;
 				const scale = Math.max(0.44, 1 - distance * 0.115);
 				const opacity = Math.max(0.3, 1 - distance * 0.14);
-				const rotation = Math.max(-24, Math.min(24, -offset * 5.5));
+				const rotation = Math.max(-24, Math.min(24, Math.atan2(2 * curveDepth * offset, spacing) * (180 / Math.PI)));
 
 				element.style.left = `${width / 2 + offset * spacing}px`;
 				element.style.top = `${y}px`;
