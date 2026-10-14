@@ -15,18 +15,14 @@
 	/** @type {ChatMessage[]} */
 	let messages = $state([]);
 	let nextMessageId = 0;
-	/** @type {HTMLInputElement | undefined} */
-	let questionInput = $state();
 	/** @type {HTMLDivElement | undefined} */
 	let messageList = $state();
 	/** @type {HTMLButtonElement | undefined} */
 	let launcherButton = $state();
 
-	async function toggleChat() {
+	function toggleChat() {
 		open = !open;
-		await tick();
-		if (open) questionInput?.focus();
-		else launcherButton?.focus();
+		if (!open) launcherButton?.focus();
 	}
 
 	/** @param {KeyboardEvent} event */
@@ -56,7 +52,6 @@
 		if (!submittedQuestion) {
 			chatState = 'empty';
 			errorMessage = '';
-			questionInput?.focus();
 			return;
 		}
 		if (chatState === 'loading') return;
@@ -141,7 +136,6 @@
 				<div class="input-row">
 					<input
 						id="chat-question"
-						bind:this={questionInput}
 						bind:value={question}
 						oninput={handleInput}
 						maxlength="2000"

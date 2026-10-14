@@ -19,7 +19,7 @@
 
 	onMount(() => {
 		const updateScrollState = () => {
-			hasScrolled = window.scrollY > 50;
+			hasScrolled = window.scrollY > (isMobileViewport ? 20 : 50);
 		};
 		const updateNavbarHeight = () => {
 			if (headerElement) navbarHeight = Math.ceil(headerElement.getBoundingClientRect().bottom);
@@ -30,6 +30,7 @@
 		const mobileBreakpoint = window.matchMedia('(max-width: 900px)');
 		const updateMobileViewport = () => {
 			isMobileViewport = mobileBreakpoint.matches;
+			updateScrollState();
 			if (!isMobileViewport) menuOpen = false;
 		};
 		mobileBreakpoint.addEventListener('change', updateMobileViewport);
@@ -106,8 +107,8 @@
 	.skip-link:focus { transform: translateY(0); }
 	@media (max-width: 900px) {
 		.navbar-spacer { height: 64px; }
-		.site-header { top: 0; left: 0; width: 100%; max-width: none; align-items: stretch; flex-direction: column; justify-content: center; gap: 0; padding: calc(10px + env(safe-area-inset-top, 0px)) max(20px, env(safe-area-inset-right, 0px)) 10px max(20px, env(safe-area-inset-left, 0px)); border-radius: 0; box-shadow: none; transform: none; }
-		.site-header.scrolled { box-shadow: none; }
+		.site-header { top: 0; left: 0; width: 100%; max-width: none; align-items: stretch; flex-direction: column; justify-content: center; gap: 0; padding: calc(10px + env(safe-area-inset-top, 0px)) max(20px, env(safe-area-inset-right, 0px)) 10px max(20px, env(safe-area-inset-left, 0px)); border-radius: 0; box-shadow: none; transform: none; transition: padding 220ms ease, box-shadow 220ms ease; }
+		.site-header.scrolled { padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-left: max(16px, env(safe-area-inset-left, 0px)); box-shadow: 0 3px 12px rgb(0 0 0 / 8%); }
 		.site-header.menu-open { border-radius: 0; }
 		.header-top-row { display: flex; width: 100%; min-width: 0; align-items: center; justify-content: space-between; gap: .5rem; }
 		.wordmark { min-width: 0; flex: 1 1 auto; }
