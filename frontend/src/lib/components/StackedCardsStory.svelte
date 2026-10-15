@@ -10,7 +10,7 @@
 			description: 'Rancang antarmuka dan pengalaman web, dari struktur halaman hingga implementasi interaktif.',
 			cta: 'Pelajari program studi',
 			href: '/profil',
-			image: '/images/konsentrasi/konsentrasi-01.svg',
+			image: '/images/konsentrasi/konsentrasi-01.jpg',
 			background: '#dce7ed'
 		},
 		{
@@ -19,7 +19,7 @@
 			description: 'Olah tipografi, warna, dan komposisi untuk menyampaikan pesan melalui media visual.',
 			cta: 'Pelajari program studi',
 			href: '/profil',
-			image: '/images/konsentrasi/konsentrasi-02.svg',
+			image: '/images/konsentrasi/konsentrasi-02.jpg',
 			background: '#e8e1dc'
 		},
 		{
@@ -28,7 +28,7 @@
 			description: 'Produksi video melalui perencanaan, pengambilan gambar, penyuntingan, dan penyajian cerita.',
 			cta: 'Pelajari program studi',
 			href: '/profil',
-			image: '/images/konsentrasi/konsentrasi-03.svg',
+			image: '/images/konsentrasi/konsentrasi-03.jpg',
 			background: '#e2e6df'
 		},
 		{
@@ -37,7 +37,7 @@
 			description: 'Bangun gerak dan cerita visual melalui teknik animasi dua dimensi maupun tiga dimensi.',
 			cta: 'Pelajari program studi',
 			href: '/profil',
-			image: '/images/konsentrasi/konsentrasi-04.svg',
+			image: '/images/konsentrasi/konsentrasi-04.jpg',
 			background: '#e6e1eb'
 		}
 	];

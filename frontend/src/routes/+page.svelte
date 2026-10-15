@@ -3,6 +3,7 @@
 	import SeoHead from '../lib/SeoHead.svelte';
 	import StackedCardsStory from '../lib/components/StackedCardsStory.svelte';
 	import CinematicScrollTransition from '../lib/components/CinematicScrollTransition.svelte';
+	import HomepageShowcase from '../lib/components/HomepageShowcase.svelte';
 
 	const heroLineOne = Array.from('Teknologi Rekayasa');
 	const heroLineTwo = Array.from('Multimedia');
@@ -400,24 +401,7 @@
 
 <CinematicScrollTransition />
 
-<section class="latest section-rule" aria-label="Berita dan karya mahasiswa">
-	<div class="section-content latest-content">
-	<div class="latest-panel">
-		<div class="section-top"><p class="eyebrow">Showcase</p><span class="section-index">02</span></div>
-		<h2 class="section-heading">Karya mahasiswa</h2>
-		<p class="latest-copy">Project mahasiswa dalam bidang multimedia.</p>
-		<p class="empty-note">Belum ada karya yang dipublikasikan.</p>
-		<a class="text-link" href="/karya">Lihat showcase <span aria-hidden="true">↗</span></a>
-	</div>
-	<div class="latest-panel">
-		<div class="section-top"><p class="eyebrow">Publikasi</p><span class="section-index">03</span></div>
-		<h2 class="section-heading">Berita prodi</h2>
-		<p class="latest-copy">Aktivitas dan kabar terbaru dari Program Studi TRM.</p>
-		<p class="empty-note">Belum ada berita yang dipublikasikan.</p>
-		<a class="text-link" href="/berita">Semua berita <span aria-hidden="true">↗</span></a>
-	</div>
-	</div>
-</section>
+<HomepageShowcase />
 
 <section class="accreditation-band">
 	<div><p class="eyebrow">Informasi resmi</p><h2 class="section-heading">Akreditasi</h2></div>
@@ -495,7 +479,6 @@
 	.disciplines { box-sizing: border-box; width: 100vw; margin-inline: calc(50% - 50vw); padding: 1rem 0 var(--space-section); }
 	.section-top { display: flex; justify-content: center; gap: 1rem; margin: 0 0 2.5rem; }
 	.section-top .eyebrow { margin: 0; opacity: .65; }
-	.section-index { margin: 0; font: 400 .72rem/1.4 'Inter', sans-serif; opacity: .65; }
 	.discipline-intro { display: grid; grid-template-columns: 1fr; justify-items: center; gap: .9rem; margin: 0 0 2.5rem; }
 	.discipline-intro p { max-width: 600px; margin: 0; font: 400 .95rem/1.7 'Inter', sans-serif; opacity: .82; }
 	.discipline-list { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--line); }
@@ -504,15 +487,6 @@
 	.discipline-list span:first-child { grid-column: 1 / -1; font: 400 .72rem/1 'Inter', sans-serif; opacity: .62; }
 	.discipline-list strong { font: 500 1.1rem/1.35 'Poppins', sans-serif; }
 	.discipline-list span:last-child { align-self: end; }
-	.latest { box-sizing: border-box; width: 100vw; margin-inline: calc(50% - 50vw); padding: var(--space-section) 0; }
-	.latest-content { display: grid; grid-template-columns: 1fr 1fr; }
-	.latest-panel { min-height: 315px; display: flex; align-items: center; flex-direction: column; padding: 0 2.2rem 0 0; }
-	.latest-panel + .latest-panel { padding: 0 0 0 2.2rem; border-left: 1px solid var(--line); }
-	.latest-panel .section-top { width: 100%; margin-bottom: 2rem; }
-	.latest-panel .section-heading { margin-bottom: .7rem; }
-	.latest-copy { margin: 0; font: 400 .9rem/1.65 'Inter', sans-serif; opacity: .82; }
-	.empty-note { width: 100%; margin: auto 0 1.6rem; padding-top: 1rem; border-top: 1px solid var(--line); font: 400 .88rem/1.6 'Inter', sans-serif; opacity: .75; }
-	.latest-panel .text-link { margin-top: 0; }
 	.accreditation-band { display: grid; grid-template-columns: 1fr; justify-items: center; gap: 1rem; padding: 2.25rem 0 var(--space-section); border-top: 1px solid var(--line); }
 	.accreditation-band .eyebrow { margin: 0 0 .8rem; opacity: .65; }
 	.accreditation-band p:not(.eyebrow) { max-width: 370px; margin: 0; font: 400 .9rem/1.7 'Inter', sans-serif; opacity: .82; }
@@ -547,12 +521,6 @@
 		.discipline-list { grid-template-columns: 1fr; }
 		.discipline-list a, .discipline-list a + a { grid-template-columns: 2.4rem 1fr auto; align-items: center; gap: 1rem; padding: 1rem 0; border-left: 0; }
 		.discipline-list span:first-child { grid-column: auto; }
-		.latest-content { grid-template-columns: 1fr; }
-		.latest-panel { min-height: 290px; align-items: flex-start; padding: 0 20px 2.5rem; text-align: left; }
-		.latest-panel + .latest-panel { padding: 2.5rem 20px; border-top: 1px solid var(--line); border-left: 0; }
-		.latest-panel .section-top { justify-content: flex-start; }
-		.latest-panel .section-heading, .latest-copy, .empty-note { text-align: left; }
-		.latest-panel .text-link { align-self: flex-start; }
 		.accreditation-band { box-sizing: border-box; width: 100vw; grid-template-columns: 1fr; justify-items: stretch; align-items: start; gap: 0; margin-inline: calc(50% - 50vw); padding: 2.5rem calc(var(--page-gutter) + 20px) var(--space-section); text-align: left; }
 		.accreditation-band > div { text-align: left; }
 		.accreditation-band .eyebrow { margin-bottom: 2rem; }
