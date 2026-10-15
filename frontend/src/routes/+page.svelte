@@ -5,6 +5,7 @@
 
 <script>
 	import { onMount, tick } from 'svelte';
+	import StackedCardsStory from '../lib/components/StackedCardsStory.svelte';
 
 	const heroLineOne = Array.from('Teknologi Rekayasa');
 	const heroLineTwo = Array.from('Multimedia');
@@ -391,6 +392,8 @@
 	</div>
 	</div>
 </section>
+
+<StackedCardsStory />
 
 <section class="latest section-rule" aria-label="Berita dan karya mahasiswa">
 	<div class="section-content latest-content">
