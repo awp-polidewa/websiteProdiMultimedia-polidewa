@@ -2,6 +2,7 @@
 	import { onMount, tick } from 'svelte';
 	import SeoHead from '../lib/SeoHead.svelte';
 	import StackedCardsStory from '../lib/components/StackedCardsStory.svelte';
+	import CinematicScrollTransition from '../lib/components/CinematicScrollTransition.svelte';
 
 	const heroLineOne = Array.from('Teknologi Rekayasa');
 	const heroLineTwo = Array.from('Multimedia');
@@ -396,6 +397,8 @@
 </section>
 
 <StackedCardsStory />
+
+<CinematicScrollTransition />
 
 <section class="latest section-rule" aria-label="Berita dan karya mahasiswa">
 	<div class="section-content latest-content">
