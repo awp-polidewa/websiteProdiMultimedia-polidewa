@@ -4,6 +4,8 @@
 
 	/** @typedef {{ id: string, title: string, slug: string, description: string | null, thumbnailPath: string | null, thumbnailUrl: string | null, category: string, studentName: string | null, projectYear: number | null }} Project */
 	/** @typedef {{ id: string, title: string, slug: string, excerpt: string | null, thumbnailPath: string | null, thumbnailUrl: string | null, publishedAt: string }} NewsItem */
+	const NEWS_CARD_GAP = 12;
+	const NEWS_BUFFER_SLOTS = 2;
 
 	/** @type {Project[]} */
 	let projects = $state([]);
@@ -21,7 +23,7 @@
 	let newsProgress = 0;
 	let newsLayoutRevision = 0;
 	let newsSlots = $derived(news.length ? Array.from({ length: newsSlotCount }, (_, index) => {
-		const virtualIndex = newsBaseIndex + index - Math.floor(newsSlotCount / 2);
+		const virtualIndex = newsBaseIndex + index - NEWS_BUFFER_SLOTS;
 		const itemIndex = ((virtualIndex % news.length) + news.length) % news.length;
 		return { ...news[itemIndex], virtualIndex };
 	}) : []);
@@ -45,8 +47,7 @@
 
 	async function measureNewsGroup() {
 		if (!newsViewport || news.length === 0) return;
-		const isMobile = window.matchMedia('(max-width: 700px)').matches;
-		const nextSlotCount = getRequiredNewsSlotCount(isMobile, newsViewport.clientWidth, newsViewport.clientHeight);
+		const nextSlotCount = getRequiredNewsSlotCount(newsViewport.clientWidth);
 		if (nextSlotCount !== newsSlotCount) {
 			newsSlotCount = nextSlotCount;
 			await tick();
@@ -54,155 +55,29 @@
 		updateNewsLayout();
 	}
 
-	/**
-	 * Return the perspective geometry for one card at its live horizontal offset
-	 * from the viewport center. This is the shared input for both sizing and spacing.
-	 * @param {boolean} isMobile
-	 * @param {number} viewportWidth
-	 * @param {number} wallHeight
-	 * @param {number} centerX
-	 */
-	function getNewsCardGeometry(isMobile, viewportWidth, wallHeight, centerX) {
-		const halfWidth = Math.max(1, viewportWidth / 2);
-		const perspective = isMobile ? 900 : 1250;
-		const stops = isMobile
-			? [[0, 0.32, 0.48], [0.76, 0.42, 0.68], [1, 0.44, 0.72]]
-			: [[0, 0.1053, 0.422], [0.226, 0.1084, 0.478], [0.482, 0.1316, 0.636], [0.838, 0.1986, 1], [1, 0.205, 1.04]];
-		/** @param {number} distance @param {number} column */
-		const interpolate = (distance, column) => {
-			for (let index = 1; index < stops.length; index += 1) {
-				const previous = stops[index - 1];
-				const next = stops[index];
-				if (distance <= next[0]) {
-					const progress = (distance - previous[0]) / Math.max(0.001, next[0] - previous[0]);
-					return previous[column] + (next[column] - previous[column]) * progress;
-				}
-			}
-			return stops.at(-1)?.[column] ?? 0;
-		};
-		const boundedDistance = Math.min(1, Math.abs(centerX) / halfWidth);
-		const side = centerX < 0 ? -1 : centerX > 0 ? 1 : 0;
-		const width = interpolate(boundedDistance, 1) * viewportWidth;
-		const height = interpolate(boundedDistance, 2) * wallHeight;
-		const tilt = -(boundedDistance * side) * (isMobile ? 6 : 9);
-		const depth = boundedDistance * 12;
-		const angle = (tilt * Math.PI) / 180;
-		/** @param {number} localX */
-		const projectX = (localX) => {
-			const worldX = centerX + localX * Math.cos(angle);
-			const worldZ = depth - localX * Math.sin(angle);
-			return (worldX * perspective) / (perspective - worldZ);
-		};
-		const projectedEdges = [projectX(-width / 2), projectX(width / 2)];
-		const left = Math.min(...projectedEdges);
-		const right = Math.max(...projectedEdges);
-		const projectedWidth = right - left;
-		const taper = Math.round(Math.min(20, Math.max(0, (boundedDistance - 0.08) * 27)));
-		const clip = boundedDistance < 0.08 || side === 0
-			? 'inset(0)'
-			: side < 0
-				? `polygon(0 0, 100% ${taper}%, 100% ${100 - taper}%, 0 100%)`
-				: `polygon(0 ${taper}%, 100% 0, 100% 100%, 0 ${100 - taper}%)`;
-		return {
-			centerX,
-			width,
-			height,
-			left,
-			right,
-			projectedWidth,
-			tilt: `${tilt.toFixed(2)}deg`,
-			depth: `${depth.toFixed(1)}px`,
-			clip,
-			layer: `${Math.round(20 - boundedDistance * 10)}`
-		};
+	/** Return a stable card width that shows about four cards on desktop and fewer at narrower widths. @param {number} viewportWidth */
+	function getNewsCardWidth(viewportWidth) {
+		if (viewportWidth <= 700) return Math.max(250, Math.min(340, viewportWidth - 48));
+		if (viewportWidth <= 1000) return Math.max(280, (viewportWidth - NEWS_CARD_GAP * 2.4) / 2.4);
+		return Math.max(280, (viewportWidth - NEWS_CARD_GAP * 3) / 4);
 	}
 
-	/** @param {ReturnType<typeof getNewsCardGeometry>} previous @param {-1 | 1} direction @param {boolean} isMobile @param {number} viewportWidth @param {number} wallHeight */
-	function getAdjacentNewsCard(previous, direction, isMobile, viewportWidth, wallHeight) {
-		let centerX = previous.centerX + direction * (previous.projectedWidth + 12);
-		let item = getNewsCardGeometry(isMobile, viewportWidth, wallHeight, centerX);
-		for (let iteration = 0; iteration < 10; iteration += 1) {
-			const targetEdge = direction > 0 ? previous.right + 12 : previous.left - 12;
-			const currentEdge = direction > 0 ? item.left : item.right;
-			centerX += targetEdge - currentEdge;
-			item = getNewsCardGeometry(isMobile, viewportWidth, wallHeight, centerX);
-		}
-		return item;
-	}
-
-	/** @param {number} fraction @param {boolean} isMobile @param {number} viewportWidth @param {number} wallHeight */
-	function getAnchorOffset(fraction, isMobile, viewportWidth, wallHeight) {
-		const center = getNewsCardGeometry(isMobile, viewportWidth, wallHeight, 0);
-		return getAdjacentNewsCard(center, -1, isMobile, viewportWidth, wallHeight).centerX * fraction;
-	}
-
-	/**
-	 * Keep enough offscreen cards on both sides to cover the viewport throughout
-	 * the anchor's full one-card travel. Extra slots are visual overscan only;
-	 * each still uses the same modulo-backed news item and continuous geometry.
-	 * @param {boolean} isMobile
-	 * @param {number} viewportWidth
-	 * @param {number} wallHeight
-	 */
-	function getRequiredNewsSlotCount(isMobile, viewportWidth, wallHeight) {
-		const minimumCount = isMobile ? 7 : 13;
-		const halfWidth = viewportWidth / 2;
-		let requiredSteps = Math.floor(minimumCount / 2);
-
-		for (let sample = 0; sample <= 8; sample += 1) {
-			const fraction = sample / 8;
-			const anchorX = getAnchorOffset(fraction, isMobile, viewportWidth, wallHeight);
-			const center = getNewsCardGeometry(isMobile, viewportWidth, wallHeight, anchorX);
-
-			for (const direction of /** @type {const} */ ([-1, 1])) {
-				let previous = center;
-				for (let step = 1; step <= 20; step += 1) {
-					const card = getAdjacentNewsCard(previous, direction, isMobile, viewportWidth, wallHeight);
-					const crossedViewportEdge = direction > 0 ? card.right >= halfWidth : card.left <= -halfWidth;
-					if (crossedViewportEdge) {
-						// Keep one complete spare card beyond the card crossing the edge.
-						requiredSteps = Math.max(requiredSteps, step + 1);
-						break;
-					}
-					previous = card;
-				}
-			}
-		}
-
-		return requiredSteps * 2 + 1;
+	/** Keep enough fixed-pitch cards rendered to cover the viewport and both edges during looping. @param {number} viewportWidth */
+	function getRequiredNewsSlotCount(viewportWidth) {
+		const pitch = getNewsCardWidth(viewportWidth) + NEWS_CARD_GAP;
+		return Math.ceil(viewportWidth / pitch) + 1 + NEWS_BUFFER_SLOTS * 2;
 	}
 
 	function updateNewsLayout() {
 		if (!newsViewport || news.length === 0) return;
-		const isMobile = window.matchMedia('(max-width: 700px)').matches;
 		const viewportWidth = newsViewport.clientWidth;
-		const wallHeight = newsViewport.clientHeight;
-		const middle = Math.floor(newsSlotCount / 2);
+		const cardWidth = getNewsCardWidth(viewportWidth);
+		const pitch = cardWidth + NEWS_CARD_GAP;
 		const fraction = newsProgress - Math.floor(newsProgress);
-		const center = getNewsCardGeometry(isMobile, viewportWidth, wallHeight, getAnchorOffset(fraction, isMobile, viewportWidth, wallHeight));
-		/** @type {Array<ReturnType<typeof getNewsCardGeometry> | undefined>} */
-		const cards = Array(newsSlotCount);
-		cards[middle] = center;
-		for (const direction of /** @type {const} */ ([-1, 1])) {
-			let previous = center;
-			for (let step = 1; step <= middle; step += 1) {
-				const slotIndex = middle + direction * step;
-				const item = getAdjacentNewsCard(previous, direction, isMobile, viewportWidth, wallHeight);
-				cards[slotIndex] = item;
-				previous = item;
-			}
-		}
 		for (const card of /** @type {NodeListOf<HTMLAnchorElement>} */ (newsViewport.querySelectorAll('.news-card'))) {
 			const slotIndex = Number(card.style.getPropertyValue('--face'));
-			const item = cards[slotIndex];
-			if (!item) continue;
-			card.style.setProperty('--card-x', `${viewportWidth / 2 + item.centerX}px`);
-			card.style.setProperty('--card-width', `${item.width}px`);
-			card.style.setProperty('--card-height', `${item.height}px`);
-			card.style.setProperty('--card-tilt', item.tilt);
-			card.style.setProperty('--card-depth', item.depth);
-			card.style.setProperty('--card-clip', item.clip);
-			card.style.zIndex = item.layer;
+			card.style.setProperty('--card-x', `${(slotIndex - NEWS_BUFFER_SLOTS) * pitch - fraction * pitch}px`);
+			card.style.setProperty('--card-width', `${cardWidth}px`);
 		}
 	}
 
@@ -246,10 +121,7 @@
 
 	function getNewsDragPitch() {
 		if (!newsViewport) return 1;
-		const isMobile = window.matchMedia('(max-width: 700px)').matches;
-		const centerX = getAnchorOffset(newsProgress - Math.floor(newsProgress), isMobile, newsViewport.clientWidth, newsViewport.clientHeight);
-		const center = getNewsCardGeometry(isMobile, newsViewport.clientWidth, newsViewport.clientHeight, centerX);
-		return center.centerX - getAdjacentNewsCard(center, -1, isMobile, newsViewport.clientWidth, newsViewport.clientHeight).centerX;
+		return getNewsCardWidth(newsViewport.clientWidth) + NEWS_CARD_GAP;
 	}
 
 	/** @param {PointerEvent} event */
@@ -466,12 +338,19 @@
 					href={`/berita/${encodeURIComponent(slot.slug)}`}
 					onclick={handleCardClick}
 				>
-					{#if slot.thumbnailPath}<img class="news-card-image" src={mediaUrl(slot.thumbnailPath)} alt="" loading={Math.abs(slotIndex - Math.floor(newsSlotCount / 2)) < 2 ? 'eager' : 'lazy'} />{/if}
-					<span class="news-card-shade"></span>
+					<span class="news-card-content">
+					{#if slot.thumbnailPath}
+						<img class="news-card-image" src={mediaUrl(slot.thumbnailPath)} alt="" loading={Math.abs(slotIndex - NEWS_BUFFER_SLOTS) < 5 ? 'eager' : 'lazy'} />
+					{:else}
+						<span class="news-card-image-fallback" aria-label="Foto berita tidak tersedia">Foto tidak tersedia</span>
+					{/if}
 					<span class="news-card-copy">
-						{#if slot.publishedAt}<time datetime={slot.publishedAt}>{formatDate(slot.publishedAt)}</time>{/if}
 						<strong>{slot.title}</strong>
-						<span class="read-label">Baca berita <span aria-hidden="true">↗</span></span>
+						<span class="news-card-footer">
+							<span class="read-label">Baca Berita <span aria-hidden="true">↗</span></span>
+							{#if slot.publishedAt}<time datetime={slot.publishedAt}>{formatDate(slot.publishedAt)}</time>{/if}
+						</span>
+					</span>
 					</span>
 				</a>
 			{/each}
@@ -514,18 +393,24 @@
 	.news-cta:hover .cta-arrow { background: #fff; color: #002aff; }
 	.news-state, .news-empty { width: min(100% - 2rem, 780px); box-sizing: border-box; align-self: center; margin: auto 0; padding: 1.25rem; border-top: 1px solid var(--line); font: 400 .9rem/1.65 'Inter', sans-serif; text-align: center; }
 	.news-state button { margin-left: .7rem; }
-	.news-wall { position: relative; width: 100%; height: min(53svh, 545px); min-height: 350px; flex: 0 0 auto; overflow: hidden; margin-top: auto; perspective: 1250px; perspective-origin: 50% 50%; touch-action: pan-y; cursor: grab; }
+	.news-wall { position: relative; width: 100%; height: min(53svh, 545px); min-height: 350px; flex: 0 0 auto; overflow: hidden; margin-top: auto; touch-action: pan-y; cursor: grab; }
 	.news-wall:active { cursor: grabbing; }
-	.news-card { position: absolute; top: 50%; left: var(--card-x, 50%); display: flex; box-sizing: border-box; width: var(--card-width, 14vw); height: var(--card-height, 60%); min-width: 0; flex-direction: column; justify-content: flex-end; overflow: hidden; container-type: inline-size; background: #002aff; color: #fff; text-decoration: none; clip-path: var(--card-clip, inset(0)); transform: translate(-50%, -50%) translateZ(var(--card-depth, 0px)) rotateY(var(--card-tilt, 0deg)); transform-origin: center center; transform-style: preserve-3d; backface-visibility: hidden; transition: filter 180ms ease; }
+	.news-card { position: absolute; top: 16px; bottom: 16px; left: var(--card-x, 0px); display: block; box-sizing: border-box; width: var(--card-width, 25%); min-width: 0; overflow: hidden; container-type: inline-size; border-radius: 14px; background: #020b1d; color: #fff; text-decoration: none; transition: filter 180ms ease; }
+	.news-card-content { position: relative; display: flex; box-sizing: border-box; width: 100%; height: 100%; min-width: 0; min-height: 0; flex-direction: column; overflow: hidden; border-radius: inherit; background: #020b1d; }
 	.news-card:hover, .news-card:focus-visible { filter: brightness(1.12); }
 	.news-card:focus-visible { outline: 3px solid #ff5a14; outline-offset: -5px; }
-	.news-card-image, .news-card-shade { position: absolute; inset: 0; width: 100%; height: 100%; }
-	.news-card-image { object-fit: cover; opacity: .4; }
-	.news-card-shade { background: rgb(0 42 255 / 82%); }
-	.news-card-copy { position: relative; z-index: 1; display: flex; box-sizing: border-box; width: 100%; max-width: 100%; min-width: 0; min-height: 0; flex-direction: column; justify-content: end; gap: clamp(4px, 2.2cqw, 9px); overflow: hidden; padding: clamp(6px, 4.8cqw, 14px); color: #fff; text-shadow: 0 1px 8px rgb(0 0 0 / 25%); }
-	.news-card-copy time { font: 400 clamp(8px, 3cqw, 11px)/1.35 'Inter', sans-serif; opacity: .86; }
-	.news-card-copy strong { display: -webkit-box; min-width: 0; overflow: hidden; overflow-wrap: break-word; font: 600 clamp(9px, 5.8cqw, 15px)/1.2 'Poppins', sans-serif; line-clamp: 4; -webkit-box-orient: vertical; -webkit-line-clamp: 4; }
-	.read-label { display: inline-flex; max-width: 100%; align-items: center; flex-wrap: wrap; gap: .35rem; margin-top: .3rem; font: 500 clamp(8px, 3cqw, 11px)/1.3 'Inter', sans-serif; }
+	.news-card-image, .news-card-image-fallback { display: block; box-sizing: border-box; width: 100%; min-width: 0; min-height: 0; flex: 0 0 44%; }
+	.news-card-image { object-fit: cover; }
+	.news-card-image-fallback { display: grid; place-items: center; background: #172334; color: #a7b1c2; font: 500 clamp(9px, 3.2cqw, 12px)/1.4 'Inter', sans-serif; }
+	.news-card-copy { display: flex; box-sizing: border-box; width: 100%; max-width: 100%; min-width: 0; min-height: 0; flex: 1 1 auto; flex-direction: column; justify-content: space-between; gap: clamp(5px, 2cqw, 9px); overflow: hidden; padding: clamp(8px, 4.8cqw, 14px); background: #020b1d; color: #fff; }
+	.news-card-copy time { flex: 0 1 auto; color: #a7b1c2; font: 400 clamp(9px, 3cqw, 11px)/1.3 'Inter', sans-serif; text-align: right; }
+	.news-card-copy strong { display: -webkit-box; min-width: 0; overflow: hidden; overflow-wrap: anywhere; font: 600 clamp(11px, 5.4cqw, 16px)/1.2 'Poppins', sans-serif; line-clamp: 3; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
+	.news-card-footer { display: flex; min-width: 0; align-items: center; justify-content: space-between; gap: clamp(4px, 2cqw, 9px); }
+	.read-label { display: inline-flex; min-height: 27px; box-sizing: border-box; align-items: center; justify-content: center; gap: .3rem; flex: 0 0 auto; border-radius: 999px; padding: 0 clamp(9px, 3.5cqw, 13px); background: #fff; color: #020b1d; font: 500 clamp(9px, 3.2cqw, 11px)/1.2 'Inter', sans-serif; white-space: nowrap; }
+	@container (max-width: 220px) {
+		.news-card-footer { align-items: flex-start; flex-direction: column; gap: 4px; }
+		.news-card-copy time { text-align: left; }
+	}
 	@media (max-width: 700px) {
 		.work-section { min-height: 100svh; padding: 7rem 20px 3rem; }
 		.work-heading { grid-template-columns: 1fr; gap: 1rem; margin-bottom: 2rem; }
@@ -537,10 +422,14 @@
 		.news-heading { padding-inline: 20px; }
 		.news-heading h2 { font-size: clamp(1.69rem, 6.75vw, 2.475rem); }
 		.news-subtitle { font-size: clamp(1.2rem, 5.25vw, 1.95rem); }
-		.news-wall { height: 40svh; min-height: 280px; margin-top: auto; perspective: 900px; }
-		.news-card { border-radius: 12px; }
-		.news-card-copy { gap: clamp(4px, 2.2cqw, 7px); padding: clamp(6px, 4.8cqw, 10px); }
-		.read-label { gap: .2rem; margin-top: .1rem; }
+		.news-wall { height: 40svh; min-height: 280px; margin-top: auto; }
+		.news-card { top: 12px; bottom: 12px; border-radius: 12px; }
+		.news-card-content { border-radius: inherit; }
+		.news-card-copy { gap: 4px; padding: clamp(7px, 4.8cqw, 10px); }
+		.news-card-copy strong { line-clamp: 2; -webkit-line-clamp: 2; }
+		.news-card-footer { align-items: flex-start; flex-direction: column; gap: 4px; }
+		.news-card-copy time { text-align: left; }
+		.read-label { min-height: 24px; }
 	}
 	@media (max-width: 390px) {
 		.news-section { padding-top: 6.5rem; }
