@@ -213,12 +213,13 @@
 			viewportHeight = window.innerHeight;
 			stageHeight = videoStoryStage.clientHeight;
 			const availableWidth = videoStory.clientWidth * 0.9;
-			const maxFrameHeight = Math.min(viewportHeight * 0.85, stageHeight * 0.85);
+			const stageFrameLimit = videoStory.clientWidth <= 700 ? stageHeight : stageHeight * 0.85;
+			const maxFrameHeight = Math.min(viewportHeight * 0.85, stageFrameLimit);
 			endWidth = Math.min(availableWidth, maxFrameHeight * (1352 / 834), 1352);
 			const endHeight = endWidth * (834 / 1352);
 			endTop = Math.max(0, stageHeight * 0.925 - endHeight);
 			startWidth = Math.min(endWidth * 0.528, 713);
-			startTop = stageHeight * 0.96;
+			startTop = videoStory.clientWidth <= 700 ? viewportHeight * 0.96 : stageHeight * 0.96;
 			trackStart = window.scrollY + videoStoryTrack.getBoundingClientRect().top;
 			transitionStart = trackStart;
 			transitionDistance = Math.max(1, videoStoryTrack.clientHeight - videoStory.clientHeight);
@@ -228,7 +229,7 @@
 
 		function renderStory() {
 			animationFrame = 0;
-			if (!videoFrame || prefersReducedMotion) return;
+			if (!videoFrame || prefersReducedMotion || (videoStory?.clientWidth ?? 0) <= 700) return;
 
 			const linearProgress = Math.min(1, Math.max(0, (window.scrollY - transitionStart) / transitionDistance));
 			const progress = linearProgress * linearProgress * (3 - 2 * linearProgress);
@@ -245,6 +246,7 @@
 		}
 
 		function scheduleStoryUpdate() {
+			if (videoStory && videoStory.clientWidth <= 700) return;
 			if (!animationFrame) animationFrame = requestAnimationFrame(renderStory);
 		}
 
@@ -505,6 +507,10 @@
 	.accreditation-band p:not(.eyebrow) { max-width: 370px; margin: 0; font: 400 .9rem/1.7 'Inter', sans-serif; opacity: .82; }
 	@media (max-width: 700px) {
 		.hero { padding: 6rem 20px 5rem; }
+		.video-story-track:not(.video-story-track--reduced) { --mobile-video-height: max(25svh, 55.52vw); height: var(--mobile-video-height); margin-top: 0; }
+		.video-story:not(.video-story--reduced) { position: relative; top: auto; height: var(--mobile-video-height); }
+		.video-story:not(.video-story--reduced) .video-story-stage { height: 100%; }
+		.video-story:not(.video-story--reduced) .video-story-frame { position: relative; top: auto !important; left: auto; display: block; width: min(90vw, calc(100vw - 40px), 1352px) !important; margin-inline: auto; border-radius: 1.25rem !important; background-color: #1f1b1b !important; transform: none !important; }
 		.video-story { padding-inline: 20px; }
 		.hero-label p { font-size: clamp(1.15rem, 5vw, 1.5rem); }
 		.hero-label span { font-size: .95rem; }
