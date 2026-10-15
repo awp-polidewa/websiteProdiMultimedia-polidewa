@@ -351,24 +351,26 @@
 			<h2 id="tools-title" class="section-heading">Tools used in practice Warga Multimedia</h2>
 			<p class="tools-intro">Perangkat yang mendukung proses belajar dan produksi karya multimedia.</p>
 		</div>
-		<div class="tools-orbit" class:tools-orbit--static={prefersReducedMotion} aria-label="Pilih tools yang digunakan dalam pembelajaran dan produksi multimedia" bind:this={toolsOrbit}>
-			{#each toolItems as tool, index (tool.name)}
-				<button
-					class="tool-orbit-icon"
-					class:tool-orbit-icon--active={activeToolIndex === index}
-					type="button"
-					aria-label={`Pilih ${tool.name}`}
-					aria-pressed={activeToolIndex === index}
-					bind:this={toolIconElements[index]}
-					onclick={() => selectTool(index)}
-				>
-					<span class="tool-icon-tile"><img src={tool.icon} alt="" /></span>
-				</button>
-			{/each}
-		</div>
-		<div class="tool-feature" aria-atomic="true">
-			<h3 class="tool-name">{toolItems[activeToolIndex].name}</h3>
-			<p>{toolItems[activeToolIndex].description}</p>
+		<div class="tools-showcase" class:tools-showcase--static={prefersReducedMotion}>
+			<div class="tools-orbit" class:tools-orbit--static={prefersReducedMotion} aria-label="Pilih tools yang digunakan dalam pembelajaran dan produksi multimedia" bind:this={toolsOrbit}>
+				{#each toolItems as tool, index (tool.name)}
+					<button
+						class="tool-orbit-icon"
+						class:tool-orbit-icon--active={activeToolIndex === index}
+						type="button"
+						aria-label={`Pilih ${tool.name}`}
+						aria-pressed={activeToolIndex === index}
+						bind:this={toolIconElements[index]}
+						onclick={() => selectTool(index)}
+					>
+						<span class="tool-icon-tile"><img src={tool.icon} alt="" /></span>
+					</button>
+				{/each}
+			</div>
+			<div class="tool-feature" aria-atomic="true">
+				<h3 class="tool-name">{toolItems[activeToolIndex].name}</h3>
+				<p>{toolItems[activeToolIndex].description}</p>
+			</div>
 		</div>
 	</div>
 	<div class="tool-cursor-tooltip" class:tool-cursor-tooltip--visible={toolsTooltipVisible} aria-hidden="true" bind:this={toolsTooltip}>klik icons</div>
@@ -437,6 +439,7 @@
 	.tools-heading .eyebrow { margin: 0 0 1rem; opacity: .65; }
 	.tools-heading .section-heading { max-width: 820px; margin: 0 auto; color: #676363; font-size: clamp(1.5rem, 3.3vw, 3rem); line-height: 1.16; }
 	.tools-intro { margin: 1rem 0 0; color: #625f5f; font: 400 clamp(.9rem, 1.2vw, 1.05rem)/1.6 'Inter', sans-serif; }
+	.tools-showcase { width: 100%; display: flex; align-items: center; flex-direction: column; }
 	.tools-orbit { position: relative; width: 100%; height: clamp(16rem, 37vh, 21rem); flex: 0 0 auto; margin-top: clamp(1rem, 2vh, 1.5rem); overflow: hidden; }
 	.tool-orbit-icon { position: absolute; top: 0; left: 50%; width: clamp(75px, 10.4vw, 142px); height: clamp(61px, 8.5vw, 116px); display: grid; place-items: center; padding: 0; border: 0; border-radius: 12px; background: transparent; cursor: pointer; transform-origin: center; transition: filter 180ms ease, outline-color 180ms ease; }
 	.tool-icon-tile { width: 100%; height: 100%; display: grid; place-items: center; border-radius: 12px; background: #e5e5e5; }
@@ -525,7 +528,12 @@
 		.tools-orbit { height: 15rem; margin-top: 1.5rem; }
 		.tool-orbit-icon { width: clamp(58px, 18vw, 77px); height: clamp(51px, 15vw, 68px); border-radius: 10px; }
 		.tool-icon-tile { border-radius: 10px; }
-		.tool-feature { min-height: 82px; margin-top: .75rem; }
+		.tools-showcase { position: relative; padding-bottom: 5rem; }
+		.tool-feature { position: absolute; top: calc(100% - 9.5rem); left: 0; min-height: 0; margin: 0; }
+		.tool-feature p { margin-top: .3rem; }
+		.tools-showcase--static { padding-bottom: 0; }
+		.tools-showcase--static .tool-feature { position: relative; top: auto; left: auto; margin-top: .4rem; }
+		.tool-cursor-tooltip { display: none; }
 		.tools-orbit--static { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .65rem; margin-block: 2.5rem 1.5rem; }
 		.discipline-intro { grid-template-columns: 1fr; gap: .9rem; }
 		.discipline-list { grid-template-columns: 1fr; }
