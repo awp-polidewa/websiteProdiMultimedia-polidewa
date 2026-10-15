@@ -1,11 +1,9 @@
 <script>
 	import PageIntro from '../../lib/PageIntro.svelte';
+	import SeoHead from '../../lib/SeoHead.svelte';
 </script>
 
-<svelte:head>
-	<title>Profil Program Studi — Teknologi Rekayasa Multimedia</title>
-	<meta name="description" content="Profil Program Studi Teknologi Rekayasa Multimedia Politeknik Dewantara." />
-</svelte:head>
+<SeoHead title="Profil TRM Polidewa | Politeknik Dewantara" description="Profil Program Studi Teknologi Rekayasa Multimedia (TRM) Politeknik Dewantara, meliputi informasi program studi dan kegiatan pembelajaran." canonicalPath="/profil" />
 
 <PageIntro section="Tentang TRM · 01" title="Teknologi Rekayasa Multimedia" description="Program Studi Teknologi Rekayasa Multimedia di Politeknik Dewantara." />
 

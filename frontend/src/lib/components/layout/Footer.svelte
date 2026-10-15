@@ -5,7 +5,7 @@
 	</div>
 	<nav class="footer-links" aria-label="Jelajahi">
 		<p class="eyebrow">Jelajahi</p>
-		<ul><li><a href="/profil">Profil</a></li><li><a href="/struktur">Struktur dosen</a></li><li><a href="/berita">Berita</a></li></ul>
+		<ul><li><a href="/profil">Profil</a></li><li><a href="/struktur">Struktur dosen</a></li><li><a href="/konsentrasi">Konsentrasi multimedia</a></li><li><a href="/berita">Berita</a></li></ul>
 	</nav>
 	<nav class="footer-links" aria-label="Publikasi">
 		<p class="eyebrow">Publikasi</p>

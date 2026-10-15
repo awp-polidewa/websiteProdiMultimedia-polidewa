@@ -39,12 +39,10 @@
 		if (!value || Number.isNaN(date.getTime())) return 'Tanggal belum tersedia';
 		return new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Makassar' }).format(date);
 	}
+	import SeoHead from '../../lib/SeoHead.svelte';
 </script>
 
-<svelte:head>
-	<title>Berita Prodi — Teknologi Rekayasa Multimedia</title>
-	<meta name="description" content="Berita dan aktivitas terbaru Program Studi Teknologi Rekayasa Multimedia." />
-</svelte:head>
+<SeoHead title="Berita TRM Polidewa | Politeknik Dewantara" description="Berita, kegiatan, dan informasi terbaru Program Studi Teknologi Rekayasa Multimedia (TRM) Politeknik Dewantara." canonicalPath="/berita" />
 
 <PageIntro section="Publikasi · 03" title="Berita prodi" description="Berita dan aktivitas terbaru Program Studi Teknologi Rekayasa Multimedia." />
 

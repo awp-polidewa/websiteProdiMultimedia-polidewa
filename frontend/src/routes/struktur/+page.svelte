@@ -61,12 +61,10 @@
 	function selectLecturer(lecturer) {
 		selectNode(lecturer.id);
 	}
+	import SeoHead from '../../lib/SeoHead.svelte';
 </script>
 
-<svelte:head>
-	<title>Struktur Dosen — Teknologi Rekayasa Multimedia</title>
-	<meta name="description" content="Struktur program studi dan bidang konsentrasi dosen TRM Politeknik Dewantara." />
-</svelte:head>
+<SeoHead title="Struktur Dosen TRM | Politeknik Dewantara" description="Lihat struktur dosen Program Studi Teknologi Rekayasa Multimedia (TRM) Politeknik Dewantara beserta bidang konsentrasi yang tersedia." canonicalPath="/struktur" />
 
 <PageIntro section="Program studi · 02" title="Struktur & dosen" description="Struktur utama Program Studi Teknologi Rekayasa Multimedia." />
 

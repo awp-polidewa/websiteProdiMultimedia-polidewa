@@ -1,10 +1,6 @@
-<svelte:head>
-	<title>Teknologi Rekayasa Multimedia — Politeknik Dewantara</title>
-	<meta name="description" content="Pusat informasi dan publikasi Program Studi Teknologi Rekayasa Multimedia Politeknik Dewantara." />
-</svelte:head>
-
 <script>
 	import { onMount, tick } from 'svelte';
+	import SeoHead from '../lib/SeoHead.svelte';
 	import StackedCardsStory from '../lib/components/StackedCardsStory.svelte';
 
 	const heroLineOne = Array.from('Teknologi Rekayasa');
@@ -294,6 +290,12 @@
 	});
 </script>
 
+<SeoHead
+	title="TRM Polidewa — Teknologi Rekayasa Multimedia | Politeknik Dewantara"
+	description="Kenali Program Studi Teknologi Rekayasa Multimedia (TRM) Politeknik Dewantara atau Polidewa: profil, dosen, konsentrasi, karya mahasiswa, berita, dan akreditasi."
+	canonicalPath="/"
+/>
+
 <div class="home-page">
 <div class="home-content">
 <section class="hero" aria-labelledby="home-title">
@@ -543,9 +545,17 @@
 		.discipline-list a, .discipline-list a + a { grid-template-columns: 2.4rem 1fr auto; align-items: center; gap: 1rem; padding: 1rem 0; border-left: 0; }
 		.discipline-list span:first-child { grid-column: auto; }
 		.latest-content { grid-template-columns: 1fr; }
-		.latest-panel { min-height: 290px; padding: 0 0 2.5rem; }
-		.latest-panel + .latest-panel { padding: 2.5rem 0; border-top: 1px solid var(--line); border-left: 0; }
-		.accreditation-band { grid-template-columns: 1fr; align-items: start; gap: 1rem; }
+		.latest-panel { min-height: 290px; align-items: flex-start; padding: 0 20px 2.5rem; text-align: left; }
+		.latest-panel + .latest-panel { padding: 2.5rem 20px; border-top: 1px solid var(--line); border-left: 0; }
+		.latest-panel .section-top { justify-content: flex-start; }
+		.latest-panel .section-heading, .latest-copy, .empty-note { text-align: left; }
+		.latest-panel .text-link { align-self: flex-start; }
+		.accreditation-band { box-sizing: border-box; width: 100vw; grid-template-columns: 1fr; justify-items: stretch; align-items: start; gap: 0; margin-inline: calc(50% - 50vw); padding: 2.5rem calc(var(--page-gutter) + 20px) var(--space-section); text-align: left; }
+		.accreditation-band > div { text-align: left; }
+		.accreditation-band .eyebrow { margin-bottom: 2rem; }
+		.accreditation-band .section-heading { margin-bottom: .7rem; }
+		.accreditation-band p:not(.eyebrow) { max-width: none; }
+		.accreditation-band .text-link { justify-self: start; margin: 1.6rem 0 0; }
 	}
 	@media (max-width: 480px) {
 		.tools-orbit--static { grid-template-columns: repeat(3, minmax(0, 1fr)); }

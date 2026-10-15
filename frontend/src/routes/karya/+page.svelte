@@ -59,12 +59,10 @@
 	function categoryLabel(value) {
 		return categories.find((item) => item.value === value)?.label ?? value;
 	}
+	import SeoHead from '../../lib/SeoHead.svelte';
 </script>
 
-<svelte:head>
-	<title>Karya Mahasiswa — Teknologi Rekayasa Multimedia</title>
-	<meta name="description" content="Showcase karya dan project mahasiswa Program Studi Teknologi Rekayasa Multimedia." />
-</svelte:head>
+<SeoHead title="Karya Mahasiswa TRM | Politeknik Dewantara" description="Jelajahi showcase karya mahasiswa Teknologi Rekayasa Multimedia (TRM) Politeknik Dewantara dalam desain, coding, 3D, dan multimedia." canonicalPath="/karya" />
 
 <PageIntro section="Showcase · 04" title="Karya mahasiswa" description="Project mahasiswa dalam bidang multimedia, dipublikasikan sebagai showcase Program Studi TRM." />
 

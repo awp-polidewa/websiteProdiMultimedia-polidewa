@@ -35,12 +35,10 @@
 		if (Number.isNaN(date.getTime())) return null;
 		return new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Makassar' }).format(date);
 	}
+	import SeoHead from '../../lib/SeoHead.svelte';
 </script>
 
-<svelte:head>
-	<title>Akreditasi — Teknologi Rekayasa Multimedia</title>
-	<meta name="description" content="Informasi dan dokumen akreditasi resmi Program Studi Teknologi Rekayasa Multimedia." />
-</svelte:head>
+<SeoHead title="Akreditasi TRM | Politeknik Dewantara" description="Informasi status dan dokumen akreditasi resmi Program Studi Teknologi Rekayasa Multimedia (TRM) Politeknik Dewantara." canonicalPath="/akreditasi" />
 
 <PageIntro section="Informasi resmi · 05" title="Akreditasi" description="Informasi status dan dokumen akreditasi Program Studi Teknologi Rekayasa Multimedia." />
 

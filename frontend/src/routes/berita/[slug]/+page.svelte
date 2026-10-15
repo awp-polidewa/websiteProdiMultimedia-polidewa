@@ -1,5 +1,6 @@
 <script>
 	import { page as routePage } from '$app/state';
+	import SeoHead from '../../../lib/SeoHead.svelte';
 	import PageIntro from '../../../lib/PageIntro.svelte';
 	import { ApiError, mediaUrl, requestApi } from '../../../lib/admin/api.js';
 
@@ -41,10 +42,11 @@
 	}
 </script>
 
-<svelte:head>
-	<title>{article ? `${article.title} — Berita TRM` : 'Berita — Teknologi Rekayasa Multimedia'}</title>
-	{#if article?.excerpt}<meta name="description" content={article.excerpt} />{/if}
-</svelte:head>
+<SeoHead
+	title={article ? `${article.title} — Berita TRM Polidewa` : 'Berita TRM — Politeknik Dewantara'}
+	description={article?.excerpt ?? 'Berita dan aktivitas Program Studi Teknologi Rekayasa Multimedia Politeknik Dewantara.'}
+	noindex={notFound || Boolean(errorMessage)}
+/>
 
 {#if loading}
 	<main class="detail-state" role="status" aria-live="polite">Memuat berita…</main>

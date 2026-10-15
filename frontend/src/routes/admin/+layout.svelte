@@ -69,6 +69,10 @@
 	}
 </script>
 
+<svelte:head>
+	<meta name="robots" content="noindex, nofollow" />
+</svelte:head>
+
 {#if checking}
 	<div class="session-check" role="status" aria-live="polite">Memeriksa sesi admin…</div>
 {:else if isLoginRoute}
