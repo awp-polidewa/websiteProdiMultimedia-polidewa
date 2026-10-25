@@ -47,29 +47,45 @@
 		updateNewsLayout();
 	}
 
+	/** @param {number} viewportWidth @param {number} viewportHeight @param {number} wallHeight */
+	function getNewsCardSizes(viewportWidth, viewportHeight, wallHeight) {
+		const compactProgress = Math.min(1, Math.max(0, (viewportHeight - 768) / 256));
+		const targetActiveWidth = 340.11 + (520.8 - 340.11) * compactProgress;
+		const targetActiveHeight = 352.09 + (539.14 - 352.09) * compactProgress;
+		const targetSideWidth = 258.27 + (395.48 - 258.27) * compactProgress;
+		const targetSideHeight = 267.37 + (409.41 - 267.37) * compactProgress;
+		const activeWidth = Math.min(targetActiveWidth, Math.max(0, viewportWidth - 48));
+		const activeHeight = wallHeight >= targetActiveHeight - 0.15 ? targetActiveHeight : wallHeight;
+		const sideWidth = Math.min(targetSideWidth, activeWidth * (targetSideWidth / targetActiveWidth));
+		const sideHeight = Math.min(targetSideHeight, activeHeight * (targetSideHeight / targetActiveHeight));
+		return { activeWidth, activeHeight, sideWidth, sideHeight };
+	}
+
 	function updateNewsLayout() {
 		if (!newsViewport || news.length === 0) return;
 		const viewportWidth = newsViewport.clientWidth;
 		const wallHeight = newsViewport.getBoundingClientRect().height;
-		const activeWidth = Math.min(520.8, Math.max(0, viewportWidth - 48));
-		const activeHeight = wallHeight >= 539 ? 539.14 : wallHeight;
-		const sideWidth = Math.min(395.48, activeWidth * (395.48 / 520.8));
-		const sideHeight = Math.min(409.41, activeHeight * (409.41 / 539.14));
+		const { activeWidth, activeHeight, sideWidth, sideHeight } = getNewsCardSizes(viewportWidth, window.innerHeight, wallHeight);
+		const cardBottom = (wallHeight + activeHeight) / 2;
 		const pitch = viewportWidth <= 700
 			? activeWidth * 0.72 + NEWS_CARD_GAP
 			: (activeWidth + sideWidth) / 2 + NEWS_CARD_GAP;
 		const center = viewportWidth / 2;
 		for (const card of /** @type {NodeListOf<HTMLAnchorElement>} */ (newsViewport.querySelectorAll('.news-card'))) {
-			const slotIndex = Number(card.style.getPropertyValue('--face'));
-			const offset = newsSlots[slotIndex].virtualIndex - newsProgress;
+			// Use the keyed card's own virtual index. Slot positions are reassigned
+			// when the buffer advances, so using an array slot can briefly make a
+			// surviving card inherit the position of the card that entered behind it.
+			const virtualIndex = Number(card.dataset.virtualIndex);
+			const offset = virtualIndex - newsProgress;
 			const distance = Math.abs(offset);
 			const sizeProgress = Math.min(1, distance);
 			const width = activeWidth - (activeWidth - sideWidth) * sizeProgress;
 			const height = activeHeight - (activeHeight - sideHeight) * sizeProgress;
 			const opacity = 1 - Math.max(0, Math.min(1, (distance - 1.08) / 0.72));
-			card.style.setProperty('--card-x', `${center + offset * pitch}px`);
+			card.style.setProperty('--card-offset', `${center + offset * pitch - center}px`);
 			card.style.setProperty('--card-width', `${width}px`);
 			card.style.setProperty('--card-height', `${height}px`);
+			card.style.setProperty('--card-bottom', `${cardBottom}px`);
 			card.style.setProperty('--card-opacity', String(opacity));
 			card.style.setProperty('--card-depth', String(20 - Math.round(distance * 10)));
 			card.setAttribute('tabindex', distance <= 1.15 ? '0' : '-1');
@@ -96,11 +112,21 @@
 	function getNewsDragPitch() {
 		if (!newsViewport) return 1;
 		const viewportWidth = newsViewport.clientWidth;
-		const activeWidth = Math.min(520.8, Math.max(0, viewportWidth - 48));
-		const sideWidth = Math.min(395.48, activeWidth * (395.48 / 520.8));
+		const { activeWidth, sideWidth } = getNewsCardSizes(viewportWidth, window.innerHeight, newsViewport.getBoundingClientRect().height);
 		return viewportWidth <= 700
 			? activeWidth * 0.72 + NEWS_CARD_GAP
 			: (activeWidth + sideWidth) / 2 + NEWS_CARD_GAP;
+	}
+
+	/** @param {number} virtualIndex */
+	function getNewsCardOffset(virtualIndex) {
+		return `${(virtualIndex - newsProgress) * getNewsDragPitch()}px`;
+	}
+
+	/** @param {number} virtualIndex */
+	function getNewsCardOpacity(virtualIndex) {
+		const distance = Math.abs(virtualIndex - newsProgress);
+		return String(1 - Math.max(0, Math.min(1, (distance - 1.08) / 0.72)));
 	}
 
 	function snapNewsToNearestCard() {
@@ -112,6 +138,13 @@
 		if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
 		event.preventDefault();
 		advanceNewsProgress(event.key === 'ArrowRight' ? 1 : -1);
+	}
+
+	/** @param {MouseEvent} event @param {number} delta */
+	function handleNewsNavigationClick(event, delta) {
+		event.preventDefault();
+		event.stopPropagation();
+		advanceNewsProgress(delta);
 	}
 
 	/** @param {PointerEvent} event */
@@ -287,7 +320,8 @@
 					class="news-card"
 					class:news-card--active={Math.abs(slot.virtualIndex - newsProgress) < 0.5}
 					class:news-card--inactive={Math.abs(slot.virtualIndex - newsProgress) >= 0.5}
-					style={`--face:${slotIndex};`}
+					style={`--card-offset:${getNewsCardOffset(slot.virtualIndex)};--card-opacity:${getNewsCardOpacity(slot.virtualIndex)};`}
+					data-virtual-index={slot.virtualIndex}
 					href={`/berita/${encodeURIComponent(slot.slug)}`}
 					aria-label={`Baca berita: ${slot.title}`}
 					tabindex={Math.abs(slot.virtualIndex - newsProgress) <= 1.15 ? 0 : -1}
@@ -297,23 +331,25 @@
 					onclick={handleCardClick}
 				>
 					<span class="news-card-content">
-					{#if slot.thumbnailPath && !brokenNewsImages.has(slot.id)}
-						<img class="news-card-image" src={mediaUrl(slot.thumbnailPath)} alt="" loading={Math.abs(slotIndex - NEWS_BUFFER_SLOTS) < 5 ? 'eager' : 'lazy'} onerror={() => handleNewsImageError(slot.id)} />
-					{:else}
-						<span class="news-card-image-fallback" role="img" aria-label="Foto berita tidak tersedia">Foto tidak tersedia</span>
-					{/if}
-					<span class="news-card-copy">
-						<strong>{slot.title}</strong>
-						<span class="news-card-footer">
-							<span class="read-label">Baca Berita <span aria-hidden="true">↗</span></span>
-							{#if slot.publishedAt}<time datetime={slot.publishedAt}>{formatDate(slot.publishedAt)}</time>{/if}
+						<span class="news-card-media">
+							{#if slot.thumbnailPath && !brokenNewsImages.has(slot.id)}
+								<img class="news-card-image" src={mediaUrl(slot.thumbnailPath)} alt="" loading={Math.abs(slotIndex - NEWS_BUFFER_SLOTS) < 5 ? 'eager' : 'lazy'} onerror={() => handleNewsImageError(slot.id)} />
+							{:else}
+								<span class="news-card-image-fallback" aria-hidden="true"></span>
+							{/if}
 						</span>
-					</span>
+						<span class="news-card-copy">
+							<strong>{slot.title}</strong>
+							<span class="news-card-footer">
+								<span class="read-label">Baca Berita <span aria-hidden="true">↗</span></span>
+								{#if slot.publishedAt}<time datetime={slot.publishedAt}>{formatDate(slot.publishedAt)}</time>{/if}
+							</span>
+						</span>
 					</span>
 				</a>
 			{/each}
-			<button class="news-nav news-nav--previous" type="button" aria-label="Berita sebelumnya" onclick={() => advanceNewsProgress(-1)}><span aria-hidden="true">←</span></button>
-			<button class="news-nav news-nav--next" type="button" aria-label="Berita berikutnya" onclick={() => advanceNewsProgress(1)}><span aria-hidden="true">→</span></button>
+			<button class="news-nav news-nav--previous" type="button" aria-label="Berita sebelumnya" onclick={(event) => handleNewsNavigationClick(event, -1)} onpointerdown={(event) => event.stopPropagation()}><span aria-hidden="true">←</span></button>
+			<button class="news-nav news-nav--next" type="button" aria-label="Berita berikutnya" onclick={(event) => handleNewsNavigationClick(event, 1)} onpointerdown={(event) => event.stopPropagation()}><span aria-hidden="true">→</span></button>
 		</div>
 	{/if}
 	<a class="news-cta" href="/berita">Lihat semua berita <span class="cta-arrow" aria-hidden="true">→</span></a>
@@ -343,7 +379,7 @@
 	.showcase-state button, .news-state button { min-height: 42px; padding: .55rem .8rem; border: 1px solid currentColor; background: transparent; color: inherit; font: inherit; cursor: pointer; }
 	.news-section { display: flex; box-sizing: border-box; width: 100vw; height: 100vh; height: 100dvh; min-height: 620px; flex-direction: column; align-items: center; overflow: hidden; margin-inline: calc(50% - 50vw); padding: clamp(7rem, 12vh, 8.25rem) 0 1.5rem; background: #fff; }
 	.news-heading { display: flex; align-items: center; flex-direction: column; padding: 0 1.5rem; text-align: center; }
-	.news-heading h2 { max-width: 850px; color: #071650; font-size: clamp(2rem, 4vw, 3.2rem); line-height: 1.12; letter-spacing: -.04em; text-wrap: balance; }
+	.news-heading h2 { max-width: 850px; color: #071650; font-size: 64px; line-height: 1.12; letter-spacing: -.04em; text-wrap: balance; }
 	.news-cta { display: inline-flex; min-height: 52px; flex: 0 0 auto; align-items: center; gap: .9rem; margin-top: clamp(1rem, 2.4vh, 1.5rem); padding: .25rem 1.2rem; border: 1px solid #244bff; border-radius: 999px; color: #1736db; font: 500 clamp(1rem, 1.8vw, 1.4rem)/1.2 'Inter', sans-serif; text-decoration: none; transition: background-color 220ms ease, color 220ms ease, transform 220ms ease; }
 	.news-cta:hover { background: #244bff; color: #fff; transform: translateY(-2px); }
 	.cta-arrow { display: grid; width: 36px; height: 36px; border: 1px solid currentColor; border-radius: 50%; place-items: center; font-size: 1.3rem; transition: transform 220ms ease; }
@@ -360,23 +396,30 @@
 	.news-nav:focus-visible { outline: 2px solid #244bff; outline-offset: 3px; }
 	.news-nav--previous { left: clamp(8px, 3vw, 40px); }
 	.news-nav--next { right: clamp(8px, 3vw, 40px); }
-	.news-card { position: absolute; top: 50%; left: var(--card-x, 50%); display: block; box-sizing: border-box; width: var(--card-width, 395.48px); height: var(--card-height, 409.41px); max-width: calc(100vw - 48px); max-height: min(539.14px, calc(100dvh - 300px)); min-width: 0; flex-shrink: 0; overflow: hidden; container-type: inline-size; border-radius: 28px; background: #000a1d; color: #fff; opacity: var(--card-opacity, 1); text-decoration: none; transform: translate3d(-50%, -50%, 0); z-index: var(--card-depth, 0); transition: left 500ms cubic-bezier(.2,.75,.25,1), width 500ms cubic-bezier(.2,.75,.25,1), height 500ms cubic-bezier(.2,.75,.25,1), opacity 420ms ease, filter 180ms ease; }
+	.news-card { position: absolute; top: var(--card-bottom, 50%); left: 50%; display: block; box-sizing: border-box; width: var(--card-width, 395.48px); height: var(--card-height, 409.41px); max-width: calc(100vw - 48px); max-height: min(539.14px, calc(100dvh - 300px)); min-width: 0; flex-shrink: 0; overflow: hidden; container-type: inline-size; border-radius: 28px; background: #000a1d; color: #fff; opacity: var(--card-opacity, 1); text-decoration: none; transform: translate3d(calc(-50% + var(--card-offset, 0px)), -100%, 0); z-index: var(--card-depth, 0); transition: transform 500ms cubic-bezier(.2,.75,.25,1), width 500ms cubic-bezier(.2,.75,.25,1), height 500ms cubic-bezier(.2,.75,.25,1), opacity 420ms ease, filter 180ms ease; }
 	.news-wall--dragging .news-card { transition: none; }
 	.news-wall--reduced .news-card { transition: none; }
-	.news-card-content { position: relative; display: flex; box-sizing: border-box; width: 100%; height: 100%; min-width: 0; min-height: 0; flex-direction: column; overflow: hidden; border-radius: inherit; background: #000a1d; }
+	.news-card-content { position: relative; display: flex; box-sizing: border-box; width: 100%; height: 100%; min-width: 0; min-height: 0; flex-direction: column; overflow: hidden; border-radius: inherit; padding: 13px; background: #000a1d; }
 	.news-card:hover, .news-card:focus-visible { filter: brightness(1.12); }
 	.news-card:focus-visible { outline: 3px solid #ff5a14; outline-offset: -5px; }
-	.news-card-image, .news-card-image-fallback { display: block; box-sizing: border-box; width: 100%; min-width: 0; min-height: 0; flex: 0 0 64%; }
-	.news-card-image { object-fit: cover; }
-	.news-card-image-fallback { display: grid; place-items: center; background: #172334; color: #a7b1c2; font: 500 clamp(9px, 3.2cqw, 12px)/1.4 'Inter', sans-serif; }
-	.news-card-copy { display: flex; box-sizing: border-box; width: 100%; max-width: 100%; min-width: 0; min-height: 0; flex: 1 1 auto; align-items: flex-start; flex-direction: column; justify-content: space-between; gap: clamp(5px, 2cqw, 9px); overflow: hidden; padding: clamp(12px, 4.8cqw, 24px); background: #000a1d; color: #fff; text-align: left; }
-	.news-card-copy time { flex: 0 1 auto; margin-left: auto; color: #a7b1c2; font: 400 clamp(9px, 3cqw, 11px)/1.3 'Inter', sans-serif; text-align: right; }
-	.news-card-copy strong { display: -webkit-box; width: 100%; min-width: 0; overflow: hidden; overflow-wrap: anywhere; font: 600 clamp(11px, 5.4cqw, 16px)/1.2 'Poppins', sans-serif; line-clamp: 3; text-align: left; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
-	.news-card-footer { display: flex; width: 100%; min-width: 0; align-items: center; justify-content: flex-start; gap: clamp(4px, 2cqw, 9px); }
-	.read-label { display: inline-flex; min-height: clamp(27px, 6cqw, 52px); box-sizing: border-box; align-items: center; justify-content: center; gap: .3rem; flex: 0 0 auto; align-self: flex-start; border-radius: 999px; padding: 0 clamp(9px, 3.5cqw, 20px); background: #fff; color: #000a1d; font: 500 clamp(9px, 3.2cqw, 17px)/1.2 'Inter', sans-serif; white-space: nowrap; }
+	.news-card-media { display: block; width: 100%; min-width: 0; flex: 0 0 auto; overflow: hidden; aspect-ratio: 1.6 / 1; border-radius: 14px; background: #000a1d; }
+	.news-card--active .news-card-media { aspect-ratio: 1.4 / 1; }
+	.news-card-image, .news-card-image-fallback { display: block; width: 100%; height: 100%; }
+	.news-card-image { object-fit: cover; object-position: center; }
+	.news-card-image-fallback { background: #000a1d; }
+	.news-card-copy { display: flex; box-sizing: border-box; width: 100%; max-width: 100%; min-width: 0; min-height: 0; flex: 1 1 auto; flex-direction: column; padding: clamp(8px, 2.7cqw, 14px) 2px 3px; background: #000a1d; color: #fff; text-align: left; }
+	.news-card-copy time { flex: 0 1 auto; margin-left: auto; color: rgb(255 255 255 / 72%); font: 400 clamp(9px, 2.4cqw, 12px)/1.3 'Inter', sans-serif; text-align: right; }
+	.news-card-copy strong { display: -webkit-box; width: 100%; min-width: 0; flex: 0 0 auto; overflow: hidden; overflow-wrap: break-word; color: #fff; font: 600 clamp(16px, 4.2cqw, 18px)/1.28 'Poppins', sans-serif; line-clamp: 2; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+	.news-card--active .news-card-copy strong { font-size: clamp(20px, 4.2cqw, 22px); line-height: 1.25; }
+	.news-card-footer { display: flex; width: 100%; min-width: 0; flex: 0 0 auto; align-items: center; justify-content: space-between; gap: clamp(4px, 2cqw, 9px); margin-top: auto; padding-bottom: clamp(0px, .6cqw, 4px); }
+	.read-label { display: inline-flex; min-height: clamp(27px, 6cqw, 42px); box-sizing: border-box; align-items: center; justify-content: center; gap: .3rem; flex: 0 0 auto; border-radius: 999px; padding: 0 clamp(9px, 3.5cqw, 20px); background: #fff; color: #000a1d; font: 500 clamp(10px, 2.7cqw, 15px)/1.2 'Inter', sans-serif; white-space: nowrap; }
+	@media (min-width: 701px) {
+		.news-cta { box-sizing: border-box; height: 38px; min-height: 38px; gap: .65rem; padding: .1rem .8rem; font-size: clamp(.95rem, 1.4vw, 1.2rem); }
+		.cta-arrow { width: 28px; height: 28px; font-size: 1.05rem; }
+	}
 	@container (max-width: 220px) {
-		.news-card-footer { align-items: flex-start; flex-direction: column; gap: 4px; }
-		.news-card-copy time { text-align: left; }
+		.news-card-footer { align-items: center; flex-direction: row; gap: 4px; }
+		.news-card-copy time { text-align: right; }
 	}
 	@media (max-width: 700px) {
 		.work-section { min-height: 100svh; padding: 7rem 20px 3rem; }
@@ -391,10 +434,13 @@
 		.news-wall { height: 40vh; height: 40dvh; min-height: 280px; margin-top: auto; }
 		.news-nav { width: 40px; height: 40px; }
 		.news-card { border-radius: 12px; }
-		.news-card-content { border-radius: inherit; }
-		.news-card-copy { gap: 4px; padding: clamp(7px, 4.8cqw, 10px); }
+		.news-card-media { border-radius: 10px; }
+		.news-card--active .news-card-media { aspect-ratio: 1.55 / 1; }
+		.news-card-copy { padding: clamp(6px, 2.2cqw, 10px) 2px 2px; }
 		.news-card-copy strong { line-clamp: 2; -webkit-line-clamp: 2; }
-		.news-card-copy time { margin-left: 0; text-align: left; }
+		.news-card--active .news-card-copy strong { font-size: clamp(17px, 5vw, 20px); line-height: 1.22; }
+		.news-card--inactive .news-card-copy strong { font-size: clamp(15px, 4.2vw, 17px); line-height: 1.25; }
+		.news-card-copy time { margin-left: auto; text-align: right; }
 		.read-label { min-height: 24px; }
 		.news-cta { min-height: 44px; margin-top: 1rem; margin-bottom: clamp(4.5rem, 9vh, 5.5rem); font-size: 1rem; }
 		.cta-arrow { width: 30px; height: 30px; }
