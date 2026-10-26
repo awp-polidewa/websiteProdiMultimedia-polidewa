@@ -542,7 +542,7 @@
 		.discipline-intro .section-heading { font-size: clamp(1.95rem, 8.25vw, 3rem); }
 		.discipline-intro p { font-size: clamp(.8rem, 3.5vw, 1rem); line-height: 1.55; }
 		.discipline-feature { grid-template-columns: 1fr; gap: 2rem; transform: none; }
-		.discipline-visual { max-width: min(100%, 480px); margin-inline: auto; }
+		.discipline-visual { width: min(78vw, 340px); max-width: 100%; margin-inline: auto; }
 		.discipline-details h3 { font-size: clamp(1.8rem, 6.75vw, 2.25rem); }
 		.discipline-list a { grid-template-columns: 2rem minmax(0, 1fr) auto; gap: .8rem; min-height: 2.8rem; }
 		.accreditation-band { box-sizing: border-box; width: 100vw; grid-template-columns: 1fr; justify-items: stretch; align-items: start; gap: 0; margin-inline: calc(50% - 50vw); padding: 2.5rem calc(var(--page-gutter) + 20px) var(--space-section); text-align: left; }
