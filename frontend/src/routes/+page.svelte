@@ -2,7 +2,6 @@
 	import { onMount, tick } from 'svelte';
 	import SeoHead from '../lib/SeoHead.svelte';
 	import StackedCardsStory from '../lib/components/StackedCardsStory.svelte';
-	import CinematicScrollTransition from '../lib/components/CinematicScrollTransition.svelte';
 	import HomepageShowcase from '../lib/components/HomepageShowcase.svelte';
 	import disciplineImage from '../lib/assets/gambar1.png';
 
@@ -408,8 +407,6 @@
 </section>
 
 <StackedCardsStory />
-
-<CinematicScrollTransition />
 
 <HomepageShowcase />
 
