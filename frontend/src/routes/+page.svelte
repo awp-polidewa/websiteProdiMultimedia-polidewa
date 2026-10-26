@@ -4,6 +4,7 @@
 	import StackedCardsStory from '../lib/components/StackedCardsStory.svelte';
 	import CinematicScrollTransition from '../lib/components/CinematicScrollTransition.svelte';
 	import HomepageShowcase from '../lib/components/HomepageShowcase.svelte';
+	import disciplineImage from '../lib/assets/gambar1.png';
 
 	const heroLineOne = Array.from('Teknologi Rekayasa');
 	const heroLineTwo = Array.from('Multimedia');
@@ -383,17 +384,26 @@
 
 <section class="disciplines section-rule" aria-labelledby="disciplines-title">
 	<div class="section-content">
-	<div class="section-top"><p class="eyebrow">Program studi</p></div>
-	<div class="discipline-intro">
-		<h2 id="disciplines-title" class="section-heading">Bidang dalam struktur prodi</h2>
-		<p>Jelajahi informasi resmi mengenai struktur dosen dan konsentrasi yang tersedia.</p>
-	</div>
-	<div class="discipline-list">
-		<a href="/struktur"><span>01</span><strong>Web Design</strong><span aria-hidden="true">↗</span></a>
-		<a href="/struktur"><span>02</span><strong>Desain Grafis</strong><span aria-hidden="true">↗</span></a>
-		<a href="/struktur"><span>03</span><strong>Videografi</strong><span aria-hidden="true">↗</span></a>
-		<a href="/struktur"><span>04</span><strong>Animasi</strong><span aria-hidden="true">↗</span></a>
-	</div>
+		<div class="section-top"><p class="eyebrow">Program studi</p></div>
+		<div class="discipline-intro">
+			<h2 id="disciplines-title" class="section-heading">Informasi program studi</h2>
+			<p>Website ini menjadi pusat informasi profil, struktur dosen, berita, karya mahasiswa, serta informasi akreditasi Program Studi Teknologi Rekayasa Multimedia.</p>
+		</div>
+		<div class="discipline-feature">
+			<div class="discipline-visual">
+				<img src={disciplineImage} alt="Mahasiswa Program Studi Teknologi Rekayasa Multimedia" loading="lazy" />
+			</div>
+			<div class="discipline-details">
+				<p class="discipline-kicker">Struktur program</p>
+				<h3>Bidang konsentrasi</h3>
+				<div class="discipline-list">
+					<a href="/struktur"><span>01</span><strong>Web Design</strong><span aria-hidden="true">↗</span></a>
+					<a href="/struktur"><span>02</span><strong>Desain Grafis</strong><span aria-hidden="true">↗</span></a>
+					<a href="/struktur"><span>03</span><strong>Videografi</strong><span aria-hidden="true">↗</span></a>
+					<a href="/struktur"><span>04</span><strong>Animasi</strong><span aria-hidden="true">↗</span></a>
+				</div>
+			</div>
+		</div>
 	</div>
 </section>
 
@@ -476,17 +486,26 @@
 	.secondary-action { color: #000; background: transparent; border: 1px solid #000; }
 	.secondary-action:hover { color: #fff; background: #000; }
 	.primary-action:focus-visible, .secondary-action:focus-visible { outline: 2px solid #000; outline-offset: 3px; }
-	.disciplines { box-sizing: border-box; width: 100vw; margin-inline: calc(50% - 50vw); padding: 1rem 0 var(--space-section); }
-	.section-top { display: flex; justify-content: center; gap: 1rem; margin: 0 0 2.5rem; }
+	.disciplines { box-sizing: border-box; display: flex; width: 100vw; min-height: 100vh; min-height: 100dvh; align-items: center; margin-inline: calc(50% - 50vw); padding: clamp(3.5rem, 7vh, 5rem) 0; }
+	.disciplines .section-content { padding-inline: clamp(.5rem, 1.5vw, 1.4rem); }
+	.section-top { display: flex; justify-content: flex-start; gap: 1rem; margin: 0 0 clamp(1.8rem, 3.5vw, 2.8rem); }
 	.section-top .eyebrow { margin: 0; opacity: .65; }
-	.discipline-intro { display: grid; grid-template-columns: 1fr; justify-items: center; gap: .9rem; margin: 0 0 2.5rem; }
-	.discipline-intro p { max-width: 600px; margin: 0; font: 400 .95rem/1.7 'Inter', sans-serif; opacity: .82; }
-	.discipline-list { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--line); }
-	.discipline-list a { display: grid; grid-template-columns: 1fr auto; justify-items: center; gap: 2.6rem .6rem; padding: 1rem 1.25rem 1.1rem 0; text-decoration: none; border-bottom: 1px solid var(--line); }
-	.discipline-list a + a { padding-left: 1.2rem; border-left: 1px solid var(--line); }
-	.discipline-list span:first-child { grid-column: 1 / -1; font: 400 .72rem/1 'Inter', sans-serif; opacity: .62; }
-	.discipline-list strong { font: 500 1.1rem/1.35 'Poppins', sans-serif; }
-	.discipline-list span:last-child { align-self: end; }
+	.discipline-intro { display: grid; grid-template-columns: 1fr; justify-items: start; gap: clamp(1.2rem, 2.4vw, 1.9rem); margin: 0 0 clamp(3rem, 6vw, 4.5rem); text-align: left; transform: translateY(30px); }
+	.discipline-intro .section-heading { color: #555; font: 600 82.05px/1.02 'Plus Jakarta Sans', sans-serif; letter-spacing: -.055em; }
+	.discipline-intro p { max-width: 920px; margin: 0; color: #555; font: 500 23.64px/1.55 'Poppins', sans-serif; }
+	.discipline-feature { display: grid; grid-template-columns: minmax(0, .72fr) minmax(0, 1.28fr); align-items: center; gap: clamp(2.5rem, 4.5vw, 4.5rem); transform: translateY(-20px); }
+	.discipline-visual { width: 480px; max-width: 100%; aspect-ratio: 535 / 351; }
+	.discipline-visual img { display: block; width: 100%; height: 100%; object-fit: contain; object-position: center; }
+	.discipline-details { min-width: 0; text-align: left; }
+	.discipline-kicker { margin: 0 0 .5rem; color: #696969; font: 500 clamp(.8rem, 1.05vw, .95rem)/1.4 'Inter', sans-serif; }
+	.discipline-details h3 { margin: 0 0 clamp(1.3rem, 2.5vw, 2rem); color: #696969; font: 500 clamp(1.8rem, 2.85vw, 2.5rem)/1.12 'Poppins', sans-serif; letter-spacing: -.04em; }
+	.discipline-list { display: grid; grid-template-columns: 1fr; border-top: 1px solid #222; }
+	.discipline-list a { display: grid; grid-template-columns: 2.5rem minmax(0, 1fr) auto; align-items: center; gap: 1rem; min-height: 2.65rem; padding: .4rem 0; border-bottom: 1px solid #333; color: #555; text-align: left; text-decoration: none; transition: color 180ms ease, padding 180ms ease; }
+	.discipline-list a:hover, .discipline-list a:focus-visible { padding-inline: .4rem; color: #111; }
+	.discipline-list a:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+	.discipline-list span:first-child { font: 400 .8rem/1.4 'Inter', sans-serif; }
+	.discipline-list strong { font: 500 clamp(.8rem, 1.05vw, .9rem)/1.4 'Poppins', sans-serif; }
+	.discipline-list span:last-child { font: 400 .9rem/1 'Inter', sans-serif; }
 	.accreditation-band { display: grid; grid-template-columns: 1fr; justify-items: center; gap: 1rem; padding: 2.25rem 0 var(--space-section); border-top: 1px solid var(--line); }
 	.accreditation-band .eyebrow { margin: 0 0 .8rem; opacity: .65; }
 	.accreditation-band p:not(.eyebrow) { max-width: 370px; margin: 0; font: 400 .9rem/1.7 'Inter', sans-serif; opacity: .82; }
@@ -517,10 +536,15 @@
 		.tools-showcase--static .tool-feature { position: relative; top: auto; left: auto; margin-top: .4rem; }
 		.tool-cursor-tooltip { display: none; }
 		.tools-orbit--static { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .65rem; margin-block: 2.5rem 1.5rem; }
-		.discipline-intro { grid-template-columns: 1fr; gap: .9rem; }
-		.discipline-list { grid-template-columns: 1fr; }
-		.discipline-list a, .discipline-list a + a { grid-template-columns: 2.4rem 1fr auto; align-items: center; gap: 1rem; padding: 1rem 0; border-left: 0; }
-		.discipline-list span:first-child { grid-column: auto; }
+		.disciplines { padding-block: 4.5rem; }
+		.disciplines .section-content { padding-inline: .4rem; }
+		.discipline-intro { gap: .9rem; margin-bottom: 2.25rem; transform: none; }
+		.discipline-intro .section-heading { font-size: clamp(1.95rem, 8.25vw, 3rem); }
+		.discipline-intro p { font-size: clamp(.8rem, 3.5vw, 1rem); line-height: 1.55; }
+		.discipline-feature { grid-template-columns: 1fr; gap: 2rem; transform: none; }
+		.discipline-visual { max-width: min(100%, 480px); margin-inline: auto; }
+		.discipline-details h3 { font-size: clamp(1.8rem, 6.75vw, 2.25rem); }
+		.discipline-list a { grid-template-columns: 2rem minmax(0, 1fr) auto; gap: .8rem; min-height: 2.8rem; }
 		.accreditation-band { box-sizing: border-box; width: 100vw; grid-template-columns: 1fr; justify-items: stretch; align-items: start; gap: 0; margin-inline: calc(50% - 50vw); padding: 2.5rem calc(var(--page-gutter) + 20px) var(--space-section); text-align: left; }
 		.accreditation-band > div { text-align: left; }
 		.accreditation-band .eyebrow { margin-bottom: 2rem; }
