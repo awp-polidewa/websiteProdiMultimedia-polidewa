@@ -20,8 +20,6 @@
 		{ name: 'PHP', icon: '/icons/tools/icon-php.svg', description: 'Membangun logika aplikasi web di sisi server.' },
 		{ name: 'XAMPP', icon: '/icons/tools/icon-xampp.svg', description: 'Menjalankan lingkungan pengembangan web lokal.' }
 	];
-	// Isi dengan path aset video lokal saat file tersedia, misalnya /videos/beranda.mp4.
-	const videoSource = '';
 	/** @type {HTMLElement | undefined} */
 	let videoStoryTrack;
 	/** @type {HTMLElement | undefined} */
@@ -38,7 +36,6 @@
 	let toolIconElements = $state([]);
 	let prefersReducedMotion = $state(false);
 	let toolsTooltipVisible = $state(false);
-	let videoUnavailable = $state(!videoSource);
 	let activeToolIndex = $state(10);
 	let orbitPhase = 10;
 	let toolsTooltipFrame = 0;
@@ -48,14 +45,6 @@
 	let toolsTooltipTargetY = 0;
 	/** @type {number | null} */
 	let orbitTarget = null;
-
-	function markVideoUnavailable() {
-		videoUnavailable = true;
-	}
-
-	function markVideoReady() {
-		videoUnavailable = false;
-	}
 
 	/** @param {PointerEvent} event */
 	function setToolsTooltipTarget(event) {
@@ -211,24 +200,25 @@
 
 			viewportHeight = window.innerHeight;
 			stageHeight = videoStoryStage.clientHeight;
-			const availableWidth = videoStory.clientWidth * 0.9;
-			const stageFrameLimit = videoStory.clientWidth <= 700 ? stageHeight : stageHeight * 0.85;
-			const maxFrameHeight = Math.min(viewportHeight * 0.85, stageFrameLimit);
-			endWidth = Math.min(availableWidth, maxFrameHeight * (1352 / 834), 1352);
-			const endHeight = endWidth * (834 / 1352);
-			endTop = Math.max(0, stageHeight * 0.925 - endHeight);
+			const isMobile = videoStory.clientWidth <= 700;
+			endWidth = videoStory.clientWidth * (isMobile ? 0.9 : 0.985);
+			const endHeight = isMobile
+				? endWidth * (834 / 1352)
+				: Math.min(viewportHeight, stageHeight) * 0.94;
+			endTop = Math.max(0, (stageHeight - endHeight) / 2);
 			startWidth = Math.min(endWidth * 0.528, 713);
-			startTop = videoStory.clientWidth <= 700 ? viewportHeight * 0.96 : stageHeight * 0.96;
+			startTop = isMobile ? viewportHeight * 0.96 : stageHeight * 0.96;
 			trackStart = window.scrollY + videoStoryTrack.getBoundingClientRect().top;
 			transitionStart = trackStart;
-			transitionDistance = Math.max(1, videoStoryTrack.clientHeight - videoStory.clientHeight);
+			transitionDistance = Math.max(1, viewportHeight * 0.75);
 			videoFrame.style.width = `${endWidth}px`;
+			videoFrame.style.height = `${endHeight}px`;
 			videoFrame.style.top = `${endTop}px`;
 		}
 
 		function renderStory() {
 			animationFrame = 0;
-			if (!videoFrame || prefersReducedMotion || (videoStory?.clientWidth ?? 0) <= 700) return;
+			if (!videoFrame || prefersReducedMotion) return;
 
 			const linearProgress = Math.min(1, Math.max(0, (window.scrollY - transitionStart) / transitionDistance));
 			const progress = linearProgress * linearProgress * (3 - 2 * linearProgress);
@@ -245,7 +235,6 @@
 		}
 
 		function scheduleStoryUpdate() {
-			if (videoStory && videoStory.clientWidth <= 700) return;
 			if (!animationFrame) animationFrame = requestAnimationFrame(renderStory);
 		}
 
@@ -304,8 +293,8 @@
 	<div class="hero-label"><p>Politeknik Dewantara</p><span>Program Studi</span></div>
 	<h1 id="home-title">
 		<span class="visually-hidden">Teknologi Rekayasa Multimedia</span>
-		<span class="hero-line" aria-hidden="true">{#each heroLineOne as character}{#if character === ' '}{' '}{:else}<span class="hero-character">{character}</span>{/if}{/each}</span>
-		<span class="hero-line" aria-hidden="true">{#each heroLineTwo as character}<span class="hero-character">{character}</span>{/each}</span>
+		<span class="hero-line" aria-hidden="true">{#each heroLineOne as character, index}{#if character === ' '}{' '}{:else}<span class="hero-character" style={`--char-index:${index}`}>{character}</span>{/if}{/each}</span>
+		<span class="hero-line" aria-hidden="true">{#each heroLineTwo as character, index}<span class="hero-character" style={`--char-index:${index}`}>{character}</span>{/each}</span>
 	</h1>
 	<div class="hero-bottom">
 		<!-- <p class="intro">Pusat informasi program studi, aktivitas, dan karya mahasiswa TRM</p> -->
@@ -325,19 +314,7 @@
 	>
 		<div class="video-story-stage" bind:this={videoStoryStage}>
 			<div class="video-story-frame" bind:this={videoFrame}>
-				<video
-					class="prototype-video"
-					src={videoSource || undefined}
-					autoplay
-					muted
-					loop
-					playsinline
-					preload="metadata"
-					aria-hidden="true"
-					onerror={markVideoUnavailable}
-					onloadeddata={markVideoReady}
-				></video>
-				{#if videoUnavailable}<p class="video-status" role="status">Video belum tersedia</p>{/if}
+				<div class="video-placeholder" role="img" aria-label="Area untuk video">VIDEO</div>
 			</div>
 		</div>
 	</section>
@@ -422,12 +399,11 @@
 	.home-page { position: relative; min-height: 100vh; text-align: center; background: transparent; }
 	.home-content { position: relative; z-index: 1; width: min(calc(100% - 2 * var(--page-gutter)), var(--page-max)); margin: 0 auto; }
 	.section-content { box-sizing: border-box; width: min(calc(100% - 2 * var(--page-gutter)), var(--page-max)); margin-inline: auto; }
-	.video-story-track { position: relative; box-sizing: border-box; width: 100vw; height: 135vh; height: 135svh; margin-top: -40vh; margin-top: -40svh; margin-inline: calc(50% - 50vw); }
+	.video-story-track { position: relative; box-sizing: border-box; width: 100vw; height: 275vh; height: 275svh; margin-top: -75vh; margin-top: -75svh; margin-inline: calc(50% - 50vw); }
 	.video-story { position: sticky; top: 0; box-sizing: border-box; width: 100%; height: 100vh; height: 100svh; padding-inline: 30px; }
 	.video-story-stage { position: relative; width: 100%; height: 100%; overflow: visible; }
 	.video-story-frame { position: absolute; top: 0; left: 50%; overflow: hidden; aspect-ratio: 1352 / 834; border-radius: 35px; background: #1f1b1b; transform-origin: 50% 0; will-change: transform, border-radius, background-color; }
-	.prototype-video { display: block; width: 100%; height: 100%; object-fit: cover; }
-	.video-status { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; color: rgb(255 255 255 / 72%); font: 500 clamp(1rem, 2.2vw, 1.5rem)/1.4 'Inter', sans-serif; }
+	.video-placeholder { display: grid; width: 100%; height: 100%; place-items: center; color: #fff; font: 600 clamp(3rem, 19vw, 18rem)/1 'Inter', sans-serif; letter-spacing: .035em; }
 	.video-story-track--reduced { height: auto; margin-top: 0; padding-block: var(--space-section); }
 	.video-story--reduced { position: relative; top: auto; height: auto; padding-inline: 30px; }
 	.video-story--reduced .video-story-stage { height: auto; }
@@ -466,9 +442,8 @@
 	h1 { width: 100%; max-width: none; margin: 1.5rem 0 1.2rem; font: 600 clamp(2rem, 7.2vw, 6.5rem)/.98 'Inter', sans-serif; letter-spacing: -.055em; text-wrap: balance; }
 	h1 > .hero-line { display: block; width: 100%; white-space: normal; }
 	.hero-character { display: inline-block; transform-origin: 50% 70%; }
-	/* Character color remains unchanged until the controlled palette in 02-desain.md is approved. */
 	@media (hover: hover) and (prefers-reduced-motion: no-preference) {
-		.hero-character:hover { animation: hero-wobble var(--motion-normal) var(--ease-out) both; }
+		.hero-line:hover .hero-character { animation: hero-wobble 520ms var(--ease-out) both; animation-delay: calc(var(--char-index, 0) * 12ms); }
 	}
 	@keyframes hero-wobble {
 		0%, 100% { transform: rotate(0); }
@@ -508,17 +483,12 @@
 	.accreditation-band p:not(.eyebrow) { max-width: 370px; margin: 0; font: 400 .9rem/1.7 'Inter', sans-serif; opacity: .82; }
 	@media (max-width: 700px) {
 		.hero { padding: 6rem 20px 5rem; }
-		.video-story-track:not(.video-story-track--reduced) { --mobile-video-height: max(25svh, 55.52vw); height: var(--mobile-video-height); margin-top: 0; }
-		.video-story:not(.video-story--reduced) { position: relative; top: auto; height: var(--mobile-video-height); }
-		.video-story:not(.video-story--reduced) .video-story-stage { height: 100%; }
-		.video-story:not(.video-story--reduced) .video-story-frame { position: relative; top: auto !important; left: auto; display: block; width: min(90vw, calc(100vw - 40px), 1352px) !important; margin-inline: auto; border-radius: 1.25rem !important; background-color: #1f1b1b !important; transform: none !important; }
 		.video-story { padding-inline: 20px; }
 		.hero-label p { font-size: clamp(1.15rem, 5vw, 1.5rem); }
 		.hero-label span { font-size: .95rem; }
 		h1 { font-size: clamp(1.9rem, 8.4vw, 3.4rem); line-height: 1.02; }
 		.hero-bottom { align-items: center; }
 		.video-story--reduced { padding-inline: 20px; }
-		.video-story--reduced .video-story-frame { border-radius: 1.25rem !important; }
 		.section-top { margin-bottom: 1.6rem; }
 		.tools { padding: 1rem .75rem; }
 		.tools-content { padding: 2.5rem 1rem; border-radius: 1.25rem; }

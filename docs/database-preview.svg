@@ -1,0 +1,180 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1840" height="1740" viewBox="0 0 1840 1740" role="img" aria-labelledby="title desc">
+  <title id="title">Diagram Database Website TRM</title>
+  <desc id="desc">Entity relationship diagram for seven tables in the Website TRM database. Only rag_chunks.document_id has a foreign key, referencing rag_documents.id with cascade delete.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth"><path d="M0 0L10 5L0 10z" fill="#61718b"/></marker>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="5" stdDeviation="8" flood-color="#10213d" flood-opacity=".08"/></filter>
+  </defs>
+  <style>
+    text { font-family: Inter, 'Segoe UI', Arial, sans-serif; fill: #17243a; }
+    .page { fill: #f4f7fb; }
+    .title { font-size: 38px; font-weight: 750; letter-spacing: -.6px; }
+    .subtitle { font-size: 18px; fill: #58677e; }
+    .tag { font-size: 13px; font-weight: 700; letter-spacing: 1.2px; }
+    .table { fill: #fff; stroke: #d8e1ed; stroke-width: 1.4; filter: url(#shadow); }
+    .head { fill: #eaf1fb; }
+    .head-rag { fill: #e8f5f2; }
+    .name { font-size: 19px; font-weight: 700; }
+    .meta { font-size: 12px; fill: #607089; }
+    .field { font-size: 14px; font-weight: 600; }
+    .type { font-size: 12px; fill: #53647b; }
+    .badge { font-size: 10px; font-weight: 750; letter-spacing: .3px; }
+    .line { stroke: #edf1f6; stroke-width: 1; }
+    .noteTitle { font-size: 16px; font-weight: 700; }
+    .note { font-size: 13px; fill: #53647b; }
+    .rel { font-size: 12px; font-weight: 650; fill: #42536b; }
+  </style>
+  <rect class="page" width="1840" height="1640" rx="0"/>
+  <text x="64" y="66" class="tag" fill="#3b68cf">WEB TRM · DATABASE OVERVIEW</text>
+  <text x="64" y="116" class="title">Database Website TRM — Politeknik Dewantara</text>
+  <text x="64" y="150" class="subtitle">ERD dari schema.sql dan migration RAG · 7 tabel · MySQL/MariaDB · seluruh kolom ditampilkan</text>
+  <g transform="translate(1424 48)">
+    <rect x="0" y="0" width="350" height="88" rx="14" fill="#fff" stroke="#d8e1ed"/>
+    <circle cx="24" cy="28" r="6" fill="#3b68cf"/><text x="40" y="33" class="note">PK primary key</text>
+    <circle cx="178" cy="28" r="6" fill="#e79436"/><text x="194" y="33" class="note">UK unique</text>
+    <circle cx="24" cy="61" r="6" fill="#29947c"/><text x="40" y="66" class="note">FK foreign key</text>
+    <text x="194" y="66" class="note">AI auto increment</text>
+  </g>
+
+  <!-- Core application tables -->
+  <text x="64" y="194" class="tag" fill="#61718b">TABEL INTI APLIKASI</text>
+
+  <g transform="translate(64 214)">
+    <rect class="table" width="552" height="414" rx="16"/>
+    <path class="head" d="M16 0h520a16 16 0 0 1 16 16v53H0V16A16 16 0 0 1 16 0z"/>
+    <text x="20" y="31" class="name">admins</text><text x="20" y="52" class="meta">Akun dan identitas login admin</text>
+    <text x="20" y="91" class="field">id</text><text x="238" y="91" class="type">BIGINT UNSIGNED · PK · AI</text><line class="line" x1="18" y1="101" x2="534" y2="101"/>
+    <text x="20" y="126" class="field">name</text><text x="238" y="126" class="type">VARCHAR(100) · NOT NULL</text><line class="line" x1="18" y1="136" x2="534" y2="136"/>
+    <text x="20" y="161" class="field">email</text><text x="238" y="161" class="type">VARCHAR(150) · NULL · UK</text><line class="line" x1="18" y1="171" x2="534" y2="171"/>
+    <text x="20" y="196" class="field">nidn</text><text x="238" y="196" class="type">VARCHAR(20) · NOT NULL · UK</text><line class="line" x1="18" y1="206" x2="534" y2="206"/>
+    <text x="20" y="231" class="field">username</text><text x="238" y="231" class="type">VARCHAR(50) · NOT NULL · UK</text><line class="line" x1="18" y1="241" x2="534" y2="241"/>
+    <text x="20" y="266" class="field">password_hash</text><text x="238" y="266" class="type">VARCHAR(255) · NOT NULL</text><line class="line" x1="18" y1="276" x2="534" y2="276"/>
+    <text x="20" y="301" class="field">created_at</text><text x="238" y="301" class="type">TIMESTAMP · CURRENT_TIMESTAMP</text><line class="line" x1="18" y1="311" x2="534" y2="311"/>
+    <text x="20" y="336" class="field">updated_at</text><text x="238" y="336" class="type">TIMESTAMP · ON UPDATE</text>
+    <text x="20" y="371" class="meta">Unique: email, nidn, username</text>
+  </g>
+
+  <g transform="translate(644 214)">
+    <rect class="table" width="552" height="456" rx="16"/>
+    <path class="head" d="M16 0h520a16 16 0 0 1 16 16v53H0V16A16 16 0 0 1 16 0z"/>
+    <text x="20" y="31" class="name">lecturers</text><text x="20" y="52" class="meta">Data dosen dan urutan tampilan</text>
+    <text x="20" y="91" class="field">id</text><text x="238" y="91" class="type">BIGINT UNSIGNED · PK · AI</text><line class="line" x1="18" y1="101" x2="534" y2="101"/>
+    <text x="20" y="126" class="field">name</text><text x="238" y="126" class="type">VARCHAR(150) · NOT NULL</text><line class="line" x1="18" y1="136" x2="534" y2="136"/>
+    <text x="20" y="161" class="field">title</text><text x="238" y="161" class="type">VARCHAR(150) · NOT NULL</text><line class="line" x1="18" y1="171" x2="534" y2="171"/>
+    <text x="20" y="196" class="field">concentration</text><text x="238" y="196" class="type">VARCHAR(50) · NULL</text><line class="line" x1="18" y1="206" x2="534" y2="206"/>
+    <text x="20" y="231" class="field">photo_path</text><text x="238" y="231" class="type">VARCHAR(255) · NULL</text><line class="line" x1="18" y1="241" x2="534" y2="241"/>
+    <text x="20" y="266" class="field">bio</text><text x="238" y="266" class="type">TEXT · NULL</text><line class="line" x1="18" y1="276" x2="534" y2="276"/>
+    <text x="20" y="301" class="field">email</text><text x="238" y="301" class="type">VARCHAR(150) · NULL</text><line class="line" x1="18" y1="311" x2="534" y2="311"/>
+    <text x="20" y="336" class="field">display_order</text><text x="238" y="336" class="type">INT UNSIGNED · INDEX · DEFAULT 0</text><line class="line" x1="18" y1="346" x2="534" y2="346"/>
+    <text x="20" y="371" class="field">created_at</text><text x="238" y="371" class="type">TIMESTAMP · CURRENT_TIMESTAMP</text><line class="line" x1="18" y1="381" x2="534" y2="381"/>
+    <text x="20" y="406" class="field">updated_at</text><text x="238" y="406" class="type">TIMESTAMP · ON UPDATE</text>
+  </g>
+
+  <g transform="translate(1224 214)">
+    <rect class="table" width="552" height="456" rx="16"/>
+    <path class="head" d="M16 0h520a16 16 0 0 1 16 16v53H0V16A16 16 0 0 1 16 0z"/>
+    <text x="20" y="31" class="name">news</text><text x="20" y="52" class="meta">Berita prodi dan publikasi</text>
+    <text x="20" y="91" class="field">id</text><text x="238" y="91" class="type">BIGINT UNSIGNED · PK · AI</text><line class="line" x1="18" y1="101" x2="534" y2="101"/>
+    <text x="20" y="126" class="field">title</text><text x="238" y="126" class="type">VARCHAR(200) · NOT NULL</text><line class="line" x1="18" y1="136" x2="534" y2="136"/>
+    <text x="20" y="161" class="field">slug</text><text x="238" y="161" class="type">VARCHAR(220) · UK</text><line class="line" x1="18" y1="171" x2="534" y2="171"/>
+    <text x="20" y="196" class="field">excerpt</text><text x="238" y="196" class="type">VARCHAR(500) · NULL</text><line class="line" x1="18" y1="206" x2="534" y2="206"/>
+    <text x="20" y="231" class="field">content</text><text x="238" y="231" class="type">MEDIUMTEXT · NOT NULL</text><line class="line" x1="18" y1="241" x2="534" y2="241"/>
+    <text x="20" y="266" class="field">thumbnail_path</text><text x="238" y="266" class="type">VARCHAR(255) · NULL</text><line class="line" x1="18" y1="276" x2="534" y2="276"/>
+    <text x="20" y="301" class="field">status</text><text x="238" y="301" class="type">ENUM(draft, published) · DEFAULT draft</text><line class="line" x1="18" y1="311" x2="534" y2="311"/>
+    <text x="20" y="336" class="field">published_at</text><text x="238" y="336" class="type">DATETIME · NULL</text><line class="line" x1="18" y1="346" x2="534" y2="346"/>
+    <text x="20" y="371" class="field">created_at</text><text x="238" y="371" class="type">TIMESTAMP · CURRENT_TIMESTAMP</text><line class="line" x1="18" y1="381" x2="534" y2="381"/>
+    <text x="20" y="406" class="field">updated_at</text><text x="238" y="406" class="type">TIMESTAMP · ON UPDATE</text><text x="20" y="433" class="meta">INDEX(status, published_at)</text>
+  </g>
+
+  <g transform="translate(64 636)">
+    <rect class="table" width="552" height="480" rx="16"/>
+    <path class="head" d="M16 0h520a16 16 0 0 1 16 16v53H0V16A16 16 0 0 1 16 0z"/>
+    <text x="20" y="31" class="name">projects</text><text x="20" y="52" class="meta">Karya dan project mahasiswa</text>
+    <text x="20" y="91" class="field">id</text><text x="238" y="91" class="type">BIGINT UNSIGNED · PK · AI</text><line class="line" x1="18" y1="101" x2="534" y2="101"/>
+    <text x="20" y="126" class="field">title</text><text x="238" y="126" class="type">VARCHAR(200) · NOT NULL</text><line class="line" x1="18" y1="136" x2="534" y2="136"/>
+    <text x="20" y="161" class="field">slug</text><text x="238" y="161" class="type">VARCHAR(220) · UK</text><line class="line" x1="18" y1="171" x2="534" y2="171"/>
+    <text x="20" y="196" class="field">description</text><text x="238" y="196" class="type">TEXT · NULL</text><line class="line" x1="18" y1="206" x2="534" y2="206"/>
+    <text x="20" y="231" class="field">thumbnail_path</text><text x="238" y="231" class="type">VARCHAR(255) · NOT NULL</text><line class="line" x1="18" y1="241" x2="534" y2="241"/>
+    <text x="20" y="266" class="field">category</text><text x="238" y="266" class="type">VARCHAR(50) · NOT NULL · INDEX</text><line class="line" x1="18" y1="276" x2="534" y2="276"/>
+    <text x="20" y="301" class="field">student_name</text><text x="238" y="301" class="type">VARCHAR(150) · NULL</text><line class="line" x1="18" y1="311" x2="534" y2="311"/>
+    <text x="20" y="336" class="field">project_year</text><text x="238" y="336" class="type">SMALLINT UNSIGNED · NULL</text><line class="line" x1="18" y1="346" x2="534" y2="346"/>
+    <text x="20" y="371" class="field">external_url</text><text x="238" y="371" class="type">VARCHAR(500) · NULL</text><line class="line" x1="18" y1="381" x2="534" y2="381"/>
+    <text x="20" y="406" class="field">created_at</text><text x="238" y="406" class="type">TIMESTAMP · CURRENT_TIMESTAMP</text><line class="line" x1="18" y1="416" x2="534" y2="416"/>
+    <text x="20" y="441" class="field">updated_at</text><text x="238" y="441" class="type">TIMESTAMP · ON UPDATE</text><text x="20" y="470" class="meta">INDEX(created_at, id)</text>
+  </g>
+
+  <g transform="translate(644 636)">
+    <rect class="table" width="552" height="480" rx="16"/>
+    <path class="head" d="M16 0h520a16 16 0 0 1 16 16v53H0V16A16 16 0 0 1 16 0z"/>
+    <text x="20" y="31" class="name">accreditation_documents</text><text x="20" y="52" class="meta">Dokumen dan sumber informasi akreditasi</text>
+    <text x="20" y="91" class="field">id</text><text x="238" y="91" class="type">BIGINT UNSIGNED · PK · AI</text><line class="line" x1="18" y1="101" x2="534" y2="101"/>
+    <text x="20" y="126" class="field">title</text><text x="238" y="126" class="type">VARCHAR(200) · NOT NULL</text><line class="line" x1="18" y1="136" x2="534" y2="136"/>
+    <text x="20" y="161" class="field">description</text><text x="238" y="161" class="type">TEXT · NULL</text><line class="line" x1="18" y1="171" x2="534" y2="171"/>
+    <text x="20" y="196" class="field">file_path</text><text x="238" y="196" class="type">VARCHAR(255) · NOT NULL</text><line class="line" x1="18" y1="206" x2="534" y2="206"/>
+    <text x="20" y="231" class="field">source_url</text><text x="238" y="231" class="type">VARCHAR(500) · NULL</text><line class="line" x1="18" y1="241" x2="534" y2="241"/>
+    <text x="20" y="266" class="field">status</text><text x="238" y="266" class="type">ENUM(draft, published) · DEFAULT draft</text><line class="line" x1="18" y1="276" x2="534" y2="276"/>
+    <text x="20" y="301" class="field">published_at</text><text x="238" y="301" class="type">DATE · NULL</text><line class="line" x1="18" y1="311" x2="534" y2="311"/>
+    <text x="20" y="336" class="field">created_at</text><text x="238" y="336" class="type">TIMESTAMP · CURRENT_TIMESTAMP</text><line class="line" x1="18" y1="346" x2="534" y2="346"/>
+    <text x="20" y="371" class="field">updated_at</text><text x="238" y="371" class="type">TIMESTAMP · ON UPDATE</text><text x="20" y="400" class="meta">INDEX(status)</text>
+  </g>
+
+  <g transform="translate(1224 636)">
+    <rect class="table" width="552" height="414" rx="16" fill="#fff" stroke="#d8e1ed"/>
+    <rect x="0" y="0" width="552" height="414" rx="16" fill="#fff" stroke="#d8e1ed"/>
+    <path class="head" d="M16 0h520a16 16 0 0 1 16 16v53H0V16A16 16 0 0 1 16 0z"/>
+    <text x="20" y="31" class="name">Model relasi inti</text><text x="20" y="52" class="meta">Batasan dan hubungan antarentitas</text>
+    <circle cx="26" cy="101" r="4" fill="#3b68cf"/><text x="42" y="106" class="noteTitle">Tidak ada FK di 5 tabel inti</text>
+    <text x="20" y="137" class="note">admins, lecturers, news, projects, dan</text><text x="20" y="158" class="note">accreditation_documents berdiri sendiri.</text>
+    <line class="line" x1="18" y1="180" x2="534" y2="180"/>
+    <circle cx="26" cy="207" r="4" fill="#29947c"/><text x="42" y="212" class="noteTitle">RAG memiliki satu relasi eksplisit</text>
+    <text x="20" y="243" class="note">Satu dokumen dapat memiliki banyak chunk.</text>
+    <text x="20" y="264" class="note">Menghapus dokumen akan menghapus chunk.</text>
+    <line class="line" x1="18" y1="286" x2="534" y2="286"/>
+    <text x="20" y="316" class="noteTitle">Konvensi umum</text>
+    <text x="20" y="341" class="note">ID BIGINT UNSIGNED · InnoDB · utf8mb4</text>
+    <text x="20" y="362" class="note">Timestamp dibuat/diubah dikelola database.</text>
+    <text x="20" y="391" class="meta">Sumber: backend/database/schema.sql</text>
+  </g>
+
+  <!-- RAG relationship -->
+  <text x="64" y="1160" class="tag" fill="#29947c">TABEL RAG · KNOWLEDGE BASE DOKUMEN</text>
+  <g transform="translate(64 1180)">
+    <rect class="table" width="552" height="414" rx="16"/>
+    <path class="head-rag" d="M16 0h520a16 16 0 0 1 16 16v53H0V16A16 16 0 0 1 16 0z"/>
+    <text x="20" y="31" class="name">rag_documents</text><text x="20" y="52" class="meta">Metadata PDF dan status ingestion · file privat</text>
+    <text x="20" y="91" class="field">id</text><text x="238" y="91" class="type">BIGINT UNSIGNED · PK · AI</text><line class="line" x1="18" y1="101" x2="534" y2="101"/>
+    <text x="20" y="126" class="field">title</text><text x="238" y="126" class="type">VARCHAR(200) · NOT NULL</text><line class="line" x1="18" y1="136" x2="534" y2="136"/>
+    <text x="20" y="161" class="field">description</text><text x="238" y="161" class="type">TEXT · NULL</text><line class="line" x1="18" y1="171" x2="534" y2="171"/>
+    <text x="20" y="196" class="field">original_filename</text><text x="238" y="196" class="type">VARCHAR(255) · NOT NULL</text><line class="line" x1="18" y1="206" x2="534" y2="206"/>
+    <text x="20" y="231" class="field">file_path</text><text x="238" y="231" class="type">VARCHAR(255) · NOT NULL</text><line class="line" x1="18" y1="241" x2="534" y2="241"/>
+    <text x="20" y="266" class="field">file_sha256</text><text x="238" y="266" class="type">CHAR(64) · UNIQUE</text><line class="line" x1="18" y1="276" x2="534" y2="276"/>
+    <text x="20" y="301" class="field">status</text><text x="238" y="301" class="type">ENUM · DEFAULT pending · INDEX</text><line class="line" x1="18" y1="311" x2="534" y2="311"/>
+    <text x="20" y="336" class="field">error_message</text><text x="238" y="336" class="type">TEXT · NULL</text>
+    <text x="20" y="371" class="field">created_at</text><text x="238" y="371" class="type">TIMESTAMP · CURRENT_TIMESTAMP</text><line class="line" x1="18" y1="381" x2="534" y2="381"/>
+    <text x="20" y="406" class="field">updated_at</text><text x="238" y="406" class="type">TIMESTAMP · ON UPDATE</text>
+  </g>
+
+  <g transform="translate(1224 1180)">
+    <rect class="table" width="552" height="414" rx="16"/>
+    <path class="head-rag" d="M16 0h520a16 16 0 0 1 16 16v53H0V16A16 16 0 0 1 16 0z"/>
+    <text x="20" y="31" class="name">rag_chunks</text><text x="20" y="52" class="meta">Teks hasil ekstraksi dan embedding</text>
+    <text x="20" y="91" class="field">id</text><text x="238" y="91" class="type">BIGINT UNSIGNED · PK · AI</text><line class="line" x1="18" y1="101" x2="534" y2="101"/>
+    <text x="20" y="126" class="field">document_id</text><text x="238" y="126" class="type">BIGINT UNSIGNED · FK · INDEX</text><line class="line" x1="18" y1="136" x2="534" y2="136"/>
+    <text x="20" y="161" class="field">chunk_text</text><text x="238" y="161" class="type">MEDIUMTEXT · NOT NULL</text><line class="line" x1="18" y1="171" x2="534" y2="171"/>
+    <text x="20" y="196" class="field">page_number</text><text x="238" y="196" class="type">INT UNSIGNED · NULL</text><line class="line" x1="18" y1="206" x2="534" y2="206"/>
+    <text x="20" y="231" class="field">chunk_order</text><text x="238" y="231" class="type">INT UNSIGNED · NOT NULL</text><line class="line" x1="18" y1="241" x2="534" y2="241"/>
+    <text x="20" y="266" class="field">embedding</text><text x="238" y="266" class="type">JSON · NULL</text><line class="line" x1="18" y1="276" x2="534" y2="276"/>
+    <text x="20" y="301" class="field">embedding_model</text><text x="238" y="301" class="type">VARCHAR(150) · NULL</text>
+    <text x="20" y="336" class="field">created_at</text><text x="238" y="336" class="type">TIMESTAMP · CURRENT_TIMESTAMP</text>
+    <text x="20" y="371" class="meta">INDEX(document_id, chunk_order)</text>
+    <text x="20" y="393" class="meta">Embedding/model NULL sampai T37.2 diproses</text>
+  </g>
+
+  <path d="M616 1388H1210" fill="none" stroke="#61718b" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <rect x="768" y="1355" width="288" height="54" rx="12" fill="#f4f7fb" stroke="#d8e1ed"/>
+  <text x="912" y="1378" text-anchor="middle" class="rel">1 dokumen → banyak chunk</text>
+  <text x="912" y="1396" text-anchor="middle" class="meta">ON DELETE CASCADE</text>
+
+  <rect x="64" y="1660" width="1712" height="54" rx="12" fill="#eaf1fb"/>
+  <text x="84" y="1693" class="note">Database: web_trm_dev · Skema gambar merujuk file schema dan migration proyek; bukan snapshot isi record/database runtime.</text>
+</svg>
