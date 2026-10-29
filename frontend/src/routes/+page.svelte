@@ -399,7 +399,7 @@
 	.home-page { position: relative; min-height: 100vh; text-align: center; background: transparent; }
 	.home-content { position: relative; z-index: 1; width: min(calc(100% - 2 * var(--page-gutter)), var(--page-max)); margin: 0 auto; }
 	.section-content { box-sizing: border-box; width: min(calc(100% - 2 * var(--page-gutter)), var(--page-max)); margin-inline: auto; }
-	.video-story-track { position: relative; box-sizing: border-box; width: 100vw; height: 275vh; height: 275svh; margin-top: -75vh; margin-top: -75svh; margin-inline: calc(50% - 50vw); }
+	.video-story-track { position: relative; box-sizing: border-box; width: 100vw; height: 187vh; height: 187svh; margin-top: -75vh; margin-top: -75svh; margin-inline: calc(50% - 50vw); }
 	.video-story { position: sticky; top: 0; box-sizing: border-box; width: 100%; height: 100vh; height: 100svh; padding-inline: 30px; }
 	.video-story-stage { position: relative; width: 100%; height: 100%; overflow: visible; }
 	.video-story-frame { position: absolute; top: 0; left: 50%; overflow: hidden; aspect-ratio: 1352 / 834; border-radius: 35px; background: #1f1b1b; transform-origin: 50% 0; will-change: transform, border-radius, background-color; }
