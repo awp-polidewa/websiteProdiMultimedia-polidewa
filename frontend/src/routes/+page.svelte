@@ -35,6 +35,7 @@
 	/** @type {HTMLButtonElement[]} */
 	let toolIconElements = $state([]);
 	let prefersReducedMotion = $state(false);
+	let videoStoryReady = $state(false);
 	let toolsTooltipVisible = $state(false);
 	let activeToolIndex = $state(10);
 	let orbitPhase = 10;
@@ -263,6 +264,8 @@
 
 		prefersReducedMotion = reducedMotionQuery.matches;
 		measureStory();
+		renderStory();
+		videoStoryReady = true;
 		updateOrbit();
 		window.addEventListener('scroll', scheduleStoryUpdate, { passive: true });
 		window.addEventListener('resize', handleResize);
@@ -313,7 +316,7 @@
 		bind:this={videoStory}
 	>
 		<div class="video-story-stage" bind:this={videoStoryStage}>
-			<div class="video-story-frame" bind:this={videoFrame}>
+			<div class="video-story-frame" class:video-story-frame--ready={videoStoryReady} bind:this={videoFrame}>
 				<div class="video-placeholder" role="img" aria-label="Area untuk video">VIDEO</div>
 			</div>
 		</div>
@@ -402,7 +405,8 @@
 	.video-story-track { position: relative; box-sizing: border-box; width: 100vw; height: 187vh; height: 187svh; margin-top: -75vh; margin-top: -75svh; margin-inline: calc(50% - 50vw); }
 	.video-story { position: sticky; top: 0; box-sizing: border-box; width: 100%; height: 100vh; height: 100svh; padding-inline: 30px; }
 	.video-story-stage { position: relative; width: 100%; height: 100%; overflow: visible; }
-	.video-story-frame { position: absolute; top: 0; left: 50%; overflow: hidden; aspect-ratio: 1352 / 834; border-radius: 35px; background: #1f1b1b; transform-origin: 50% 0; will-change: transform, border-radius, background-color; }
+	.video-story-frame { position: absolute; top: 0; left: 50%; overflow: hidden; aspect-ratio: 1352 / 834; border-radius: 35px; background: #1f1b1b; transform-origin: 50% 0; visibility: hidden; will-change: transform, border-radius, background-color; }
+	.video-story-frame--ready { visibility: visible; }
 	.video-placeholder { display: grid; width: 100%; height: 100%; place-items: center; color: #fff; font: 600 clamp(3rem, 19vw, 18rem)/1 'Inter', sans-serif; letter-spacing: .035em; }
 	.video-story-track--reduced { height: auto; margin-top: 0; padding-block: var(--space-section); }
 	.video-story--reduced { position: relative; top: auto; height: auto; padding-inline: 30px; }

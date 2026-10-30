@@ -1,6 +1,7 @@
 <script>
 	import { onMount, tick } from 'svelte';
 	import { mediaUrl, requestApi } from '../admin/api.js';
+	import InternshipPlacesMarquee from './InternshipPlacesMarquee.svelte';
 
 	/** @typedef {{ id: string, title: string, slug: string, description: string | null, thumbnailPath: string | null, thumbnailUrl: string | null, category: string, studentName: string | null, projectYear: number | null }} Project */
 	/** @typedef {{ id: string, title: string, slug: string, excerpt: string | null, thumbnailPath: string | null, thumbnailUrl: string | null, publishedAt: string }} NewsItem */
@@ -295,6 +296,8 @@
 		{/if}
 	</div>
 </section>
+
+<InternshipPlacesMarquee />
 
 <section id="news-section" class="news-section section-rule" aria-labelledby="news-title">
 	<div class="news-heading">

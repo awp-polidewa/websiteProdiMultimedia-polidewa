@@ -89,21 +89,21 @@
 <style>
 	.navbar-spacer { height: 73px; }
 	.navbar-spacer.home-route { display: none; }
-	.site-header { position: fixed; z-index: 40; isolation: isolate; top: 19px; left: 50%; width: min(calc(100% - 40px), 1079.38px); box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; border: 0; border-radius: 200px; background: rgb(255 255 255 / 72%); color: #313131; box-shadow: none; -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); transform: translateX(-50%); transition: border-radius .3s ease, box-shadow 250ms ease; }
+	.site-header { position: fixed; z-index: 40; isolation: isolate; top: 19px; left: 50%; width: min(calc(100% - 40px), 1079.38px); box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; border: 0; border-radius: 200px; background: rgb(255 255 255 / 72%); color: #000000; box-shadow: none; -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); transform: translateX(-50%); transition: border-radius .3s ease, box-shadow 250ms ease; }
 	.site-header.scrolled { box-shadow: 0px 4px 6.4px rgba(0, 0, 0, 0.25); }
 	@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
 		.site-header { background: rgb(255 255 255 / 96%); }
 	}
 	.header-top-row { display: contents; }
-	.wordmark { display: inline-flex; max-width: 100%; flex: 0 1 auto; align-items: center; gap: 10.377px; color: #313131; text-decoration: none; }
+	.wordmark { display: inline-flex; max-width: 100%; flex: 0 1 auto; align-items: center; gap: 10.377px; color: #000000; text-decoration: none; }
 	.wordmark img { display: block; width: 34px; height: 34px; flex: 0 0 34px; object-fit: contain; }
 	.program-name { min-width: 0; font: 500 18px/normal 'Inter', sans-serif; }
 	.menu-toggle { display: none; }
 	.site-header nav { position: relative; z-index: 1; flex: 0 1 auto; }
 	.site-header nav ul { display: flex; flex-wrap: wrap; justify-content: end; gap: .25rem 40px; margin: 0; padding: 0; list-style: none; }
-	.site-header nav a { display: inline-flex; align-items: center; min-height: 34px; color: #313131; font: 400 16px/normal 'Inter', sans-serif; text-decoration: none; text-underline-offset: .4em; opacity: .82; transition: opacity var(--motion-fast) var(--ease-out); }
+	.site-header nav a { display: inline-flex; align-items: center; min-height: 34px; color: #000000; font: 400 16px/normal 'Inter', sans-serif; text-decoration: none; text-underline-offset: .4em; opacity: 1; transition: opacity var(--motion-fast) var(--ease-out); }
 	.site-header nav a:hover, .site-header nav a:focus-visible, .site-header nav a[aria-current='page'] { opacity: 1; text-decoration: underline; }
-	.skip-link { position: absolute; z-index: 50; top: .75rem; left: var(--page-gutter); padding: .7rem 1rem; background: #fff; color: #313131; transform: translateY(-180%); transition: transform var(--motion-fast) var(--ease-out); }
+	.skip-link { position: absolute; z-index: 50; top: .75rem; left: var(--page-gutter); padding: .7rem 1rem; background: #fff; color: #000000; transform: translateY(-180%); transition: transform var(--motion-fast) var(--ease-out); }
 	.skip-link:focus { transform: translateY(0); }
 	@media (max-width: 900px) {
 		.navbar-spacer { height: 64px; }
@@ -112,7 +112,7 @@
 		.site-header.menu-open { border-radius: 0; }
 		.header-top-row { display: flex; width: 100%; min-width: 0; align-items: center; justify-content: space-between; gap: .5rem; }
 		.wordmark { min-width: 0; flex: 1 1 auto; }
-		.menu-toggle { position: relative; z-index: 2; display: inline-grid; width: 44px; height: 44px; flex: 0 0 44px; place-items: center; padding: 0; border: 0; border-radius: 50%; background: transparent; color: #313131; cursor: pointer; }
+		.menu-toggle { position: relative; z-index: 2; display: inline-grid; width: 44px; height: 44px; flex: 0 0 44px; place-items: center; padding: 0; border: 0; border-radius: 50%; background: transparent; color: #000000; cursor: pointer; }
 		.menu-toggle:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
 		.hamburger-icon { position: relative; display: block; width: 24px; height: 18px; }
 		.hamburger-icon span { position: absolute; left: 0; display: block; width: 24px; height: 2px; border-radius: 2px; background: currentColor; transform-origin: center; transition: top .3s ease, transform .3s ease, opacity .3s ease; }
