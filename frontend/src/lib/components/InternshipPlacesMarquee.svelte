@@ -180,9 +180,9 @@
 		}
 
 		.internship-heading { width: calc(100% - 40px); margin-bottom: 1rem; }
-		.internship-heading h2 { margin-inline: auto; padding: 0; border: 0; }
+		.internship-heading h2 { width: 100%; margin-inline: auto; padding: 0; border: 0; }
 		.internship-heading .title-side, .internship-heading .highlight { display: none; }
-		.mobile-title-art { display: block; width: min(254px, 100%); height: auto; }
+		.mobile-title-art { display: block; width: 96%; height: auto; }
 		.logo-track { animation-duration: 28s; }
 		.logo-group { width: calc(100vw + 80px); }
 		.logo-slot img { width: min(100%, clamp(52px, 16vw, 92px)); height: min(10svh, 76px); }
