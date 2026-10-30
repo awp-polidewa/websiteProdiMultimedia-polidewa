@@ -27,10 +27,11 @@
 
 <section class="internship-places section-rule" aria-labelledby="internship-places-title">
 	<header class="internship-heading">
-		<h2 id="internship-places-title">
+		<h2 id="internship-places-title" aria-label="Daftar Tempat Magang Mahasiswa">
 			<span class="title-side">Daftar</span>
-			<span class="highlight">Tempat Magang</span>
+			<span class="highlight"><span class="title-place">Tempat</span> <span class="title-magang">Magang</span></span>
 			<span class="title-side">Mahasiswa</span>
+			<img class="mobile-title-art" src="/icons/judul-halaman-magang.svg" alt="" />
 		</h2>
 	</header>
 
@@ -111,6 +112,8 @@
 		letter-spacing: -.045em;
 	}
 
+	.mobile-title-art { display: none; }
+
 	.logo-rows {
 		display: grid;
 		height: 86%;
@@ -177,10 +180,9 @@
 		}
 
 		.internship-heading { width: calc(100% - 40px); margin-bottom: 1rem; }
-		.internship-heading h2 { padding-bottom: 5px; border-bottom-width: 3px; }
-		.internship-heading h2 { column-gap: .45rem; row-gap: .05rem; }
-		.internship-heading .title-side { font-size: clamp(1.85rem, 8vw, 2.65rem); }
-		.internship-heading .highlight { top: -5px; font-size: clamp(2.2rem, 10vw, 3.25rem); }
+		.internship-heading h2 { margin-inline: auto; padding: 0; border: 0; }
+		.internship-heading .title-side, .internship-heading .highlight { display: none; }
+		.mobile-title-art { display: block; width: min(254px, 100%); height: auto; }
 		.logo-track { animation-duration: 28s; }
 		.logo-group { width: calc(100vw + 80px); }
 		.logo-slot img { width: min(100%, clamp(52px, 16vw, 92px)); height: min(10svh, 76px); }
