@@ -1,10 +1,10 @@
 <script>
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import { ApiError, requestApi } from '../../../lib/admin/api.js';
 	import MediaUploadField from '../../../lib/admin/MediaUploadField.svelte';
 
 	/** @typedef {{ id: string, title: string, slug: string, description: string | null, thumbnailPath: string, category: string, studentName: string | null, projectYear: number | null, externalUrl: string | null, createdAt: string, updatedAt: string }} Project */
-	/** @typedef {{ title: string, slug: string, description: string, thumbnail_path: string, category: string, student_name: string, project_year: string, external_url: string }} ProjectForm */
+	/** @typedef {{ title: string, slug: string, description: string, thumbnail_path: string, category: string, student_name: string, project_year: string | number, external_url: string }} ProjectForm */
 	/** @returns {ProjectForm} */
 	const emptyForm = () => ({ title: '', slug: '', description: '', thumbnail_path: '', category: '', student_name: '', project_year: '', external_url: '' });
 	const categories = [
@@ -98,10 +98,29 @@
 		else formOpen = false;
 	}
 
+	async function revealFormError() {
+		await tick();
+		const errorElement = dialogElement?.querySelector('[aria-invalid="true"], .field-error, .notice.error');
+		if (!(errorElement instanceof HTMLElement)) return;
+
+		const fieldElement = errorElement.closest('label, .upload-field') || errorElement;
+		fieldElement.scrollIntoView({
+			block: 'center',
+			behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+		});
+		if (errorElement instanceof HTMLInputElement || errorElement instanceof HTMLSelectElement || errorElement instanceof HTMLTextAreaElement) {
+			errorElement.focus({ preventScroll: true });
+		}
+	}
+
 	/** @param {SubmitEvent} event */
 	async function submitForm(event) {
 		event.preventDefault();
-		if (mediaUploading) { formError = 'Tunggu sampai upload selesai sebelum menyimpan.'; return; }
+		if (mediaUploading) {
+			formError = 'Tunggu sampai upload thumbnail selesai sebelum menyimpan.';
+			await revealFormError();
+			return;
+		}
 		fieldErrors = {};
 		formError = '';
 		const title = form.title.trim();
@@ -109,7 +128,7 @@
 		const thumbnailPath = form.thumbnail_path.trim();
 		const studentName = form.student_name.trim();
 		const externalUrl = form.external_url.trim();
-		const yearValue = form.project_year.trim();
+		const yearValue = String(form.project_year ?? '').trim();
 
 		if (!title) fieldErrors.title = 'Judul wajib diisi.';
 		else if (title.length > 200) fieldErrors.title = 'Maksimal 200 karakter.';
@@ -135,7 +154,10 @@
 				}
 			}
 		}
-		if (Object.keys(fieldErrors).length) return;
+		if (Object.keys(fieldErrors).length) {
+			await revealFormError();
+			return;
+		}
 
 		saving = true;
 		const body = {
@@ -161,12 +183,16 @@
 				await loadProjects(page);
 			}
 		} catch (error) {
-			if (error instanceof ApiError) {
+			if (error instanceof ApiError && error.status === 409) {
+				fieldErrors = { slug: 'Slug ini sudah digunakan oleh karya lain. Gunakan slug yang unik, misalnya dengan menambahkan nama mahasiswa.' };
+				formError = '';
+			} else if (error instanceof ApiError) {
 				fieldErrors = error.errors;
 				formError = error.message;
 			} else {
 				formError = error instanceof Error ? error.message : 'Karya gagal disimpan.';
 			}
+			await revealFormError();
 		} finally {
 			saving = false;
 		}
@@ -255,7 +281,7 @@
 			<label>Nama mahasiswa<input bind:value={form.student_name} maxlength="150" aria-invalid={Boolean(fieldErrors.student_name)} aria-describedby={fieldErrors.student_name ? 'student-error' : undefined} />{#if fieldErrors.student_name}<small id="student-error" class="field-error">{fieldErrors.student_name}</small>{/if}</label>
 			<label>Tahun karya<input bind:value={form.project_year} type="number" min="0" max="65535" step="1" inputmode="numeric" aria-invalid={Boolean(fieldErrors.project_year)} aria-describedby={fieldErrors.project_year ? 'year-error' : 'year-hint'} /><small id="year-hint" class="hint">Opsional, bilangan bulat 0–65535.</small>{#if fieldErrors.project_year}<small id="year-error" class="field-error">{fieldErrors.project_year}</small>{/if}</label>
 			<label>URL eksternal<input bind:value={form.external_url} type="url" maxlength="500" placeholder="https://contoh.id/karya" aria-invalid={Boolean(fieldErrors.external_url)} aria-describedby={fieldErrors.external_url ? 'url-error' : 'url-hint'} /><small id="url-hint" class="hint">Opsional. Hanya URL HTTP atau HTTPS.</small>{#if fieldErrors.external_url}<small id="url-error" class="field-error">{fieldErrors.external_url}</small>{/if}</label>
-			<div class="form-actions"><button class="button" type="button" onclick={closeForm} disabled={saving || mediaUploading}>Batal</button><button class="button primary" type="submit" disabled={saving || mediaUploading}>{mediaUploading ? 'Mengunggah…' : saving ? 'Menyimpan…' : editingId ? 'Simpan perubahan' : 'Simpan karya'}</button></div>
+			<div class="form-actions"><button class="button" type="button" onclick={closeForm} disabled={saving || mediaUploading}>Batal</button><button class="button primary" type="submit" disabled={saving} aria-busy={saving || mediaUploading}>{mediaUploading ? 'Tunggu upload selesai' : saving ? 'Menyimpan…' : editingId ? 'Simpan perubahan' : 'Simpan karya'}</button></div>
 		</form>
 	</dialog>
 {/if}

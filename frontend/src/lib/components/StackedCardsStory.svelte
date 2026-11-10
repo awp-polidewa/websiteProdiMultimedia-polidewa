@@ -3,6 +3,8 @@
 	import { cubicOut } from 'svelte/easing';
 	import { fly } from 'svelte/transition';
 
+	let { textEntranceDuration = 500 } = $props();
+
 	const storyCards = [
 		{
 			label: 'Konsentrasi 01',
@@ -138,19 +140,19 @@
 	aria-label="Konsentrasi Teknologi Rekayasa Multimedia"
 >
 	<div class="story-stage" class:story-stage--reduced={prefersReducedMotion}>
-		<div class="story-copy" aria-live="polite" aria-atomic="true">
+		<div class="story-copy" aria-live="polite" aria-atomic="true" data-aos="fade-up" data-aos-duration={textEntranceDuration} data-aos-delay="0" data-aos-anchor=".story-track" data-aos-once="true">
 			{#key activeIndex}
 				<div class="story-copy-panel">
-					<div class="story-motion-item" data-aos="fade-up" data-aos-duration="500" data-aos-delay="500" data-aos-anchor=".story-track" data-aos-once="true">
+					<div class="story-motion-item">
 						<p class="story-label" in:fly={{ y: 8, duration: prefersReducedMotion ? 0 : 340, easing: cubicOut }} out:fly={{ y: -6, duration: prefersReducedMotion ? 0 : 260, easing: cubicOut }}>{storyCards[activeIndex].label}</p>
 					</div>
-					<div class="story-motion-item" data-aos="fade-up" data-aos-duration="500" data-aos-delay="700" data-aos-anchor=".story-track" data-aos-once="true">
+					<div class="story-motion-item">
 						<h2 in:fly={{ y: 12, duration: prefersReducedMotion ? 0 : 380, easing: cubicOut }} out:fly={{ y: -10, duration: prefersReducedMotion ? 0 : 300, easing: cubicOut }}>{storyCards[activeIndex].title}</h2>
 					</div>
-					<div class="story-motion-item" data-aos="fade-up" data-aos-duration="500" data-aos-delay="900" data-aos-anchor=".story-track" data-aos-once="true">
+					<div class="story-motion-item">
 						<p class="story-description" in:fly={{ y: 10, duration: prefersReducedMotion ? 0 : 360, delay: prefersReducedMotion ? 0 : 45, easing: cubicOut }} out:fly={{ y: -8, duration: prefersReducedMotion ? 0 : 280, easing: cubicOut }}>{storyCards[activeIndex].description}</p>
 					</div>
-					<div class="story-motion-item story-motion-cta" data-aos="fade-up" data-aos-duration="500" data-aos-delay="1100" data-aos-anchor=".story-track" data-aos-once="true">
+					<div class="story-motion-item story-motion-cta">
 						<a class="story-cta" href={storyCards[activeIndex].href} in:fly={{ y: 8, duration: prefersReducedMotion ? 0 : 340, delay: prefersReducedMotion ? 0 : 85, easing: cubicOut }} out:fly={{ y: -6, duration: prefersReducedMotion ? 0 : 260, easing: cubicOut }}>
 							{storyCards[activeIndex].cta}<span aria-hidden="true">↗</span>
 						</a>
@@ -159,7 +161,7 @@
 			{/key}
 		</div>
 
-		<div class="story-card-deck" aria-hidden="true" data-aos="fade-up" data-aos-duration="500" data-aos-delay="1300" data-aos-anchor=".story-track" data-aos-once="true">
+		<div class="story-card-deck" aria-hidden="true" data-aos="fade-up" data-aos-duration="300" data-aos-delay="200" data-aos-anchor=".story-track" data-aos-once="true">
 			{#each storyCards as card, index (card.title)}
 				<article class="story-card" style={getCardStyle(index)}>
 					<img src={card.image} alt="" fetchpriority={index === 0 ? 'high' : 'auto'} />

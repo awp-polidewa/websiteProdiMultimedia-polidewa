@@ -202,10 +202,12 @@
 			viewportHeight = window.innerHeight;
 			stageHeight = videoStoryStage.clientHeight;
 			const isMobile = videoStory.clientWidth <= 700;
-			endWidth = videoStory.clientWidth * (isMobile ? 0.9 : 0.985);
-			const endHeight = isMobile
-				? endWidth * (834 / 1352)
-				: Math.min(viewportHeight, stageHeight) * 0.94;
+			const videoAspectRatio = 16 / 9;
+			const maxFrameHeight = Math.min(viewportHeight, stageHeight) * 0.94;
+			const maxFrameWidth = maxFrameHeight * videoAspectRatio;
+			const availableFrameWidth = videoStoryStage.clientWidth * (isMobile ? 0.9 : 0.985);
+			endWidth = Math.min(availableFrameWidth, maxFrameWidth);
+			const endHeight = endWidth / videoAspectRatio;
 			endTop = Math.max(0, (stageHeight - endHeight) / 2);
 			startWidth = Math.min(endWidth * 0.528, 713);
 			startTop = isMobile ? viewportHeight * 0.96 : stageHeight * 0.96;
@@ -317,7 +319,18 @@
 	>
 		<div class="video-story-stage" bind:this={videoStoryStage}>
 			<div class="video-story-frame" class:video-story-frame--ready={videoStoryReady} bind:this={videoFrame}>
-				<div class="video-placeholder" role="img" aria-label="Area untuk video">VIDEO</div>
+			<video
+				class="video-story-media"
+				autoplay
+				muted
+				loop
+				playsinline
+				preload="metadata"
+				aria-label="Video pengantar Program Studi Teknologi Rekayasa Multimedia"
+			>
+				<source src="/videos/beranda-video.mp4" type="video/mp4" />
+				Browser Anda tidak mendukung pemutaran video.
+			</video>
 			</div>
 		</div>
 	</section>
@@ -405,13 +418,13 @@
 	.video-story-track { position: relative; box-sizing: border-box; width: 100vw; height: 187vh; height: 187svh; margin-top: -75vh; margin-top: -75svh; margin-inline: calc(50% - 50vw); }
 	.video-story { position: sticky; top: 0; box-sizing: border-box; width: 100%; height: 100vh; height: 100svh; padding-inline: 30px; }
 	.video-story-stage { position: relative; width: 100%; height: 100%; overflow: visible; }
-	.video-story-frame { position: absolute; top: 0; left: 50%; overflow: hidden; aspect-ratio: 1352 / 834; border-radius: 35px; background: #1f1b1b; transform-origin: 50% 0; visibility: hidden; will-change: transform, border-radius, background-color; }
+	.video-story-frame { position: absolute; top: 0; left: 50%; overflow: hidden; aspect-ratio: 16 / 9; border-radius: 35px; background: #1f1b1b; transform-origin: 50% 0; visibility: hidden; will-change: transform, border-radius, background-color; }
 	.video-story-frame--ready { visibility: visible; }
-	.video-placeholder { display: grid; width: 100%; height: 100%; place-items: center; color: #fff; font: 600 clamp(3rem, 19vw, 18rem)/1 'Inter', sans-serif; letter-spacing: .035em; }
+	.video-story-media { display: block; width: 100%; height: 100%; object-fit: cover; }
 	.video-story-track--reduced { height: auto; margin-top: 0; padding-block: var(--space-section); }
 	.video-story--reduced { position: relative; top: auto; height: auto; padding-inline: 30px; }
 	.video-story--reduced .video-story-stage { height: auto; }
-	.video-story--reduced .video-story-frame { position: relative; top: auto !important; left: auto; width: min(90%, 1352px) !important; margin-inline: auto; border-radius: 35px !important; transform: none !important; }
+	.video-story--reduced .video-story-frame { position: relative; top: auto !important; left: auto; margin-inline: auto; border-radius: 35px !important; transform: none !important; }
 	.tools { box-sizing: border-box; width: 100vw; min-height: 100svh; display: flex; flex-direction: column; margin-inline: calc(50% - 50vw); padding: clamp(1rem, 2vh, 1.5rem) clamp(1rem, 2.7vw, 2.5rem); background-color: #f2f4f5; background-image: linear-gradient(to right, rgb(255 255 255 / 13%) 2px, transparent 2px), linear-gradient(to bottom, rgb(255 255 255 / 13%) 2px, transparent 2px); background-size: 114px 102.5px; }
 	.tools-content { box-sizing: border-box; width: min(100%, 1440px); flex: 1 0 auto; min-height: 0; display: flex; align-items: center; flex-direction: column; justify-content: center; margin-inline: auto; padding: clamp(3rem, 7.5vh, 3.5rem) clamp(1rem, 4vw, 3.5rem) 0; border-radius: 38px; background: #fff; text-align: center; }
 	.tools-heading { width: 100%; }

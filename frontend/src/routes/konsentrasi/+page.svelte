@@ -5,4 +5,4 @@
 
 <SeoHead title="Konsentrasi TRM | Politeknik Dewantara" description="Kenali konsentrasi Web Design, Desain Grafis, Videografi, dan Animasi pada Program Studi Teknologi Rekayasa Multimedia (TRM) Politeknik Dewantara." canonicalPath="/konsentrasi" />
 
-<StackedCardsStory />
+<StackedCardsStory textEntranceDuration={200} />

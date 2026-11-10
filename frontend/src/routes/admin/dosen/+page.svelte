@@ -1,10 +1,10 @@
 <script>
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import { ApiError, requestApi } from '../../../lib/admin/api.js';
 	import MediaUploadField from '../../../lib/admin/MediaUploadField.svelte';
 
 	/** @typedef {{ id: string, name: string, title: string, concentration: string | null, photoPath: string | null, bio: string | null, email: string | null, displayOrder: number, createdAt: string, updatedAt: string }} Lecturer */
-	/** @typedef {{ name: string, title: string, concentration: string, photo_path: string, bio: string, email: string, display_order: string }} LecturerForm */
+	/** @typedef {{ name: string, title: string, concentration: string, photo_path: string, bio: string, email: string, display_order: string | number }} LecturerForm */
 	/** @returns {LecturerForm} */
 	const emptyForm = () => ({ name: '', title: '', concentration: '', photo_path: '', bio: '', email: '', display_order: '0' });
 	const concentrations = ['Web Design', 'Desain Grafis', 'Videografi'];
@@ -91,10 +91,29 @@
 		else formOpen = false;
 	}
 
+	async function revealFormError() {
+		await tick();
+		const errorElement = dialogElement?.querySelector('[aria-invalid="true"], .field-error, .notice.error');
+		if (!(errorElement instanceof HTMLElement)) return;
+
+		const fieldElement = errorElement.closest('label, .upload-field') || errorElement;
+		fieldElement.scrollIntoView({
+			block: 'center',
+			behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+		});
+		if (errorElement instanceof HTMLInputElement || errorElement instanceof HTMLSelectElement || errorElement instanceof HTMLTextAreaElement) {
+			errorElement.focus({ preventScroll: true });
+		}
+	}
+
 	/** @param {SubmitEvent} event */
 	async function submitForm(event) {
 		event.preventDefault();
-		if (mediaUploading) { formError = 'Tunggu sampai upload selesai sebelum menyimpan.'; return; }
+		if (mediaUploading) {
+			formError = 'Tunggu sampai upload foto selesai sebelum menyimpan.';
+			await revealFormError();
+			return;
+		}
 		fieldErrors = {};
 		formError = '';
 		const name = form.name.trim();
@@ -102,7 +121,7 @@
 		const concentration = form.concentration;
 		const photoPath = form.photo_path.trim();
 		const email = form.email.trim();
-		const displayOrderInput = form.display_order.trim();
+		const displayOrderInput = String(form.display_order ?? '').trim();
 
 		if (!name) fieldErrors.name = 'Nama wajib diisi.';
 		else if (name.length > 150) fieldErrors.name = 'Maksimal 150 karakter.';
@@ -116,7 +135,10 @@
 		if (!displayOrderInput || !Number.isInteger(displayOrder) || displayOrder < 0 || displayOrder > 4_294_967_295) {
 			fieldErrors.display_order = 'Masukkan bilangan bulat 0 sampai 4294967295.';
 		}
-		if (Object.keys(fieldErrors).length) return;
+		if (Object.keys(fieldErrors).length) {
+			await revealFormError();
+			return;
+		}
 
 		saving = true;
 		const body = {
@@ -147,6 +169,7 @@
 			} else {
 				formError = error instanceof Error ? error.message : 'Data dosen gagal disimpan.';
 			}
+			await revealFormError();
 		} finally {
 			saving = false;
 		}
@@ -229,7 +252,7 @@
 			<MediaUploadField type="lecturers" label="Foto dosen" bind:path={form.photo_path} bind:busy={mediaUploading} />
 			{#if fieldErrors.photo_path}<small id="photo-error" class="field-error">{fieldErrors.photo_path}</small>{/if}
 			<label>Bio<textarea bind:value={form.bio} rows="5" aria-invalid={Boolean(fieldErrors.bio)} aria-describedby={fieldErrors.bio ? 'bio-error' : 'bio-hint'}></textarea><small id="bio-hint" class="hint">Opsional.</small>{#if fieldErrors.bio}<small id="bio-error" class="field-error">{fieldErrors.bio}</small>{/if}</label>
-			<div class="form-actions"><button class="button" type="button" onclick={closeForm} disabled={saving || mediaUploading}>Batal</button><button class="button primary" type="submit" disabled={saving || mediaUploading}>{mediaUploading ? 'Mengunggah…' : saving ? 'Menyimpan…' : editingId ? 'Simpan perubahan' : 'Simpan dosen'}</button></div>
+			<div class="form-actions"><button class="button" type="button" onclick={closeForm} disabled={saving || mediaUploading}>Batal</button><button class="button primary" type="submit" disabled={saving} aria-busy={saving || mediaUploading}>{mediaUploading ? 'Tunggu upload selesai' : saving ? 'Menyimpan…' : editingId ? 'Simpan perubahan' : 'Simpan dosen'}</button></div>
 		</form>
 	</dialog>
 {/if}

@@ -13,7 +13,7 @@
 	let selectedNodeId = $state('');
 	let reducedMotion = $state(false);
 	let requestVersion = 0;
-	let leadLecturer = $derived(lecturers.find((lecturer) => lecturer.concentration === null) ?? null);
+	let leadLecturer = $derived(lecturers.find((lecturer) => /\bkaprodi\b/i.test(lecturer.title)) ?? lecturers.find((lecturer) => lecturer.concentration === null) ?? null);
 	let groups = $derived(concentrations.map((name) => ({ name, lecturers: lecturers.filter((lecturer) => lecturer.concentration === name) })));
 	let activeLecturer = $derived(lecturers.find((lecturer) => lecturer.id === selectedNodeId) ?? null);
 	let activeEmptyLead = $derived(!leadLecturer && selectedNodeId === 'empty:lead');
