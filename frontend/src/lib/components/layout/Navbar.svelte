@@ -1,6 +1,7 @@
 <script>
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
+	import 'aos/dist/aos.css';
 	import politeknikDewantaraLogo from '../../assets/politeknik-dewantara.png';
 
 	const publicLinks = [
@@ -18,11 +19,38 @@
 	let headerElement = $state(/** @type {HTMLElement | null} */ (null));
 
 	onMount(() => {
+		let mounted = true;
+		let aosFrame = 0;
+		let aosFrameNext = 0;
+		void import('aos').then(({ default: AOS }) => {
+			if (!mounted) return;
+			AOS.init({
+				startEvent: 'trm-aos-start',
+				once: true,
+				duration: 300,
+				easing: 'ease-out-cubic',
+				offset: 0,
+				disable: () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
+			});
+			// Let AOS apply its initial state for at least one paint before triggering
+			// elements already visible at page load, such as the fixed navbar brand.
+			aosFrame = window.requestAnimationFrame(() => {
+				aosFrame = 0;
+				aosFrameNext = window.requestAnimationFrame(() => {
+					aosFrameNext = 0;
+					if (mounted) document.dispatchEvent(new Event('trm-aos-start'));
+				});
+			});
+		});
+
 		const updateScrollState = () => {
 			hasScrolled = window.scrollY > (isMobileViewport ? 20 : 50);
 		};
 		const updateNavbarHeight = () => {
-			if (headerElement) navbarHeight = Math.ceil(headerElement.getBoundingClientRect().bottom);
+			if (headerElement) {
+				const top = Number.parseFloat(window.getComputedStyle(headerElement).top);
+				navbarHeight = Math.ceil(headerElement.offsetHeight + (Number.isFinite(top) ? top : 0));
+			}
 		};
 
 		updateScrollState();
@@ -41,6 +69,9 @@
 		updateNavbarHeight();
 
 		return () => {
+			mounted = false;
+			if (aosFrame) window.cancelAnimationFrame(aosFrame);
+			if (aosFrameNext) window.cancelAnimationFrame(aosFrameNext);
 			window.removeEventListener('scroll', updateScrollState);
 			mobileBreakpoint.removeEventListener('change', updateMobileViewport);
 			resizeObserver.disconnect();
@@ -50,7 +81,7 @@
 
 <a class="skip-link" href="#main-content">Lewati ke konten utama</a>
 <div class="navbar-spacer" class:home-route={page.url.pathname === '/'} style:height={navbarHeight === null ? undefined : `${navbarHeight}px`} aria-hidden="true"></div>
-<header bind:this={headerElement} class="site-header" class:scrolled={hasScrolled} class:menu-open={menuOpen}>
+<header bind:this={headerElement} class="site-header" class:scrolled={hasScrolled} class:menu-open={menuOpen} data-aos="fade-down" data-aos-duration="500" data-aos-once="true">
 	<div class="header-top-row">
 		<a class="wordmark" href="/" aria-label="TRM — Beranda">
 			<img src={politeknikDewantaraLogo} alt="" />
@@ -89,7 +120,7 @@
 <style>
 	.navbar-spacer { height: 73px; }
 	.navbar-spacer.home-route { display: none; }
-	.site-header { position: fixed; z-index: 40; isolation: isolate; top: 19px; left: 50%; width: min(calc(100% - 40px), 1079.38px); box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; border: 0; border-radius: 200px; background: rgb(255 255 255 / 72%); color: #000000; box-shadow: none; -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); transform: translateX(-50%); transition: border-radius .3s ease, box-shadow 250ms ease; }
+	.site-header { position: fixed; z-index: 40; isolation: isolate; top: 19px; left: 50%; width: min(calc(100% - 40px), 1079.38px); box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; border: 0; border-radius: 200px; background: rgb(255 255 255 / 72%); color: #000000; box-shadow: none; -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); translate: -50% 0; transition: border-radius .3s ease, box-shadow 250ms ease; }
 	.site-header.scrolled { box-shadow: 0px 4px 6.4px rgba(0, 0, 0, 0.25); }
 	@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
 		.site-header { background: rgb(255 255 255 / 96%); }
@@ -107,7 +138,7 @@
 	.skip-link:focus { transform: translateY(0); }
 	@media (max-width: 900px) {
 		.navbar-spacer { height: 64px; }
-		.site-header { top: 0; left: 0; width: 100%; max-width: none; align-items: stretch; flex-direction: column; justify-content: center; gap: 0; padding: calc(10px + env(safe-area-inset-top, 0px)) max(20px, env(safe-area-inset-right, 0px)) 10px max(20px, env(safe-area-inset-left, 0px)); border-radius: 0; box-shadow: none; transform: none; transition: padding 220ms ease, box-shadow 220ms ease; }
+		.site-header { top: 0; left: 0; width: 100%; max-width: none; align-items: stretch; flex-direction: column; justify-content: center; gap: 0; padding: calc(10px + env(safe-area-inset-top, 0px)) max(20px, env(safe-area-inset-right, 0px)) 10px max(20px, env(safe-area-inset-left, 0px)); border-radius: 0; box-shadow: none; translate: none; transition: padding 220ms ease, box-shadow 220ms ease; }
 		.site-header.scrolled { padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-left: max(16px, env(safe-area-inset-left, 0px)); box-shadow: 0 3px 12px rgb(0 0 0 / 8%); }
 		.site-header.menu-open { border-radius: 0; }
 		.header-top-row { display: flex; width: 100%; min-width: 0; align-items: center; justify-content: space-between; gap: .5rem; }

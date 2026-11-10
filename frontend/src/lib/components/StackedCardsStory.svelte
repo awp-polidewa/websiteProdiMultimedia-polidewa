@@ -141,17 +141,25 @@
 		<div class="story-copy" aria-live="polite" aria-atomic="true">
 			{#key activeIndex}
 				<div class="story-copy-panel">
-					<p class="story-label" in:fly={{ y: 8, duration: prefersReducedMotion ? 0 : 340, easing: cubicOut }} out:fly={{ y: -6, duration: prefersReducedMotion ? 0 : 260, easing: cubicOut }}>{storyCards[activeIndex].label}</p>
-					<h2 in:fly={{ y: 12, duration: prefersReducedMotion ? 0 : 380, easing: cubicOut }} out:fly={{ y: -10, duration: prefersReducedMotion ? 0 : 300, easing: cubicOut }}>{storyCards[activeIndex].title}</h2>
-					<p class="story-description" in:fly={{ y: 10, duration: prefersReducedMotion ? 0 : 360, delay: prefersReducedMotion ? 0 : 45, easing: cubicOut }} out:fly={{ y: -8, duration: prefersReducedMotion ? 0 : 280, easing: cubicOut }}>{storyCards[activeIndex].description}</p>
-					<a class="story-cta" href={storyCards[activeIndex].href} in:fly={{ y: 8, duration: prefersReducedMotion ? 0 : 340, delay: prefersReducedMotion ? 0 : 85, easing: cubicOut }} out:fly={{ y: -6, duration: prefersReducedMotion ? 0 : 260, easing: cubicOut }}>
-						{storyCards[activeIndex].cta}<span aria-hidden="true">↗</span>
-					</a>
+					<div class="story-motion-item" data-aos="fade-up" data-aos-duration="500" data-aos-delay="500" data-aos-anchor=".story-track" data-aos-once="true">
+						<p class="story-label" in:fly={{ y: 8, duration: prefersReducedMotion ? 0 : 340, easing: cubicOut }} out:fly={{ y: -6, duration: prefersReducedMotion ? 0 : 260, easing: cubicOut }}>{storyCards[activeIndex].label}</p>
+					</div>
+					<div class="story-motion-item" data-aos="fade-up" data-aos-duration="500" data-aos-delay="700" data-aos-anchor=".story-track" data-aos-once="true">
+						<h2 in:fly={{ y: 12, duration: prefersReducedMotion ? 0 : 380, easing: cubicOut }} out:fly={{ y: -10, duration: prefersReducedMotion ? 0 : 300, easing: cubicOut }}>{storyCards[activeIndex].title}</h2>
+					</div>
+					<div class="story-motion-item" data-aos="fade-up" data-aos-duration="500" data-aos-delay="900" data-aos-anchor=".story-track" data-aos-once="true">
+						<p class="story-description" in:fly={{ y: 10, duration: prefersReducedMotion ? 0 : 360, delay: prefersReducedMotion ? 0 : 45, easing: cubicOut }} out:fly={{ y: -8, duration: prefersReducedMotion ? 0 : 280, easing: cubicOut }}>{storyCards[activeIndex].description}</p>
+					</div>
+					<div class="story-motion-item story-motion-cta" data-aos="fade-up" data-aos-duration="500" data-aos-delay="1100" data-aos-anchor=".story-track" data-aos-once="true">
+						<a class="story-cta" href={storyCards[activeIndex].href} in:fly={{ y: 8, duration: prefersReducedMotion ? 0 : 340, delay: prefersReducedMotion ? 0 : 85, easing: cubicOut }} out:fly={{ y: -6, duration: prefersReducedMotion ? 0 : 260, easing: cubicOut }}>
+							{storyCards[activeIndex].cta}<span aria-hidden="true">↗</span>
+						</a>
+					</div>
 				</div>
 			{/key}
 		</div>
 
-		<div class="story-card-deck" aria-hidden="true">
+		<div class="story-card-deck" aria-hidden="true" data-aos="fade-up" data-aos-duration="500" data-aos-delay="1300" data-aos-anchor=".story-track" data-aos-once="true">
 			{#each storyCards as card, index (card.title)}
 				<article class="story-card" style={getCardStyle(index)}>
 					<img src={card.image} alt="" fetchpriority={index === 0 ? 'high' : 'auto'} />
@@ -166,6 +174,8 @@
 	.story-stage { position: sticky; top: 0; box-sizing: border-box; width: 100%; height: 100svh; min-height: 620px; display: grid; grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr); align-items: center; gap: clamp(2rem, 5vw, 5rem); padding: clamp(2rem, 6vw, 5.5rem); }
 	.story-copy { position: relative; z-index: 5; display: grid; align-items: center; max-width: 540px; min-height: 340px; text-align: left; }
 	.story-copy-panel { grid-area: 1 / 1; width: 100%; }
+	.story-motion-item { width: 100%; }
+	.story-motion-cta { width: fit-content; }
 	.story-label { margin: 0 0 1.25rem; color: #575656; font: 500 .75rem/1.4 'Inter', sans-serif; letter-spacing: .13em; text-transform: uppercase; }
 	.story-copy h2 { max-width: 520px; margin: 0; color: #313131; font: 500 clamp(3rem, 6vw, 5.5rem)/.98 'Poppins', sans-serif; letter-spacing: -.065em; text-wrap: balance; }
 	.story-description { max-width: 440px; margin: 1.5rem 0 0; color: #4d4a4a; font: 400 clamp(1rem, 1.4vw, 1.125rem)/1.7 'Inter', sans-serif; }

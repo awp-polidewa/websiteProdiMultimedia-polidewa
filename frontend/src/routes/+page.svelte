@@ -293,15 +293,15 @@
 <div class="home-page">
 <div class="home-content">
 <section class="hero" aria-labelledby="home-title">
-	<div class="hero-label"><p>Politeknik Dewantara</p><span>Program Studi</span></div>
-	<h1 id="home-title">
+	<div class="hero-label" data-aos="fade-up" data-aos-duration="400" data-aos-delay="0" data-aos-once="true"><p>Politeknik Dewantara</p><span>Program Studi</span></div>
+	<h1 id="home-title" data-aos="fade-up" data-aos-duration="400" data-aos-delay="200" data-aos-once="true">
 		<span class="visually-hidden">Teknologi Rekayasa Multimedia</span>
 		<span class="hero-line" aria-hidden="true">{#each heroLineOne as character, index}{#if character === ' '}{' '}{:else}<span class="hero-character" style={`--char-index:${index}`}>{character}</span>{/if}{/each}</span>
 		<span class="hero-line" aria-hidden="true">{#each heroLineTwo as character, index}<span class="hero-character" style={`--char-index:${index}`}>{character}</span>{/each}</span>
 	</h1>
 	<div class="hero-bottom">
 		<!-- <p class="intro">Pusat informasi program studi, aktivitas, dan karya mahasiswa TRM</p> -->
-		<div class="hero-actions">
+		<div class="hero-actions" data-aos="fade-up" data-aos-duration="400" data-aos-delay="400" data-aos-once="true">
 			<a class="primary-action" href="https://wa.me/62887436943503" target="_blank" rel="noreferrer">Daftar Polidewa</a>
 			<a class="secondary-action" href="/profil">Tentang Program Studi</a>
 		</div>
@@ -332,12 +332,12 @@
 >
 	<div class="tools-content">
 		<div class="tools-heading">
-			<p class="eyebrow">Teknologi multimedia</p>
-			<h2 id="tools-title" class="section-heading">Tools used in practice Warga Multimedia</h2>
-			<p class="tools-intro">Perangkat yang mendukung proses belajar dan produksi karya multimedia.</p>
+			<p class="eyebrow" data-aos="fade-up" data-aos-duration="400" data-aos-delay="400" data-aos-anchor=".tools" data-aos-once="true">Teknologi multimedia</p>
+			<h2 id="tools-title" class="section-heading" data-aos="fade-up" data-aos-duration="400" data-aos-delay="600" data-aos-anchor=".tools" data-aos-once="true">Tools used in practice Warga Multimedia</h2>
+			<p class="tools-intro" data-aos="fade-up" data-aos-duration="400" data-aos-delay="800" data-aos-anchor=".tools">Perangkat yang mendukung proses belajar dan produksi karya multimedia.</p>
 		</div>
 		<div class="tools-showcase" class:tools-showcase--static={prefersReducedMotion}>
-			<div class="tools-orbit" class:tools-orbit--static={prefersReducedMotion} aria-label="Pilih tools yang digunakan dalam pembelajaran dan produksi multimedia" bind:this={toolsOrbit}>
+			<div class="tools-orbit" class:tools-orbit--static={prefersReducedMotion} aria-label="Pilih tools yang digunakan dalam pembelajaran dan produksi multimedia" bind:this={toolsOrbit} data-aos="fade-up" data-aos-duration="400" data-aos-delay="1000" data-aos-anchor=".tools" data-aos-once="true">
 				{#each toolItems as tool, index (tool.name)}
 					<button
 						class="tool-orbit-icon"
@@ -353,8 +353,8 @@
 				{/each}
 			</div>
 			<div class="tool-feature" aria-atomic="true">
-				<h3 class="tool-name">{toolItems[activeToolIndex].name}</h3>
-				<p>{toolItems[activeToolIndex].description}</p>
+				<h3 class="tool-name" data-aos="fade-up" data-aos-duration="400" data-aos-delay="1200" data-aos-anchor=".tools" data-aos-once="true">{toolItems[activeToolIndex].name}</h3>
+				<p data-aos="fade-up" data-aos-duration="400" data-aos-delay="1400" data-aos-anchor=".tools" data-aos-once="true">{toolItems[activeToolIndex].description}</p>
 			</div>
 		</div>
 	</div>
@@ -363,23 +363,23 @@
 
 <section class="disciplines section-rule" aria-labelledby="disciplines-title">
 	<div class="section-content">
-		<div class="section-top"><p class="eyebrow">Program studi</p></div>
+		<div class="section-top"><p class="eyebrow" data-aos="fade-up" data-aos-duration="500" data-aos-delay="500" data-aos-anchor=".disciplines" data-aos-once="true">Program studi</p></div>
 		<div class="discipline-intro">
-			<h2 id="disciplines-title" class="section-heading">Informasi program studi</h2>
-			<p>Website ini menjadi pusat informasi profil, struktur dosen, berita, karya mahasiswa, serta informasi akreditasi Program Studi Teknologi Rekayasa Multimedia.</p>
+			<h2 id="disciplines-title" class="section-heading" data-aos="fade-up" data-aos-duration="500" data-aos-delay="700" data-aos-anchor=".disciplines" data-aos-once="true">Informasi program studi</h2>
+			<p data-aos="fade-up" data-aos-duration="500" data-aos-delay="900" data-aos-anchor=".disciplines" data-aos-once="true">Website ini menjadi pusat informasi profil, struktur dosen, berita, karya mahasiswa, serta informasi akreditasi Program Studi Teknologi Rekayasa Multimedia.</p>
 		</div>
 		<div class="discipline-feature">
 			<div class="discipline-visual">
-				<img src={disciplineImage} alt="Mahasiswa Program Studi Teknologi Rekayasa Multimedia" loading="lazy" />
+				<img src={disciplineImage} alt="Mahasiswa Program Studi Teknologi Rekayasa Multimedia" loading="lazy" data-aos="fade-up" data-aos-duration="500" data-aos-delay="1100" data-aos-anchor=".disciplines" data-aos-once="true" />
 			</div>
 			<div class="discipline-details">
-				<p class="discipline-kicker">Struktur program</p>
-				<h3>Bidang konsentrasi</h3>
+				<p class="discipline-kicker" data-aos="fade-up" data-aos-duration="500" data-aos-delay="1300" data-aos-anchor=".disciplines" data-aos-once="true">Struktur program</p>
+				<h3 data-aos="fade-up" data-aos-duration="500" data-aos-delay="1500" data-aos-anchor=".disciplines" data-aos-once="true">Bidang konsentrasi</h3>
 				<div class="discipline-list">
-					<a href="/struktur"><span>01</span><strong>Web Design</strong><span aria-hidden="true">↗</span></a>
-					<a href="/struktur"><span>02</span><strong>Desain Grafis</strong><span aria-hidden="true">↗</span></a>
-					<a href="/struktur"><span>03</span><strong>Videografi</strong><span aria-hidden="true">↗</span></a>
-					<a href="/struktur"><span>04</span><strong>Animasi</strong><span aria-hidden="true">↗</span></a>
+					<a href="/struktur" data-aos="fade-up" data-aos-duration="500" data-aos-delay="1700" data-aos-anchor=".disciplines" data-aos-once="true"><span>01</span><strong>Web Design</strong><span aria-hidden="true">↗</span></a>
+					<a href="/struktur" data-aos="fade-up" data-aos-duration="500" data-aos-delay="1900" data-aos-anchor=".disciplines" data-aos-once="true"><span>02</span><strong>Desain Grafis</strong><span aria-hidden="true">↗</span></a>
+					<a href="/struktur" data-aos="fade-up" data-aos-duration="500" data-aos-delay="2100" data-aos-anchor=".disciplines" data-aos-once="true"><span>03</span><strong>Videografi</strong><span aria-hidden="true">↗</span></a>
+					<a href="/struktur" data-aos="fade-up" data-aos-duration="500" data-aos-delay="2300" data-aos-anchor=".disciplines" data-aos-once="true"><span>04</span><strong>Animasi</strong><span aria-hidden="true">↗</span></a>
 				</div>
 			</div>
 		</div>

@@ -161,6 +161,10 @@
 		aria-expanded={open}
 		aria-controls={open ? 'chatbot-panel' : undefined}
 		aria-label={open ? 'Tutup Tanya TRM' : 'Buka Tanya TRM'}
+		data-aos="fade-up"
+		data-aos-duration="400"
+		data-aos-delay="600"
+		data-aos-once="true"
 		onclick={toggleChat}
 	>
 		<span aria-hidden="true">{open ? '×' : 'Tanya TRM'}</span>

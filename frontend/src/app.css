@@ -31,7 +31,26 @@ a:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
 .text-link:hover, .text-link:focus-visible { text-decoration: underline; text-underline-offset: .35em; }
 .section-rule { border-top: 1px solid var(--line); }
 
+/* Shared starting/revealed states for the opt-in `use:fadeUp` action. */
+[data-fade-up] {
+	transition:
+		opacity var(--fade-up-duration, 700ms) cubic-bezier(.22, 1, .36, 1),
+		transform var(--fade-up-duration, 700ms) cubic-bezier(.22, 1, .36, 1);
+	will-change: opacity, transform;
+}
+[data-fade-up='pending'] {
+	opacity: 0;
+	transform: translate3d(0, var(--fade-up-distance, 24px), 0);
+}
+[data-fade-up='visible'] {
+	opacity: 1;
+	transform: translate3d(0, 0, 0);
+	will-change: auto;
+}
+
 @media (prefers-reduced-motion: reduce) {
 	html { scroll-behavior: auto; }
 	*, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
+	[data-fade-up] { transition: none; will-change: auto; }
+	[data-fade-up='pending'] { opacity: 1; transform: none; }
 }
